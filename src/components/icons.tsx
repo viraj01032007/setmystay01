@@ -4,16 +4,20 @@ import { cn } from "@/lib/utils";
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <defs>
-        <linearGradient id="logo-gradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-          <stop stopColor="hsl(var(--primary))"/>
-          <stop offset="1" stopColor="hsl(var(--accent))"/>
-        </linearGradient>
-      </defs>
-      <rect width="48" height="48" rx="12" fill="url(#logo-gradient)"/>
-      <path d="M14 34V18.2L24 14L34 18.2V34H14Z" fill="white" fillOpacity="0.2"/>
-      <path d="M24 20L17 23.5V32H31V23.5L24 20Z" fill="hsl(var(--primary-foreground))"/>
-      <path d="M20 28H28V30H20V28Z" fill="hsl(var(--primary))"/>
+      {/* Blue rounded square background */}
+      <rect width="48" height="48" rx="12" fill="#3B82F6"/>
+      
+      {/* White circle outline */}
+      <circle cx="24" cy="24" r="17" stroke="white" strokeWidth="1.5" fill="none"/>
+
+      {/* Location Pin with House */}
+      <g transform="translate(0, -2)">
+        <path d="M24 15C19.5817 15 16 18.5817 16 23C16 28.5 24 36 24 36C24 36 32 28.5 32 24C32 18.5817 28.4183 15 24 15Z" stroke="white" strokeWidth="1.5" fill="none"/>
+        <path d="M21 21H27V26H21V21Z" fill="white"/>
+        <path d="M20 22L24 19L28 22" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+        <rect x="22.25" y="22.25" width="1.5" height="1.5" fill="#3B82F6"/>
+        <rect x="24.75" y="22.25" width="1.5" height="1.5" fill="#3B82F6"/>
+      </g>
     </svg>
   );
 }
