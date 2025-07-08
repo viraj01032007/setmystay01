@@ -72,17 +72,17 @@ export default function AdminDashboard() {
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
     useEffect(() => {
-        // const authStatus = localStorage.getItem('admin_authenticated');
-        // if (authStatus !== 'true') {
-        //     router.replace('/admin/login');
-        // } else {
+        const authStatus = localStorage.getItem('admin_authenticated');
+        if (authStatus !== 'true') {
+            router.replace('/admin/login');
+        } else {
             setIsAuthenticated(true);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
                 lastUpdated: new Date().toLocaleString()
             });
-        // }
+        }
     }, [router]);
 
     const handleLogout = () => {

@@ -11,9 +11,9 @@ import { KeyRound, ShieldQuestion, Lock, LogIn } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
 
 // Hardcoded credentials for simulation
-const ADMIN_PASSWORD = 'password123';
-const ADMIN_OTP = '123456';
-const ADMIN_ANSWER = 'blue';
+const ADMIN_PASSWORD = 'Bluechip@123';
+const ADMIN_OTP = '16082007';
+const ADMIN_ANSWER = 'rohan kholi';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
           <CardTitle className="text-2xl font-bold">Admin Panel Access</CardTitle>
           <CardDescription>
             {step === 'password' && 'Factor 1: Enter your password.'}
-            {step === 'otp' && 'Factor 2: Enter your OTP. (Hint: 123456)'}
+            {step === 'otp' && 'Factor 2: Enter your PIN. (Hint: 16082007)'}
             {step === 'question' && 'Factor 3: Answer your security question.'}
           </CardDescription>
         </CardHeader>
@@ -103,7 +103,7 @@ export default function AdminLoginPage() {
           {step === 'otp' && (
             <form onSubmit={handleOtpSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="otp">One-Time Password (OTP)</Label>
+                <Label htmlFor="otp">PIN</Label>
                 <div className="relative">
                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -111,15 +111,15 @@ export default function AdminLoginPage() {
                         type="text"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
-                        placeholder="6-digit code"
-                        maxLength={6}
+                        placeholder="8-digit code"
+                        maxLength={8}
                         required
                         className="pl-10"
                     />
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                Verify OTP
+                Verify PIN
               </Button>
             </form>
           )}
@@ -127,7 +127,7 @@ export default function AdminLoginPage() {
           {step === 'question' && (
             <form onSubmit={handleQuestionSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="answer">Security Question: What is your favorite color?</Label>
+                <Label htmlFor="answer">Security Question: Who are you?</Label>
                 <div className="relative">
                     <ShieldQuestion className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -135,7 +135,7 @@ export default function AdminLoginPage() {
                         type="text"
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
-                        placeholder="Your answer (e.g., blue)"
+                        placeholder="Your answer (e.g., Rohan Kholi)"
                         required
                         className="pl-10"
                     />
