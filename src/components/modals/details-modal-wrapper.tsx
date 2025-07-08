@@ -18,7 +18,7 @@ export function DetailsModalWrapper({ isOpen, onClose, title, children }: Detail
         <DialogHeader className="p-6 pb-4 border-b sticky top-0 bg-card z-10">
           <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-grow">
+        <ScrollArea className="flex-1">
           <div className="p-6">
             {children}
           </div>
