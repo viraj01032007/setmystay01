@@ -85,11 +85,11 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={onSubscriptionClick}>
+          <Button variant="default" size="sm" onClick={onSubscriptionClick}>
             <Crown className="w-4 h-4 mr-2" />
-            Subscription
+            Pricing
           </Button>
-          <Button variant="outline" size="sm" onClick={onSignInClick}>
+          <Button variant="secondary" size="sm" onClick={onSignInClick}>
             <User className="w-4 h-4 mr-2" />
             Sign In
           </Button>
@@ -127,7 +127,7 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
                 
                 <Button size="lg" className="w-full mt-4" onClick={onSubscriptionClick}>
                   <Crown className="w-4 h-4 mr-2"/>
-                  Subscription
+                  Pricing
                 </Button>
               </div>
             </SheetContent>

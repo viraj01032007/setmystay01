@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 
-export function Footer() {
+interface FooterProps {
+  onYourPropertiesClick: () => void;
+}
+
+export function Footer({ onYourPropertiesClick }: FooterProps) {
   const [currentYear, setCurrentYear] = useState<number | null>(null);
 
   useEffect(() => {
@@ -48,10 +52,10 @@ export function Footer() {
             <h3 className="font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="#" className="hover:text-white">Home</Link></li>
-              <li><Link href="#" className="hover:text-white">Your Properties</Link></li>
+              <li><button onClick={onYourPropertiesClick} className="hover:text-white text-left w-full">Your Properties</button></li>
               <li><Link href="#" className="hover:text-white">Contact Us</Link></li>
               <li><Link href="#" className="hover:text-white">Visit Our Office</Link></li>
-              <li><Link href="#" className="hover:text-white">Admin Dashboard (3FA)</Link></li>
+              <li><button onClick={onYourPropertiesClick} className="hover:text-white text-left w-full">Admin Dashboard (3FA)</button></li>
               <li><Link href="#" className="hover:text-white">Post Your Property</Link></li>
             </ul>
           </div>

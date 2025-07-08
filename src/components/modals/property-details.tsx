@@ -165,6 +165,9 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
                 <Phone className="w-5 h-5 mr-2" /> Call Owner
             </Button>
            </a>
+           <Button size="lg" variant="ghost" className="flex-1" onClick={onClose}>
+                Close
+           </Button>
         </div>
       </div>
     </DetailsModalWrapper>

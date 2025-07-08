@@ -32,8 +32,8 @@ export default function Home() {
   const [allListings, setAllListings] = useState<Listing[]>(dummyProperties);
   const [allRoommates, setAllRoommates] = useState<RoommateProfile[]>(dummyRoommates);
   const [isLoading, setIsLoading] = useState(false);
-  const [featuredProperties, setFeaturedProperties] = useState<Listing[]>(dummyProperties.slice(0, 3));
-  const [featuredRoommates, setFeaturedRoommates] = useState<RoommateProfile[]>(dummyRoommates.slice(0, 3));
+  const [featuredProperties, setFeaturedProperties] = useState<Listing[]>([]);
+  const [featuredRoommates, setFeaturedRoommates] = useState<RoommateProfile[]>([]);
 
   const [selectedItem, setSelectedItem] = useState<{ type: 'listing' | 'roommate'; data: Listing | RoommateProfile } | null>(null);
   const [isUnlockModalOpen, setUnlockModalOpen] = useState(false);
@@ -246,7 +246,7 @@ export default function Home() {
         )}
       </main>
 
-      <Footer />
+      <Footer onYourPropertiesClick={() => setAuthModalOpen(true)} />
       
       {/* Modals */}
       <PropertyDetails 

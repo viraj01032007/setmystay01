@@ -54,12 +54,15 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
           <p className="text-lg sm:text-xl text-slate-200">
             Discover roommates, rental properties, and PG accommodations with transparent pricing.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center">
             <Button size="lg" onClick={() => onNavigate('roommates')}>
               <Users className="mr-2 h-5 w-5" /> Find Roommates
             </Button>
             <Button size="lg" variant="secondary" onClick={() => onNavigate('rentals')}>
               <HomeIcon className="mr-2 h-5 w-5" /> Browse Rentals
+            </Button>
+            <Button size="lg" variant="secondary" onClick={() => onNavigate('pg')}>
+              <BedDouble className="mr-2 h-5 w-5" /> Browse Co-living / PG
             </Button>
           </div>
         </div>
