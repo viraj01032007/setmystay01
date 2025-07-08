@@ -5,8 +5,16 @@ import { Logo } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function Footer() {
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
+
   return (
     <footer className="bg-slate-800 text-slate-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -58,7 +66,7 @@ export function Footer() {
               </a>
               <a href="tel:+918210552902" className="flex items-center gap-2 hover:text-white">
                 <Phone className="w-4 h-4" />
-                <span>+91 82105 52902</span>
+                <span>+91 8210552902</span>
               </a>
             </div>
           </div>
@@ -75,7 +83,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-slate-700 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} SetMyStay. All rights reserved.</p>
+          {currentYear && <p>&copy; {currentYear} SetMyStay. All rights reserved.</p>}
         </div>
       </div>
     </footer>

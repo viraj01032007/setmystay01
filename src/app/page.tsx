@@ -29,11 +29,11 @@ type ToastInfo = {
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
-  const [allListings, setAllListings] = useState<Listing[]>([]);
-  const [allRoommates, setAllRoommates] = useState<RoommateProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [featuredProperties, setFeaturedProperties] = useState<Listing[]>([]);
-  const [featuredRoommates, setFeaturedRoommates] = useState<RoommateProfile[]>([]);
+  const [allListings, setAllListings] = useState<Listing[]>(dummyProperties);
+  const [allRoommates, setAllRoommates] = useState<RoommateProfile[]>(dummyRoommates);
+  const [isLoading, setIsLoading] = useState(false);
+  const [featuredProperties, setFeaturedProperties] = useState<Listing[]>(dummyProperties.slice(0, 3));
+  const [featuredRoommates, setFeaturedRoommates] = useState<RoommateProfile[]>(dummyRoommates.slice(0, 3));
 
   const [selectedItem, setSelectedItem] = useState<{ type: 'listing' | 'roommate'; data: Listing | RoommateProfile } | null>(null);
   const [isUnlockModalOpen, setUnlockModalOpen] = useState(false);
@@ -49,17 +49,11 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load data
-    setAllListings(dummyProperties);
-    setAllRoommates(dummyRoommates);
-    
     // Shuffle and set featured items only on the client to prevent hydration mismatch
     const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
     const shuffledRoommates = [...dummyRoommates].sort(() => 0.5 - Math.random());
     setFeaturedProperties(shuffledListings.slice(0, 3));
     setFeaturedRoommates(shuffledRoommates.slice(0, 3));
-
-    setIsLoading(false);
 
     // Load unlocks from local storage
     const savedCount = parseInt(localStorage.getItem('setmystay_unlocks') || '0');
