@@ -51,11 +51,11 @@ export function Footer({ onYourPropertiesClick }: FooterProps) {
           <div>
             <h3 className="font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-white">Home</Link></li>
+              <li><Link href="/" className="hover:text-white">Home</Link></li>
               <li><button onClick={onYourPropertiesClick} className="hover:text-white text-left w-full">Your Properties</button></li>
               <li><Link href="#" className="hover:text-white">Contact Us</Link></li>
               <li><Link href="#" className="hover:text-white">Visit Our Office</Link></li>
-              <li><button onClick={onYourPropertiesClick} className="hover:text-white text-left w-full">Admin Dashboard (3FA)</button></li>
+              <li><Link href="/admin" className="hover:text-white">Admin Dashboard</Link></li>
               <li><Link href="#" className="hover:text-white">Post Your Property</Link></li>
             </ul>
           </div>
