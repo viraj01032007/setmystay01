@@ -276,7 +276,7 @@ export default function Home() {
         {activePage === 'home' && (
           <HomeSection 
             featuredProperties={featuredProperties} 
-            featuredRoommates={featuredRoommates} 
+            featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
             onNavigate={setActivePage}
           />
@@ -335,6 +335,10 @@ export default function Home() {
         isOpen={isUnlockModalOpen}
         onClose={() => setUnlockModalOpen(false)}
         onPurchase={handleUnlockPurchase}
+        onNavigateToListProperty={() => {
+          setUnlockModalOpen(false);
+          setActivePage('list');
+        }}
       />
       <ListPropertyPaymentModal
         isOpen={isListPaymentModalOpen}
