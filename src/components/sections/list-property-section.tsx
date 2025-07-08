@@ -21,6 +21,8 @@ const amenityIcons: { [key: string]: string } = {
   'AC': '❄️', 'WiFi': '📶', 'Parking': '🅿️', 'Gym': '🏋️', 'Pool': '🏊', 'Elevator': '↕️', 'Security': '🛡️', 'Balcony': '🪟', 'Power Backup': '🔋', 'Meals': '🍴', 'Laundry': '🧺', 'Housekeeping': '🧹', 'Garden': '🌳'
 };
 
+const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
 
 const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
@@ -35,18 +37,26 @@ const formSchema = z.object({
   amenities: z.array(z.string()).optional(),
   brokerStatus: z.enum(['With Broker', 'Without Broker']),
   verificationDocument: z.any().optional(),
-  videoUrl: z.string().url({ message: "Please enter a valid video URL." }).optional().or(z.literal('')),
+  videoFile: z
+    .any()
+    .refine((file) => file instanceof File, "Video is required.")
+    .refine((file) => file?.size <= MAX_VIDEO_SIZE, `Max video size is 50MB.`)
+    .refine(
+      (file) => file?.type ? ACCEPTED_VIDEO_TYPES.includes(file.type) : false,
+      ".mp4, .webm and .ogg formats are supported."
+    ),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface ListPropertySectionProps {
-  onSubmit: (data: FormValues) => void;
+  onSubmit: (data: FormValues & { images: File[] }) => void;
 }
 
 export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [verificationFile, setVerificationFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,15 +65,11 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       brokerStatus: 'Without Broker',
       rent: 15000,
       amenities: [],
-      videoUrl: '',
     },
   });
   
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log({ ...data, mediaFiles, verificationFile });
-    // In a real app, you would upload files and get URLs here.
-    // For now, we pass the form data to the parent.
-    onSubmit(data);
+    onSubmit({ ...data, images: mediaFiles });
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,6 +82,14 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     if (event.target.files && event.target.files[0]) {
       setVerificationFile(event.target.files[0]);
       form.setValue('verificationDocument', event.target.files[0]);
+    }
+  };
+
+  const handleVideoFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
+        setVideoFile(file);
+        form.setValue('videoFile', file, { shouldValidate: true });
     }
   };
 
@@ -195,7 +209,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Media Upload</CardTitle>
+                <CardTitle>Photo Upload</CardTitle>
                 <CardDescription>Add photos to attract more interest. (Max 5)</CardDescription>
               </CardHeader>
               <CardContent>
@@ -221,22 +235,28 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
              <Card>
               <CardHeader>
-                <CardTitle>Video Tour (Optional)</CardTitle>
-                <CardDescription>Add a link to a video tour (e.g., from YouTube, Vimeo).</CardDescription>
+                <CardTitle>Video Tour (Required)</CardTitle>
+                <CardDescription>Upload a short video tour. (Max 50MB)</CardDescription>
               </CardHeader>
               <CardContent>
-                <FormField control={form.control} name="videoUrl" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Video URL</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                         <Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                         <Input placeholder="https://example.com/video.mp4" {...field} className="pl-10" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}/>
+                <FormField
+                    control={form.control}
+                    name="videoFile"
+                    render={() => (
+                        <FormItem>
+                            <FormControl>
+                                <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('video-upload')?.click()}>
+                                    <Video className="mx-auto h-12 w-12 text-muted-foreground"/>
+                                    <p className="mt-4 text-sm text-muted-foreground">
+                                        {videoFile ? videoFile.name : 'Click to upload video file'}
+                                    </p>
+                                    <Input id="video-upload" type="file" accept="video/*" className="hidden" onChange={handleVideoFileChange} />
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
               </CardContent>
             </Card>
 

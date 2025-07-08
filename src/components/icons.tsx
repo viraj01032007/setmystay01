@@ -4,23 +4,29 @@ import { cn } from "@/lib/utils";
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      {/* Blue rounded square background */}
-      <rect width="48" height="48" rx="12" fill="#3B82F6"/>
-      
-      {/* White circle outline */}
-      <circle cx="24" cy="24" r="17" stroke="white" strokeWidth="1.5" fill="none"/>
-
-      {/* Location Pin with House */}
-      <g transform="translate(0, -2)">
-        <path d="M24 15C19.5817 15 16 18.5817 16 23C16 28.5 24 36 24 36C24 36 32 28.5 32 24C32 18.5817 28.4183 15 24 15Z" stroke="white" strokeWidth="1.5" fill="none"/>
-        <path d="M21 21H27V26H21V21Z" fill="white"/>
-        <path d="M20 22L24 19L28 22" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-        <rect x="22.25" y="22.25" width="1.5" height="1.5" fill="#3B82F6"/>
-        <rect x="24.75" y="22.25" width="1.5" height="1.5" fill="#3B82F6"/>
+      <rect width="48" height="48" rx="12" fill="#4582EF"/>
+      <g stroke="white" strokeWidth="2">
+        <path 
+          d="M24 14C19.5817 14 16 17.5817 16 22C16 28.35 24 38 24 38C24 38 32 28.35 32 22C32 17.5817 28.4183 14 24 14Z" 
+          fill="#4582EF" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        />
+        <path 
+          d="M21 26V21H27V26" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        />
+        <path 
+          d="M20 22L24 18L28 22" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        />
       </g>
     </svg>
   );
 }
+
 
 export function LoadingSpinner({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (

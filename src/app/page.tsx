@@ -55,9 +55,8 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Only load data on the client side to prevent hydration mismatches
     const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
-    
-    // Only feature roommates who already have a property
     const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
     const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
     
@@ -73,6 +72,7 @@ export default function Home() {
     const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
     setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
   }, []);
+
 
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
@@ -146,7 +146,7 @@ export default function Home() {
     }
   }
 
-  const handleInitiateListing = (data: Omit<Listing, 'id' | 'views'> | Omit<RoommateProfile, 'id' | 'views'>) => {
+  const handleInitiateListing = (data: any) => {
     setPendingListingData(data);
     setListPaymentModalOpen(true);
   };
@@ -157,11 +157,52 @@ export default function Home() {
     setListPaymentModalOpen(false);
     const newId = `new-${Date.now()}`;
     if ('propertyType' in pendingListingData && pendingListingData.propertyType !== 'Roommate') {
-      const newListing: Listing = { ...(pendingListingData as Omit<Listing, 'id' | 'views'>), id: newId, views: 0, images: pendingListingData.images?.length ? pendingListingData.images : ['https://placehold.co/600x400'] };
-      setAllListings(prev => [newListing, ...prev]);
+        const mappedListing: Listing = {
+          id: newId,
+          propertyType: pendingListingData.propertyType,
+          title: pendingListingData.title,
+          rent: pendingListingData.rent,
+          area: 1200, // Default value, form field can be added
+          city: pendingListingData.city,
+          locality: pendingListingData.locality,
+          state: "Maharashtra", // Default value, form field can be added
+          completeAddress: pendingListingData.address,
+          partialAddress: `${pendingListingData.locality}, ${pendingListingData.city}`,
+          ownerName: pendingListingData.ownerName,
+          contactPhone: pendingListingData.phone,
+          description: pendingListingData.description,
+          furnishedStatus: 'Furnished', // Default value, form field can be added
+          amenities: pendingListingData.amenities,
+          size: '2 BHK', // Default value, form field can be added
+          images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/600x400'],
+          videoUrl: pendingListingData.videoFile ? URL.createObjectURL(pendingListingData.videoFile) : undefined,
+          views: 0,
+          ownerId: 'newUser',
+          brokerStatus: pendingListingData.brokerStatus
+      }
+      setAllListings(prev => [mappedListing, ...prev]);
     } else {
-      const newRoommate: RoommateProfile = { ...(pendingListingData as Omit<RoommateProfile, 'id'|'views'>), id: newId, views: 0, hasProperty: true, images: pendingListingData.images?.length ? pendingListingData.images : ['https://placehold.co/400x400'] };
-      setAllRoommates(prev => [newRoommate, ...prev]);
+       const mappedRoommate: RoommateProfile = {
+        id: newId,
+        propertyType: 'Roommate',
+        ownerName: pendingListingData.ownerName,
+        age: 30, // Default
+        rent: pendingListingData.rent,
+        city: pendingListingData.city,
+        locality: pendingListingData.locality,
+        state: 'Maharashtra', // Default
+        completeAddress: pendingListingData.address,
+        partialAddress: `${pendingListingData.locality}, ${pendingListingData.city}`,
+        contactPhone: pendingListingData.phone,
+        description: pendingListingData.description,
+        preferences: [], // Default
+        gender: 'Any', // Default
+        views: 0,
+        ownerId: 'newUser',
+        hasProperty: true, 
+        images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/400x400'],
+    }
+      setAllRoommates(prev => [mappedRoommate, ...prev]);
     }
     setPendingListingData(null);
     setPostPurchaseToast({
