@@ -1,7 +1,8 @@
+
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan } from "@/lib/types";
+import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed } from "@/lib/types";
 import { dummyProperties, dummyRoommates } from "@/lib/data";
 import { smartSortListings } from "@/ai/flows/smart-sort";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,7 @@ import { AuthModal } from "@/components/modals/auth-modal";
 import { ChatModal } from "@/components/modals/chat-modal";
 import { LoadingSpinner } from "@/components/icons";
 import { RateUsModal } from "@/components/modals/rate-us-modal";
+import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 
 type ToastInfo = {
     title: string;
@@ -29,9 +31,9 @@ type ToastInfo = {
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
-  const [allListings, setAllListings] = useState<Listing[]>(dummyProperties);
-  const [allRoommates, setAllRoommates] = useState<RoommateProfile[]>(dummyRoommates);
-  const [isLoading, setIsLoading] = useState(false);
+  const [allListings, setAllListings] = useState<Listing[]>([]);
+  const [allRoommates, setAllRoommates] = useState<RoommateProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [featuredProperties, setFeaturedProperties] = useState<Listing[]>([]);
   const [featuredRoommates, setFeaturedRoommates] = useState<RoommateProfile[]>([]);
 
@@ -46,14 +48,19 @@ export default function Home() {
   const [unlocks, setUnlocks] = useState({ count: 0, isUnlimited: false, unlockedIds: new Set<string>() });
   const [postPurchaseToast, setPostPurchaseToast] = useState<ToastInfo | null>(null);
 
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [inquiryData, setInquiryData] = useState<{ listing: Listing; bed: Bed } | null>(null);
+
   const { toast } = useToast();
 
   useEffect(() => {
-    // Shuffle and set featured items only on the client to prevent hydration mismatch
     const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
     const shuffledRoommates = [...dummyRoommates].sort(() => 0.5 - Math.random());
     setFeaturedProperties(shuffledListings.slice(0, 3));
     setFeaturedRoommates(shuffledRoommates.slice(0, 3));
+    setAllListings(dummyProperties);
+    setAllRoommates(dummyRoommates);
+    setIsLoading(false);
 
     // Load unlocks from local storage
     const savedCount = parseInt(localStorage.getItem('setmystay_unlocks') || '0');
@@ -156,6 +163,12 @@ export default function Home() {
     setSelectedItem(null); // Close details modal
     setChatModalOpen(true);
   }
+
+  const handleBookInquiry = (listing: Listing, bed: Bed) => {
+    setInquiryData({ listing, bed });
+    setIsBookingModalOpen(true);
+    setSelectedItem(null); // Close the details modal
+  };
   
   const handleSmartSort = async (type: ListingType, currentItems: (Listing | RoommateProfile)[]) => {
     toast({ title: 'AI sorting in progress...', description: 'Please wait while we reorder the listings for you.' });
@@ -255,6 +268,7 @@ export default function Home() {
         isUnlocked={selectedItem?.data ? unlocks.unlockedIds.has(selectedItem.data.id) : false}
         onUnlock={handleUnlockClick}
         onChat={() => handleChat(selectedItem?.data?.ownerName || 'Owner')}
+        onBookInquiry={handleBookInquiry}
       />
       <RoommateDetails
         profile={selectedItem?.type === 'roommate' ? selectedItem.data as RoommateProfile : null}
@@ -285,6 +299,12 @@ export default function Home() {
       <RateUsModal 
         isOpen={isRateUsModalOpen}
         onClose={handleRateUsClose}
+      />
+      <BookingInquiryModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        listing={inquiryData?.listing || null}
+        bed={inquiryData?.bed || null}
       />
     </div>
   );

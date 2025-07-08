@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -16,6 +17,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
+const amenityIcons: { [key: string]: string } = {
+  'AC': '❄️', 'WiFi': '📶', 'Parking': '🅿️', 'Gym': '🏋️', 'Pool': '🏊', 'Elevator': '↕️', 'Security': '🛡️', 'Balcony': '🪟', 'Power Backup': '🔋', 'Meals': '🍴', 'Laundry': '🧺', 'Housekeeping': '🧹', 'Garden': '🌳'
+};
+
 
 const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
@@ -152,7 +157,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                         return (
                                         <FormItem
                                             key={amenity}
-                                            className="flex flex-row items-start space-x-3 space-y-0"
+                                            className="flex flex-row items-center space-x-3 space-y-0"
                                         >
                                             <FormControl>
                                             <Checkbox
@@ -168,8 +173,9 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                                 }}
                                             />
                                             </FormControl>
-                                            <FormLabel className="font-normal">
-                                            {amenity}
+                                            <FormLabel className="font-normal flex items-center gap-2">
+                                              <span className="text-lg w-6 text-center">{amenityIcons[amenity]}</span>
+                                              <span>{amenity}</span>
                                             </FormLabel>
                                         </FormItem>
                                         )

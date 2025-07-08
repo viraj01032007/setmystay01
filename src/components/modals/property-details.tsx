@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -15,6 +16,7 @@ interface PropertyDetailsProps {
   isUnlocked: boolean;
   onUnlock: () => void;
   onChat: () => void;
+  onBookInquiry: (listing: Listing, bed: Bed) => void;
 }
 
 const amenityIcons: { [key: string]: React.ReactNode } = {
@@ -77,16 +79,12 @@ const MediaGallery = ({ listing }: { listing: Listing }) => {
 };
 
 
-export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat }: PropertyDetailsProps) {
+export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat, onBookInquiry }: PropertyDetailsProps) {
   if (!listing) return null;
 
   const handleBedClick = (bed: Bed) => {
     if (bed.status === 'vacant') {
-        if (!isUnlocked) {
-            onUnlock();
-        } else {
-            onChat();
-        }
+        onBookInquiry(listing, bed);
     }
   }
 
