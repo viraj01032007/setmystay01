@@ -4,8 +4,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -16,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { LoadingSpinner } from '@/components/icons';
 
 // Mock data similar to the provided script
 const initialProperties = [
@@ -50,6 +52,8 @@ const chartData = [
 
 
 export default function AdminDashboard() {
+    const router = useRouter();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const { toast } = useToast();
     
     // State management
@@ -67,14 +71,24 @@ export default function AdminDashboard() {
     const [currentItem, setCurrentItem] = useState(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
-    // Load initial data and analytics on component mount
     useEffect(() => {
-        setAnalytics({
-            totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
-            totalUnlocks: (Math.floor(Math.random() * 500) + 50),
-            lastUpdated: new Date().toLocaleString()
-        });
-    }, []);
+        const authStatus = localStorage.getItem('admin_authenticated');
+        if (authStatus !== 'true') {
+            router.replace('/admin/login');
+        } else {
+            setIsAuthenticated(true);
+            setAnalytics({
+                totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
+                totalUnlocks: (Math.floor(Math.random() * 500) + 50),
+                lastUpdated: new Date().toLocaleString()
+            });
+        }
+    }, [router]);
+
+    const handleLogout = () => {
+        localStorage.removeItem('admin_authenticated');
+        router.replace('/admin/login');
+    };
 
     const pendingListings = useMemo(() => {
         return [
@@ -140,17 +154,31 @@ export default function AdminDashboard() {
         return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
     };
 
+    if (!isAuthenticated) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-slate-100">
+                <LoadingSpinner className="w-12 h-12 text-primary" />
+            </div>
+        );
+    }
+
     return (
         <div className="bg-slate-50 min-h-screen">
             <header className="bg-white shadow-sm">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
                      <h1 className="text-2xl font-bold text-slate-800">SetMyStay Admin</h1>
-                     <Button asChild>
-                        <Link href="/">
-                            <Home className="w-4 h-4 mr-2" />
-                            Go to Main Site
-                        </Link>
-                    </Button>
+                     <div className="flex items-center gap-4">
+                        <Button asChild>
+                            <Link href="/">
+                                <Home className="w-4 h-4 mr-2" />
+                                Go to Main Site
+                            </Link>
+                        </Button>
+                        <Button variant="outline" onClick={handleLogout}>
+                            <LogOut className="w-4 h-4 mr-2" />
+                            Logout
+                        </Button>
+                     </div>
                 </div>
             </header>
 
