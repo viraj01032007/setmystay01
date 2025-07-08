@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan } from "@/lib/types";
 import { dummyProperties, dummyRoommates } from "@/lib/data";
 import { smartSortListings } from "@/ai/flows/smart-sort";
@@ -32,6 +32,8 @@ export default function Home() {
   const [allListings, setAllListings] = useState<Listing[]>([]);
   const [allRoommates, setAllRoommates] = useState<RoommateProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [featuredProperties, setFeaturedProperties] = useState<Listing[]>([]);
+  const [featuredRoommates, setFeaturedRoommates] = useState<RoommateProfile[]>([]);
 
   const [selectedItem, setSelectedItem] = useState<{ type: 'listing' | 'roommate'; data: Listing | RoommateProfile } | null>(null);
   const [isUnlockModalOpen, setUnlockModalOpen] = useState(false);
@@ -50,6 +52,13 @@ export default function Home() {
     // Load data
     setAllListings(dummyProperties);
     setAllRoommates(dummyRoommates);
+    
+    // Shuffle and set featured items only on the client to prevent hydration mismatch
+    const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
+    const shuffledRoommates = [...dummyRoommates].sort(() => 0.5 - Math.random());
+    setFeaturedProperties(shuffledListings.slice(0, 3));
+    setFeaturedRoommates(shuffledRoommates.slice(0, 3));
+
     setIsLoading(false);
 
     // Load unlocks from local storage
@@ -153,15 +162,6 @@ export default function Home() {
     setSelectedItem(null); // Close details modal
     setChatModalOpen(true);
   }
-
-  const { featuredProperties, featuredRoommates } = useMemo(() => {
-    const shuffledListings = [...allListings].sort(() => 0.5 - Math.random());
-    const shuffledRoommates = [...allRoommates].sort(() => 0.5 - Math.random());
-    return {
-      featuredProperties: shuffledListings.slice(0, 3),
-      featuredRoommates: shuffledRoommates.slice(0, 3),
-    };
-  }, [allListings, allRoommates]);
   
   const handleSmartSort = async (type: ListingType, currentItems: (Listing | RoommateProfile)[]) => {
     toast({ title: 'AI sorting in progress...', description: 'Please wait while we reorder the listings for you.' });
