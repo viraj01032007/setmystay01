@@ -67,7 +67,7 @@ export default function Home() {
       
       toast({
         title: "Purchase Successful!",
-        description: plan === 'unlimited' ? "You now have unlimited unlocks." : `You've added ${plan} unlocks.`,
+        description: plan === 'unlimited' ? "You've subscribed to unlimited unlocks for one month." : `You've added ${plan} unlocks.`,
         variant: "default",
       });
       
@@ -185,7 +185,12 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body text-foreground">
-      <Header activePage={activePage} setActivePage={setActivePage} onSignInClick={() => setAuthModalOpen(true)} />
+      <Header 
+        activePage={activePage} 
+        setActivePage={setActivePage} 
+        onSignInClick={() => setAuthModalOpen(true)}
+        onSubscriptionClick={() => setUnlockModalOpen(true)}
+      />
       
       <main className="flex-grow">
         {activePage === 'home' && (

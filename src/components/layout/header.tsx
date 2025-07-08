@@ -56,9 +56,10 @@ interface HeaderProps {
   activePage: Page;
   setActivePage: (page: Page) => void;
   onSignInClick: () => void;
+  onSubscriptionClick: () => void;
 }
 
-export function Header({ activePage, setActivePage, onSignInClick }: HeaderProps) {
+export function Header({ activePage, setActivePage, onSignInClick, onSubscriptionClick }: HeaderProps) {
   const navItems = [
     { page: 'home' as Page, label: 'Home', icon: <Home className="w-5 h-5" /> },
     { page: 'pg' as Page, label: 'PG Listings', icon: <BedDouble className="w-5 h-5" /> },
@@ -84,6 +85,10 @@ export function Header({ activePage, setActivePage, onSignInClick }: HeaderProps
         </nav>
 
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={onSubscriptionClick}>
+            <Crown className="w-4 h-4 mr-2" />
+            Subscription
+          </Button>
           <Button variant="outline" size="sm" onClick={onSignInClick}>
             <User className="w-4 h-4 mr-2" />
             Sign In
@@ -120,7 +125,7 @@ export function Header({ activePage, setActivePage, onSignInClick }: HeaderProps
                   ))}
                 </nav>
                 
-                <Button size="lg" className="w-full mt-4" onClick={onSignInClick}>
+                <Button size="lg" className="w-full mt-4" onClick={onSubscriptionClick}>
                   <Crown className="w-4 h-4 mr-2"/>
                   Subscription
                 </Button>

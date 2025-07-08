@@ -11,6 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { UploadCloud, Image as ImageIcon, X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+
+const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 
 const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
@@ -22,6 +25,7 @@ const formSchema = z.object({
   ownerName: z.string().min(2, 'Name is required'),
   phone: z.string().regex(/^\d{10}$/, 'Must be a valid 10-digit phone number'),
   description: z.string().optional(),
+  amenities: z.array(z.string()).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -38,6 +42,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     defaultValues: {
       propertyType: 'Rental',
       rent: 15000,
+      amenities: [],
     },
   });
   
@@ -89,6 +94,59 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                   <FormItem><FormLabel>Monthly Rent (₹)</FormLabel><FormControl><Input type="number" placeholder="25000" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
               </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Amenities</CardTitle>
+                    <CardDescription>Select all the amenities that apply.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <FormField
+                        control={form.control}
+                        name="amenities"
+                        render={() => (
+                            <FormItem>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {amenitiesList.map((amenity) => (
+                                    <FormField
+                                    key={amenity}
+                                    control={form.control}
+                                    name="amenities"
+                                    render={({ field }) => {
+                                        return (
+                                        <FormItem
+                                            key={amenity}
+                                            className="flex flex-row items-start space-x-3 space-y-0"
+                                        >
+                                            <FormControl>
+                                            <Checkbox
+                                                checked={field.value?.includes(amenity)}
+                                                onCheckedChange={(checked) => {
+                                                return checked
+                                                    ? field.onChange([...(field.value || []), amenity])
+                                                    : field.onChange(
+                                                        field.value?.filter(
+                                                        (value) => value !== amenity
+                                                        )
+                                                    )
+                                                }}
+                                            />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                            {amenity}
+                                            </FormLabel>
+                                        </FormItem>
+                                        )
+                                    }}
+                                    />
+                                ))}
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
             </Card>
 
             <Card>
