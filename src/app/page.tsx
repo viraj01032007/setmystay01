@@ -55,7 +55,11 @@ export default function Home() {
 
   useEffect(() => {
     const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
-    const shuffledRoommates = [...dummyRoommates].sort(() => 0.5 - Math.random());
+    
+    // Only feature roommates who already have a property
+    const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
+    const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
+    
     setFeaturedProperties(shuffledListings.slice(0, 3));
     setFeaturedRoommates(shuffledRoommates.slice(0, 3));
     setAllListings(dummyProperties);
@@ -148,7 +152,7 @@ export default function Home() {
       const newListing: Listing = { ...(data as Omit<Listing, 'id' | 'views'>), id: newId, views: 0, images: data.images?.length ? data.images : ['https://placehold.co/600x400'] };
       setAllListings(prev => [newListing, ...prev]);
     } else {
-      const newRoommate: RoommateProfile = { ...(data as Omit<RoommateProfile, 'id'|'views'>), id: newId, views: 0, images: data.images?.length ? data.images : ['https://placehold.co/400x400'] };
+      const newRoommate: RoommateProfile = { ...(data as Omit<RoommateProfile, 'id'|'views'>), id: newId, views: 0, hasProperty: true, images: data.images?.length ? data.images : ['https://placehold.co/400x400'] };
       setAllRoommates(prev => [newRoommate, ...prev]);
     }
     setPostPurchaseToast({
@@ -249,7 +253,7 @@ export default function Home() {
           <ListingsSection
             key="roommates"
             type="roommate"
-            listings={allRoommates}
+            listings={allRoommates.filter(r => r.hasProperty)}
             onViewDetails={handleViewDetails}
             onSmartSort={handleSmartSort}
           />

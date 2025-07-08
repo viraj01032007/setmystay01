@@ -1,3 +1,4 @@
+
 export type Page = 'home' | 'pg' | 'rentals' | 'roommates' | 'list' | 'your-properties';
 
 export type ListingType = 'pg' | 'rental' | 'roommate';
@@ -56,6 +57,7 @@ export interface RoommateProfile {
   ownerId: string;
   'data-ai-hint'?: string;
   verificationDocumentUrl?: string;
+  hasProperty: boolean;
 }
 
 export type UnlockPlan = 1 | 5 | 10 | 'unlimited';

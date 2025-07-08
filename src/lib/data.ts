@@ -1,3 +1,4 @@
+
 import type { Listing, RoommateProfile } from './types';
 
 export const dummyProperties: Listing[] = [
@@ -128,7 +129,7 @@ export const dummyRoommates: RoommateProfile[] = [
         partialAddress: 'CBD Belapur, Navi Mumbai',
         contactPhone: '+919012345678',
         contactEmail: 'rahul.sharma@example.com',
-        description: 'Friendly and organized software engineer looking for a male roommate. Prefer a non-smoker, clean and quiet environment.',
+        description: 'Friendly and organized software engineer looking for a male roommate to find and share an apartment with. Prefer a non-smoker, clean and quiet environment.',
         preferences: ['Non-Smoker', 'Clean', 'Drinker', 'Vegetarian'],
         gender: 'Male',
         images: [
@@ -136,7 +137,8 @@ export const dummyRoommates: RoommateProfile[] = [
         ],
         'data-ai-hint': 'male portrait',
         views: 75,
-        ownerId: 'dummyRoommateOwner1'
+        ownerId: 'dummyRoommateOwner1',
+        hasProperty: false,
     },
     {
         id: 'ankita-reddy-kharghar',
@@ -151,7 +153,7 @@ export const dummyRoommates: RoommateProfile[] = [
         partialAddress: 'Kharghar, Navi Mumbai',
         contactPhone: '+918012345678',
         contactEmail: 'ankita.r@example.com',
-        description: 'Looking for a female roommate to share a 2BHK apartment. I enjoy cooking and quiet evenings. Prefer someone clean and respectful.',
+        description: "I have a lovely 2BHK and am looking for a female roommate to share it. I enjoy cooking and quiet evenings. Prefer someone clean and respectful.",
         preferences: ['Non-Smoker', 'Clean', 'Drinker', 'Non-Vegetarian'],
         gender: 'Female',
         images: [
@@ -159,6 +161,7 @@ export const dummyRoommates: RoommateProfile[] = [
         ],
         'data-ai-hint': 'female portrait',
         views: 180,
-        ownerId: 'dummyRoommateOwner2'
+        ownerId: 'dummyRoommateOwner2',
+        hasProperty: true,
     },
 ];
