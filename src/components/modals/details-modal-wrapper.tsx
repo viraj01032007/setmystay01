@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface DetailsModalWrapperProps {
   isOpen: boolean;
@@ -18,11 +17,11 @@ export function DetailsModalWrapper({ isOpen, onClose, title, children }: Detail
         <DialogHeader className="p-6 pb-4 border-b sticky top-0 bg-card z-10">
           <DialogTitle className="text-2xl font-bold">{title}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <div className="p-6">
             {children}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
