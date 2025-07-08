@@ -26,6 +26,12 @@ export const dummyProperties: Listing[] = [
         views: 125,
         ownerId: 'dummyOwner1',
         brokerStatus: 'Without Broker',
+        beds: [
+            { id: 'bed1', status: 'occupied' },
+            { id: 'bed2', status: 'vacant' },
+            { id: 'bed3', status: 'vacant' },
+            { id: 'bed4', status: 'occupied' },
+        ]
     },
     {
         id: 'luxury-2bhk-vashi',

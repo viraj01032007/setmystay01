@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import type { Listing } from '@/lib/types';
+import type { Listing, Bed } from '@/lib/types';
 import { DetailsModalWrapper } from './details-modal-wrapper';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, IndianRupee, Home, Eye, BedDouble, ChevronLeft, ChevronRight, Lock, MessageSquare, Phone } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PropertyDetailsProps {
   listing: Listing | null;
@@ -17,19 +18,19 @@ interface PropertyDetailsProps {
 }
 
 const amenityIcons: { [key: string]: React.ReactNode } = {
-  AC: <BedDouble className="w-4 h-4" />,
-  WiFi: <BedDouble className="w-4 h-4" />,
-  Parking: <BedDouble className="w-4 h-4" />,
-  Gym: <BedDouble className="w-4 h-4" />,
-  Pool: <BedDouble className="w-4 h-4" />,
-  Elevator: <BedDouble className="w-4 h-4" />,
-  Security: <BedDouble className="w-4 h-4" />,
-  Balcony: <BedDouble className="w-4 h-4" />,
-  'Power Backup': <BedDouble className="w-4 h-4" />,
-  Meals: <BedDouble className="w-4 h-4" />,
-  Laundry: <BedDouble className="w-4 h-4" />,
-  Housekeeping: <BedDouble className="w-4 h-4" />,
-  Garden: <BedDouble className="w-4 h-4" />,
+  'AC': '❄️',
+  'WiFi': '📶',
+  'Parking': '🅿️',
+  'Gym': '🏋️',
+  'Pool': '🏊',
+  'Elevator': '🛗',
+  'Security': '🛡️',
+  'Balcony': '🏞️',
+  'Power Backup': '🔋',
+  'Meals': '🍲',
+  'Laundry': '🧺',
+  'Housekeeping': '🧹',
+  'Garden': '🌳',
 };
 
 const MediaGallery = ({ listing }: { listing: Listing }) => {
@@ -79,6 +80,16 @@ const MediaGallery = ({ listing }: { listing: Listing }) => {
 export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat }: PropertyDetailsProps) {
   if (!listing) return null;
 
+  const handleBedClick = (bed: Bed) => {
+    if (bed.status === 'vacant') {
+        if (!isUnlocked) {
+            onUnlock();
+        } else {
+            onChat();
+        }
+    }
+  }
+
   return (
     <DetailsModalWrapper isOpen={!!listing} onClose={onClose} title={listing.title}>
       <div className="space-y-6">
@@ -118,10 +129,34 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
             <h3 className="text-lg font-semibold mb-2">Amenities</h3>
             <div className="flex flex-wrap gap-2">
               {listing.amenities.map(amenity => (
-                <Badge key={amenity} variant="secondary" className="text-sm">
-                  {amenityIcons[amenity] || <Home className="w-4 h-4" />}
-                  <span className="ml-2">{amenity}</span>
+                <Badge key={amenity} variant="secondary" className="text-sm flex items-center gap-2">
+                  <span>{amenityIcons[amenity] || '✅'}</span>
+                  <span>{amenity}</span>
                 </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {listing.propertyType === 'PG' && listing.beds && (
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Room Layout</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-muted/50">
+              {listing.beds.map((bed) => (
+                <button
+                  key={bed.id}
+                  onClick={() => handleBedClick(bed)}
+                  disabled={bed.status === 'occupied'}
+                  className={cn(
+                    "p-4 rounded-lg flex flex-col items-center justify-center transition-transform transform hover:scale-105",
+                    bed.status === 'vacant' 
+                      ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 cursor-pointer hover:bg-green-200 dark:hover:bg-green-900' 
+                      : 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 cursor-not-allowed opacity-70',
+                  )}
+                >
+                  <BedDouble className="w-8 h-8" />
+                  <span className="mt-2 text-sm font-semibold capitalize">{bed.status}</span>
+                </button>
               ))}
             </div>
           </div>

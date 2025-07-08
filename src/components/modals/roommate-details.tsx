@@ -17,12 +17,12 @@ interface RoommateDetailsProps {
 }
 
 const preferenceIcons: { [key: string]: React.ReactNode } = {
-  'Non-Smoker': <CigaretteOff className="w-4 h-4" />,
-  Vegetarian: <Leaf className="w-4 h-4" />,
-  'Non-Vegetarian': <Drumstick className="w-4 h-4" />,
-  Clean: <Sparkles className="w-4 h-4" />,
-  Drinker: <Utensils className="w-4 h-4" />,
-  'Pet-Friendly': <PawPrint className="w-4 h-4" />,
+  'Non-Smoker': '🚭',
+  'Vegetarian': '🥗',
+  'Non-Vegetarian': '🍗',
+  'Clean': '✨',
+  'Drinker': '🍻',
+  'Pet-Friendly': '🐾',
 };
 
 
@@ -108,9 +108,9 @@ export function RoommateDetails({ profile, onClose, isUnlocked, onUnlock, onChat
             <h3 className="text-lg font-semibold mb-2">Lifestyle Preferences</h3>
             <div className="flex flex-wrap gap-2">
               {profile.preferences.map(preference => (
-                <Badge key={preference} variant="secondary" className="text-sm">
-                   {preferenceIcons[preference] || <User className="w-4 h-4" />}
-                  <span className="ml-2">{preference}</span>
+                <Badge key={preference} variant="secondary" className="text-sm flex items-center gap-2">
+                  <span>{preferenceIcons[preference] || '👍'}</span>
+                  <span>{preference}</span>
                 </Badge>
               ))}
             </div>

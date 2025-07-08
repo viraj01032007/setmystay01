@@ -2,6 +2,11 @@ export type Page = 'home' | 'pg' | 'rentals' | 'roommates' | 'list' | 'your-prop
 
 export type ListingType = 'pg' | 'rental' | 'roommate';
 
+export interface Bed {
+  id: string;
+  status: 'vacant' | 'occupied';
+}
+
 export interface Listing {
   id: string;
   propertyType: 'PG' | 'Rental';
@@ -27,6 +32,7 @@ export interface Listing {
   'data-ai-hint'?: string;
   brokerStatus: 'With Broker' | 'Without Broker';
   verificationDocumentUrl?: string;
+  beds?: Bed[];
 }
 
 export interface RoommateProfile {
