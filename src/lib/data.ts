@@ -24,7 +24,8 @@ export const dummyProperties: Listing[] = [
         ],
         'data-ai-hint': 'modern apartment',
         views: 125,
-        ownerId: 'dummyOwner1'
+        ownerId: 'dummyOwner1',
+        brokerStatus: 'Without Broker',
     },
     {
         id: 'luxury-2bhk-vashi',
@@ -50,7 +51,8 @@ export const dummyProperties: Listing[] = [
         'data-ai-hint': 'luxury apartment',
         videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
         views: 340,
-        ownerId: 'dummyOwner2'
+        ownerId: 'dummyOwner2',
+        brokerStatus: 'With Broker',
     },
     {
         id: 'spacious-3bhk-kharghar',
@@ -75,7 +77,8 @@ export const dummyProperties: Listing[] = [
         ],
         'data-ai-hint': 'house garden',
         views: 210,
-        ownerId: 'dummyOwner1'
+        ownerId: 'dummyOwner1',
+        brokerStatus: 'Without Broker',
     },
     {
         id: 'modern-2bhk-nerul',
@@ -100,7 +103,8 @@ export const dummyProperties: Listing[] = [
         ],
         'data-ai-hint': 'bright apartment',
         views: 95,
-        ownerId: 'dummyOwner3'
+        ownerId: 'dummyOwner3',
+        brokerStatus: 'With Broker',
     },
 ];
 

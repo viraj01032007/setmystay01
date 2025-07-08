@@ -10,8 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import Image from 'next/image';
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 
@@ -26,6 +28,8 @@ const formSchema = z.object({
   phone: z.string().regex(/^\d{10}$/, 'Must be a valid 10-digit phone number'),
   description: z.string().optional(),
   amenities: z.array(z.string()).optional(),
+  brokerStatus: z.enum(['With Broker', 'Without Broker']),
+  verificationDocument: z.any().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -36,18 +40,20 @@ interface ListPropertySectionProps {
 
 export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [verificationFile, setVerificationFile] = useState<File | null>(null);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       propertyType: 'Rental',
+      brokerStatus: 'Without Broker',
       rent: 15000,
       amenities: [],
     },
   });
   
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log({ ...data, mediaFiles });
+    console.log({ ...data, mediaFiles, verificationFile });
     // In a real app, you would pass the data to the parent component
     onSubmit();
   };
@@ -55,6 +61,13 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setMediaFiles(prev => [...prev, ...Array.from(event.target.files)].slice(0, 5));
+    }
+  };
+  
+  const handleVerificationFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setVerificationFile(event.target.files[0]);
+      form.setValue('verificationDocument', event.target.files[0]);
     }
   };
 
@@ -92,6 +105,28 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 )}/>
                 <FormField control={form.control} name="rent" render={({ field }) => (
                   <FormItem><FormLabel>Monthly Rent (₹)</FormLabel><FormControl><Input type="number" placeholder="25000" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="brokerStatus" render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Are you a broker or owner?</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex gap-4"
+                      >
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                          <FormControl><RadioGroupItem value="Without Broker" /></FormControl>
+                          <FormLabel className="font-normal">Owner</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-2 space-y-0">
+                          <FormControl><RadioGroupItem value="With Broker" /></FormControl>
+                          <FormLabel className="font-normal">Broker</FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}/>
               </CardContent>
             </Card>
@@ -172,6 +207,29 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+             <Card>
+              <CardHeader>
+                <CardTitle>Verification Document</CardTitle>
+                <CardDescription>Upload a document for verification (e.g., Aadhar card, Agreement). This will only be visible to our admin team.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                 <FormField control={form.control} name="verificationDocument" render={({ field }) => (
+                    <FormItem>
+                        <FormControl>
+                            <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('verification-upload')?.click()}>
+                                <ShieldCheck className="mx-auto h-12 w-12 text-muted-foreground"/>
+                                <p className="mt-4 text-sm text-muted-foreground">
+                                    {verificationFile ? verificationFile.name : 'Click to upload your verification document'}
+                                </p>
+                                <Input id="verification-upload" type="file" accept="image/*,application/pdf" className="hidden" onChange={handleVerificationFileChange} />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                 )} />
               </CardContent>
             </Card>
 

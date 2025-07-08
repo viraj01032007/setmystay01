@@ -37,13 +37,14 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-white mb-4">Services</h3>
+            <h3 className="font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-white">PG Accommodations</Link></li>
-              <li><Link href="#" className="hover:text-white">Rental Properties</Link></li>
-              <li><Link href="#" className="hover:text-white">Find Roommates</Link></li>
-              <li><Link href="#" className="hover:text-white">List Property</Link></li>
-              <li><Link href="#" className="hover:text-white">Property Management</Link></li>
+              <li><Link href="#" className="hover:text-white">Home</Link></li>
+              <li><Link href="#" className="hover:text-white">Your Properties</Link></li>
+              <li><Link href="#" className="hover:text-white">Contact Us</Link></li>
+              <li><Link href="#" className="hover:text-white">Visit Our Office</Link></li>
+              <li><Link href="#" className="hover:text-white">Admin Dashboard (3FA)</Link></li>
+              <li><Link href="#" className="hover:text-white">Post Your Property</Link></li>
             </ul>
           </div>
 

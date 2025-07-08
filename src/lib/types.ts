@@ -25,6 +25,8 @@ export interface Listing {
   views: number;
   ownerId: string;
   'data-ai-hint'?: string;
+  brokerStatus: 'With Broker' | 'Without Broker';
+  verificationDocumentUrl?: string;
 }
 
 export interface RoommateProfile {
@@ -47,6 +49,7 @@ export interface RoommateProfile {
   views: number;
   ownerId: string;
   'data-ai-hint'?: string;
+  verificationDocumentUrl?: string;
 }
 
 export type UnlockPlan = 1 | 5 | 10 | 'unlimited';
@@ -61,4 +64,5 @@ export type FilterState = {
   roomType: string;
   gender: string;
   locationQuery: string;
+  brokerStatus: string;
 };

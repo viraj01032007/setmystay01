@@ -19,6 +19,13 @@ import { ListPropertyPaymentModal } from "@/components/modals/list-property-paym
 import { AuthModal } from "@/components/modals/auth-modal";
 import { ChatModal } from "@/components/modals/chat-modal";
 import { LoadingSpinner } from "@/components/icons";
+import { RateUsModal } from "@/components/modals/rate-us-modal";
+
+type ToastInfo = {
+    title: string;
+    description: string;
+    variant?: "default" | "destructive";
+}
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
@@ -31,9 +38,11 @@ export default function Home() {
   const [isListPaymentModalOpen, setListPaymentModalOpen] = useState(false);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [isRateUsModalOpen, setRateUsModalOpen] = useState(false);
   const [chattingWith, setChattingWith] = useState<string | null>(null);
 
   const [unlocks, setUnlocks] = useState({ count: 0, isUnlimited: false, unlockedIds: new Set<string>() });
+  const [postPurchaseToast, setPostPurchaseToast] = useState<ToastInfo | null>(null);
 
   const { toast } = useToast();
 
@@ -50,6 +59,14 @@ export default function Home() {
     setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
   }, []);
 
+  const handleRateUsClose = (rated: boolean) => {
+    setRateUsModalOpen(false);
+    if (postPurchaseToast) {
+        toast(postPurchaseToast);
+        setPostPurchaseToast(null);
+    }
+  }
+
   const handleUnlockPurchase = useCallback((plan: UnlockPlan) => {
     setUnlocks(prev => {
       let newCount = prev.count;
@@ -65,7 +82,7 @@ export default function Home() {
       localStorage.setItem('setmystay_unlocks', newUnlocks.count.toString());
       localStorage.setItem('setmystay_isUnlimited', newUnlocks.isUnlimited.toString());
       
-      toast({
+      setPostPurchaseToast({
         title: "Purchase Successful!",
         description: plan === 'unlimited' ? "You've subscribed to unlimited unlocks for one month." : `You've added ${plan} unlocks.`,
         variant: "default",
@@ -74,7 +91,8 @@ export default function Home() {
       return newUnlocks;
     });
     setUnlockModalOpen(false);
-  }, [toast]);
+    setRateUsModalOpen(true);
+  }, []);
 
   const useUnlock = useCallback((itemId: string) => {
     if (unlocks.isUnlimited) {
@@ -116,17 +134,18 @@ export default function Home() {
   const handleListProperty = (data: Omit<Listing, 'id' | 'views'> | Omit<RoommateProfile, 'id' | 'views'>) => {
     setListPaymentModalOpen(false);
     const newId = `new-${Date.now()}`;
-    if ('propertyType' in data) {
-      const newListing: Listing = { ...data, id: newId, views: 0, images: data.images?.length ? data.images : ['https://placehold.co/600x400'] };
+    if ('propertyType' in data && data.propertyType !== 'Roommate') {
+      const newListing: Listing = { ...(data as Omit<Listing, 'id' | 'views'>), id: newId, views: 0, images: data.images?.length ? data.images : ['https://placehold.co/600x400'] };
       setAllListings(prev => [newListing, ...prev]);
     } else {
-      const newRoommate: RoommateProfile = { ...data, id: newId, views: 0, images: data.images?.length ? data.images : ['https://placehold.co/400x400'] };
+      const newRoommate: RoommateProfile = { ...(data as Omit<RoommateProfile, 'id'|'views'>), id: newId, views: 0, images: data.images?.length ? data.images : ['https://placehold.co/400x400'] };
       setAllRoommates(prev => [newRoommate, ...prev]);
     }
-    toast({
+    setPostPurchaseToast({
       title: "Listing Submitted!",
       description: "Your property is now live.",
     });
+    setRateUsModalOpen(true);
   };
   
   const handleChat = (name: string) => {
@@ -268,6 +287,10 @@ export default function Home() {
         isOpen={isChatModalOpen}
         onClose={() => setChatModalOpen(false)}
         contactName={chattingWith}
+      />
+      <RateUsModal 
+        isOpen={isRateUsModalOpen}
+        onClose={handleRateUsClose}
       />
     </div>
   );
