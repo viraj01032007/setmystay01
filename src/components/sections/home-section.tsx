@@ -44,7 +44,7 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="modern city"
+          data-ai-hint="futuristic city"
         />
         <div className="absolute inset-0 bg-black/60 -z-10" />
         <div className="relative text-white max-w-4xl space-y-6">
