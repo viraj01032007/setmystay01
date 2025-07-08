@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -10,7 +11,7 @@ import type { Listing, RoommateProfile } from "@/lib/types";
 interface ListPropertyPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<Listing, 'id' | 'views'> | Omit<RoommateProfile, 'id' | 'views'>) => void;
+  onSubmit: () => void;
 }
 
 const listingPlans = {
@@ -25,17 +26,9 @@ export function ListPropertyPaymentModal({ isOpen, onClose, onSubmit }: ListProp
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>('roommate');
 
   const handleSubmit = () => {
-    // This is a placeholder. In a real app, you'd get the form data from a state management solution (e.g., Zustand, Redux, or Context)
-    // For this example, we'll simulate it.
-    const dummyFormData: any = {
-      propertyType: selectedPlan === 'pg' ? 'PG' : 'Rental',
-      ownerName: "Simulated User",
-      // ...other fields
-    };
-    if (selectedPlan === 'roommate') {
-        dummyFormData.propertyType = 'Roommate';
-    }
-    onSubmit(dummyFormData);
+    // The data is already in the parent component's state.
+    // This component's only job now is to trigger the submission.
+    onSubmit();
   };
 
   return (

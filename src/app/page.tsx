@@ -50,6 +50,7 @@ export default function Home() {
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [inquiryData, setInquiryData] = useState<{ listing: Listing; bed: Bed } | null>(null);
+  const [pendingListingData, setPendingListingData] = useState<any>(null);
 
   const { toast } = useToast();
 
@@ -145,16 +146,24 @@ export default function Home() {
     }
   }
 
-  const handleListProperty = (data: Omit<Listing, 'id' | 'views'> | Omit<RoommateProfile, 'id' | 'views'>) => {
+  const handleInitiateListing = (data: Omit<Listing, 'id' | 'views'> | Omit<RoommateProfile, 'id' | 'views'>) => {
+    setPendingListingData(data);
+    setListPaymentModalOpen(true);
+  };
+
+  const handleListProperty = () => {
+    if (!pendingListingData) return;
+    
     setListPaymentModalOpen(false);
     const newId = `new-${Date.now()}`;
-    if ('propertyType' in data && data.propertyType !== 'Roommate') {
-      const newListing: Listing = { ...(data as Omit<Listing, 'id' | 'views'>), id: newId, views: 0, images: data.images?.length ? data.images : ['https://placehold.co/600x400'] };
+    if ('propertyType' in pendingListingData && pendingListingData.propertyType !== 'Roommate') {
+      const newListing: Listing = { ...(pendingListingData as Omit<Listing, 'id' | 'views'>), id: newId, views: 0, images: pendingListingData.images?.length ? pendingListingData.images : ['https://placehold.co/600x400'] };
       setAllListings(prev => [newListing, ...prev]);
     } else {
-      const newRoommate: RoommateProfile = { ...(data as Omit<RoommateProfile, 'id'|'views'>), id: newId, views: 0, hasProperty: true, images: data.images?.length ? data.images : ['https://placehold.co/400x400'] };
+      const newRoommate: RoommateProfile = { ...(pendingListingData as Omit<RoommateProfile, 'id'|'views'>), id: newId, views: 0, hasProperty: true, images: pendingListingData.images?.length ? pendingListingData.images : ['https://placehold.co/400x400'] };
       setAllRoommates(prev => [newRoommate, ...prev]);
     }
+    setPendingListingData(null);
     setPostPurchaseToast({
       title: "Listing Submitted!",
       description: "Your property is now live.",
@@ -259,7 +268,7 @@ export default function Home() {
           />
         )}
         {activePage === 'list' && (
-          <ListPropertySection onSubmit={() => setListPaymentModalOpen(true)} />
+          <ListPropertySection onSubmit={handleInitiateListing} />
         )}
       </main>
 

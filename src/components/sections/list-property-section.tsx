@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X, ShieldCheck } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
@@ -35,12 +35,13 @@ const formSchema = z.object({
   amenities: z.array(z.string()).optional(),
   brokerStatus: z.enum(['With Broker', 'Without Broker']),
   verificationDocument: z.any().optional(),
+  videoUrl: z.string().url({ message: "Please enter a valid video URL." }).optional().or(z.literal('')),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface ListPropertySectionProps {
-  onSubmit: () => void; // Simplified for now
+  onSubmit: (data: FormValues) => void;
 }
 
 export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
@@ -54,13 +55,15 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       brokerStatus: 'Without Broker',
       rent: 15000,
       amenities: [],
+      videoUrl: '',
     },
   });
   
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
     console.log({ ...data, mediaFiles, verificationFile });
-    // In a real app, you would pass the data to the parent component
-    onSubmit();
+    // In a real app, you would upload files and get URLs here.
+    // For now, we pass the form data to the parent.
+    onSubmit(data);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,6 +216,27 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+             <Card>
+              <CardHeader>
+                <CardTitle>Video Tour (Optional)</CardTitle>
+                <CardDescription>Add a link to a video tour (e.g., from YouTube, Vimeo).</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField control={form.control} name="videoUrl" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Video URL</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                         <Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                         <Input placeholder="https://example.com/video.mp4" {...field} className="pl-10" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}/>
               </CardContent>
             </Card>
 
