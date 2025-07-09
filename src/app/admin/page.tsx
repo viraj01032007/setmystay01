@@ -57,8 +57,8 @@ export default function AdminDashboard() {
     const { toast } = useToast();
     
     // State management
-    const [properties, setProperties] = useState(initialProperties);
-    const [roommates, setRoommates] = useState(initialRoommates);
+    const [properties, setProperties] = useState([]);
+    const [roommates, setRoommates] = useState([]);
     const [pricing, setPricing] = useState(initialPricing);
 
     const [analytics, setAnalytics] = useState({
@@ -77,6 +77,8 @@ export default function AdminDashboard() {
             router.replace('/admin/login');
         } else {
             setIsAuthenticated(true);
+            setProperties(initialProperties);
+            setRoommates(initialRoommates);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
