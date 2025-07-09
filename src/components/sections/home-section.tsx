@@ -1,12 +1,14 @@
+
 "use client";
 
 import type { Listing, RoommateProfile, Page } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Home as HomeIcon, BedDouble } from "lucide-react";
+import { Users, Home as HomeIcon, BedDouble, Search } from "lucide-react";
 import { PropertyCard } from "@/components/shared/property-card";
 import { RoommateCard } from "@/components/shared/roommate-card";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
 
 interface HomeSectionProps {
   featuredProperties: Listing[];
@@ -40,22 +42,36 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
       <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center p-6">
         <Image
           src="https://placehold.co/1200x600"
-          alt="Modern city skyline"
+          alt="Modern architecture"
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="futuristic city"
+          data-ai-hint="modern architecture"
         />
         <div className="absolute inset-0 bg-black/60 -z-10" />
-        <div className="relative text-white max-w-4xl space-y-6">
+        <div className="relative text-white max-w-4xl space-y-6 w-full">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
             Find Your Perfect Living Space
           </h1>
           <p className="text-lg sm:text-xl text-slate-200">
             Discover roommates, rental properties, and PG accommodations with transparent pricing.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" onClick={() => onNavigate('roommates')}>
+          
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center bg-white rounded-full shadow-lg p-2">
+              <Input
+                type="text"
+                placeholder="Search for a location, e.g., 'Mumbai'"
+                className="flex-grow bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
+              />
+              <Button size="lg" className="rounded-full">
+                <Search className="mr-2 h-5 w-5" /> Search
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-4 justify-center pt-4">
+            <Button size="lg" variant="secondary" onClick={() => onNavigate('roommates')}>
               <Users className="mr-2 h-5 w-5" /> Find Roommates
             </Button>
             <Button size="lg" variant="secondary" onClick={() => onNavigate('rentals')}>
