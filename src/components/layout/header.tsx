@@ -89,7 +89,7 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
             <Crown className="w-4 h-4 mr-2" />
             Pricing
           </Button>
-          <Button variant="secondary" size="sm" onClick={onSignInClick}>
+          <Button variant="default" size="sm" onClick={onSignInClick}>
             <User className="w-4 h-4 mr-2" />
             Sign In
           </Button>
