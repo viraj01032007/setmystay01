@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
+import type { Page } from "@/lib/types";
 
 interface FooterProps {
   onYourPropertiesClick: () => void;
+  onNavigate: (page: Page) => void;
 }
 
-export function Footer({ onYourPropertiesClick }: FooterProps) {
+export function Footer({ onYourPropertiesClick, onNavigate }: FooterProps) {
   const [currentYear, setCurrentYear] = useState<number | null>(null);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export function Footer({ onYourPropertiesClick }: FooterProps) {
               <li><Link href="#" className="hover:text-white">Contact Us</Link></li>
               <li><Link href="#" className="hover:text-white">Visit Our Office</Link></li>
               <li><Link href="/admin" className="hover:text-white">Admin Dashboard</Link></li>
-              <li><Link href="#" className="hover:text-white">Post Your Property</Link></li>
+              <li><button onClick={() => onNavigate('list')} className="hover:text-white text-left w-full">Post Your Property</button></li>
             </ul>
           </div>
 

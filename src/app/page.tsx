@@ -22,6 +22,7 @@ import { ChatModal } from "@/components/modals/chat-modal";
 import { LoadingSpinner } from "@/components/icons";
 import { RateUsModal } from "@/components/modals/rate-us-modal";
 import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
+import { FloatingCta } from "@/components/shared/floating-cta";
 
 type ToastInfo = {
     title: string;
@@ -315,7 +316,8 @@ export default function Home() {
         )}
       </main>
 
-      <Footer onYourPropertiesClick={() => setAuthModalOpen(true)} />
+      <Footer onYourPropertiesClick={() => setAuthModalOpen(true)} onNavigate={setActivePage}/>
+      <FloatingCta />
       
       {/* Modals */}
       <PropertyDetails 
