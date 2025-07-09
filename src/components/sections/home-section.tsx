@@ -53,7 +53,7 @@ export function HomeSection({
           priority
           data-ai-hint="modern buildings"
         />
-        <div className="relative text-white max-w-4xl space-y-6 w-full bg-black/60 p-4 sm:p-8 rounded-xl shadow-2xl">
+        <div className="relative text-white max-w-4xl space-y-6 w-full bg-black/70 p-4 sm:p-8 rounded-xl shadow-2xl">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
             Find Your Perfect Living Space
           </h1>
