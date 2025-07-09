@@ -15,10 +15,10 @@ interface FooterProps {
 }
 
 export function Footer({ onYourPropertiesClick, onNavigate }: FooterProps) {
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
+    setIsMounted(true);
   }, []);
 
 
@@ -81,7 +81,7 @@ export function Footer({ onYourPropertiesClick, onNavigate }: FooterProps) {
         </div>
 
         <div className="mt-12 border-t border-slate-700 pt-8 text-center text-sm">
-          {currentYear && <p>&copy; {currentYear} SetMyStay. All rights reserved.</p>}
+          {isMounted && <p>&copy; {new Date().getFullYear()} SetMyStay. All rights reserved.</p>}
         </div>
       </div>
     </footer>
