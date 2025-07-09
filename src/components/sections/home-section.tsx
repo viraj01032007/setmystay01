@@ -46,12 +46,12 @@ export function HomeSection({
       {/* Hero Section */}
       <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center p-6">
         <Image
-          src="https://placehold.co/1200x600"
-          alt="Skyline of Bandra Kurla Complex (BKC) in Mumbai"
+          src="https://placehold.co/1200x600.png"
+          alt="Modern city skyline with residential buildings"
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="BKC Mumbai"
+          data-ai-hint="cityscape buildings"
         />
         <div className="relative text-white max-w-4xl space-y-6 w-full bg-black/60 p-8 rounded-xl shadow-2xl">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
