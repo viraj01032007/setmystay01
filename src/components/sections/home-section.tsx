@@ -51,7 +51,7 @@ export function HomeSection({
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="cityscape buildings"
+          data-ai-hint="modern cityscape"
         />
         <div className="relative text-white max-w-4xl space-y-6 w-full bg-black/60 p-8 rounded-xl shadow-2xl">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
