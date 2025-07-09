@@ -67,6 +67,7 @@ export type FilterState = {
   amenities: string[];
   furnishedStatus: string;
   propertyType: string;
+  state: string;
   city: string;
   locality: string;
   roomType: string;

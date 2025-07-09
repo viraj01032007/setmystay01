@@ -15,6 +15,9 @@ import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video } from 'lucide-r
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
+import { AutocompleteInput } from '@/components/shared/autocomplete-input';
+import { indianStates } from '@/lib/states';
+import { indianCities } from '@/lib/cities';
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 const amenityIcons: { [key: string]: string } = {
@@ -28,6 +31,7 @@ const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
   title: z.string().min(5, 'Title must be at least 5 characters'),
   rent: z.coerce.number().min(1000, 'Rent must be at least 1000'),
+  state: z.string().min(1, 'State is required'),
   city: z.string().min(1, 'City is required'),
   locality: z.string().min(1, 'Locality is required'),
   address: z.string().min(10, 'Full address is required'),
@@ -78,6 +82,9 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       amenities: [],
       phone: '',
       gender: undefined,
+      state: '',
+      city: '',
+      locality: '',
     },
   });
   
@@ -321,11 +328,36 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 <CardTitle>Location</CardTitle>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-6">
+                 <FormField control={form.control} name="state" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>State</FormLabel>
+                        <FormControl>
+                            <AutocompleteInput 
+                                placeholder="e.g., Maharashtra"
+                                value={field.value}
+                                onChange={field.onChange}
+                                suggestions={indianStates}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                  )}/>
                  <FormField control={form.control} name="city" render={({ field }) => (
-                    <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="e.g., Navi Mumbai" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem>
+                        <FormLabel>City</FormLabel>
+                        <FormControl>
+                            <AutocompleteInput 
+                                placeholder="e.g., Navi Mumbai"
+                                value={field.value}
+                                onChange={field.onChange}
+                                suggestions={indianCities}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
                   )}/>
                   <FormField control={form.control} name="locality" render={({ field }) => (
-                    <FormItem><FormLabel>Locality / Area</FormLabel><FormControl><Input placeholder="e.g., Kharghar" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Area / Locality</FormLabel><FormControl><Input placeholder="e.g., Kharghar" {...field} /></FormControl><FormMessage /></FormItem>
                   )}/>
                   <div className="md:col-span-2">
                     <FormField control={form.control} name="address" render={({ field }) => (

@@ -163,9 +163,9 @@ export default function Home() {
           title: pendingListingData.title,
           rent: pendingListingData.rent,
           area: 1200, // Default value, form field can be added
+          state: pendingListingData.state,
           city: pendingListingData.city,
           locality: pendingListingData.locality,
-          state: "Maharashtra", // Default value, form field can be added
           completeAddress: pendingListingData.address,
           partialAddress: `${pendingListingData.locality}, ${pendingListingData.city}`,
           ownerName: pendingListingData.ownerName,
@@ -188,9 +188,9 @@ export default function Home() {
         ownerName: pendingListingData.ownerName,
         age: 30, // Default
         rent: pendingListingData.rent,
+        state: pendingListingData.state,
         city: pendingListingData.city,
         locality: pendingListingData.locality,
-        state: 'Maharashtra', // Default
         completeAddress: pendingListingData.address,
         partialAddress: `${pendingListingData.locality}, ${pendingListingData.city}`,
         contactPhone: pendingListingData.phone,

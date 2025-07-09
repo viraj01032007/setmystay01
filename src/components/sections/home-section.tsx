@@ -11,6 +11,7 @@ import { RoommateCard } from "@/components/shared/roommate-card";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { indianCities } from "@/lib/cities";
+import { indianStates } from "@/lib/states";
 
 interface HomeSectionProps {
   featuredProperties: Listing[];
@@ -38,32 +39,58 @@ const features = [
 ];
 
 export function HomeSection({ featuredProperties, featuredRoommates, onViewDetails, onNavigate }: HomeSectionProps) {
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [stateQuery, setStateQuery] = useState("");
+  const [cityQuery, setCityQuery] = useState("");
+  const [areaQuery, setAreaQuery] = useState("");
+
+  const [stateSuggestions, setStateSuggestions] = useState<string[]>([]);
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setQuery(value);
+    setStateQuery(value);
     if (value.length > 0) {
-      const filteredSuggestions = indianCities
-        .filter(city => city.toLowerCase().startsWith(value.toLowerCase()))
-        .slice(0, 7); // Limit suggestions
-      setSuggestions(filteredSuggestions);
+      setStateSuggestions(
+        indianStates
+          .filter(s => s.toLowerCase().startsWith(value.toLowerCase()))
+          .slice(0, 5)
+      );
     } else {
-      setSuggestions([]);
+      setStateSuggestions([]);
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-    setSuggestions([]);
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCityQuery(value);
+    if (value.length > 0) {
+      setCitySuggestions(
+        indianCities
+          .filter(c => c.toLowerCase().startsWith(value.toLowerCase()))
+          .slice(0, 7)
+      );
+    } else {
+      setCitySuggestions([]);
+    }
+  };
+
+  const handleStateSuggestionClick = (suggestion: string) => {
+    setStateQuery(suggestion);
+    setStateSuggestions([]);
+  };
+
+  const handleCitySuggestionClick = (suggestion: string) => {
+    setCityQuery(suggestion);
+    setCitySuggestions([]);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setSuggestions([]);
+        setStateSuggestions([]);
+        setCitySuggestions([]);
       }
     };
 
@@ -83,7 +110,7 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="modern architecture"
+          data-ai-hint="modern architecture building"
         />
         <div className="absolute inset-0 bg-black/60 -z-10" />
         <div className="relative text-white max-w-4xl space-y-6 w-full">
@@ -94,33 +121,69 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
             Discover roommates, rental properties, and PG accommodations with transparent pricing.
           </p>
           
-          <div className="max-w-2xl mx-auto relative" ref={searchContainerRef}>
-            <div className="flex items-center bg-white rounded-full shadow-lg p-2">
-              <Input
-                type="text"
-                placeholder="Search for a location, e.g., 'Mumbai'"
-                className="flex-grow bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
-                value={query}
-                onChange={handleInputChange}
-                onFocus={handleInputChange}
-              />
-              <Button size="lg" className="rounded-full">
-                <Search className="mr-2 h-5 w-5" /> Search
-              </Button>
+          <div className="max-w-3xl mx-auto" ref={searchContainerRef}>
+            <div className="grid grid-cols-1 md:grid-cols-10 gap-2 bg-white rounded-full shadow-lg p-2">
+              <div className="md:col-span-3 relative">
+                <Input
+                  type="text"
+                  placeholder="State"
+                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
+                  value={stateQuery}
+                  onChange={handleStateChange}
+                  onFocus={handleStateChange}
+                />
+                {stateSuggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full bg-white mt-2 rounded-lg shadow-lg max-h-60 overflow-y-auto text-left">
+                    {stateSuggestions.map((suggestion, index) => (
+                      <li
+                        key={index}
+                        className="px-4 py-2 cursor-pointer hover:bg-muted text-gray-800"
+                        onClick={() => handleStateSuggestionClick(suggestion)}
+                      >
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="md:col-span-3 relative">
+                <Input
+                  type="text"
+                  placeholder="City"
+                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
+                  value={cityQuery}
+                  onChange={handleCityChange}
+                  onFocus={handleCityChange}
+                />
+                {citySuggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full bg-white mt-2 rounded-lg shadow-lg max-h-60 overflow-y-auto text-left">
+                    {citySuggestions.map((suggestion, index) => (
+                      <li
+                        key={index}
+                        className="px-4 py-2 cursor-pointer hover:bg-muted text-gray-800"
+                        onClick={() => handleCitySuggestionClick(suggestion)}
+                      >
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <Input
+                  type="text"
+                  placeholder="Area"
+                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
+                  value={areaQuery}
+                  onChange={(e) => setAreaQuery(e.target.value)}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Button size="lg" className="rounded-full w-full">
+                  <Search className="mr-2 h-5 w-5" /> Search
+                </Button>
+              </div>
             </div>
-            {suggestions.length > 0 && (
-              <ul className="absolute z-10 w-full bg-white mt-2 rounded-lg shadow-lg max-h-60 overflow-y-auto text-left">
-                {suggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    className="px-4 py-2 cursor-pointer hover:bg-muted text-gray-800"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center pt-4">

@@ -14,6 +14,9 @@ import { PropertyCard } from "@/components/shared/property-card";
 import { RoommateCard } from "@/components/shared/roommate-card";
 import { Wand2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AutocompleteInput } from '@/components/shared/autocomplete-input';
+import { indianStates } from '@/lib/states';
+import { indianCities } from '@/lib/cities';
 
 interface ListingsSectionProps {
   type: ListingType;
@@ -27,6 +30,7 @@ const initialFilters: FilterState = {
   amenities: [],
   furnishedStatus: "any",
   propertyType: "any",
+  state: "",
   city: "",
   locality: "",
   roomType: "any",
@@ -59,6 +63,7 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
       if (item.rent > filters.budget) return false;
 
       // Common geo filter
+      if (filters.state && !item.state.toLowerCase().includes(filters.state.toLowerCase())) return false;
       if (filters.city && !item.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
       if (filters.locality && !item.locality.toLowerCase().includes(filters.locality.toLowerCase())) return false;
 
@@ -115,13 +120,20 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                 
                 {/* Common Geographic Filters */}
                 <div className="space-y-4 px-6">
-                    <Input
+                    <AutocompleteInput 
+                      placeholder="Enter State"
+                      value={filters.state}
+                      onChange={(val) => handleFilterChange('state', val)}
+                      suggestions={indianStates}
+                    />
+                    <AutocompleteInput 
                       placeholder="Enter City"
                       value={filters.city}
-                      onChange={(e) => handleFilterChange('city', e.target.value)}
+                      onChange={(val) => handleFilterChange('city', val)}
+                      suggestions={indianCities}
                     />
                     <Input
-                      placeholder="Enter Locality / Area"
+                      placeholder="Enter Area / Locality"
                       value={filters.locality}
                       onChange={(e) => handleFilterChange('locality', e.target.value)}
                     />
