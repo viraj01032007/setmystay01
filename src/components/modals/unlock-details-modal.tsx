@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Check, Star, Gem, Rocket, Crown, Building, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UnlockPlan } from "@/lib/types";
 
 interface UnlockDetailsModalProps {
@@ -37,11 +38,18 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
             Choose a plan that's right for you.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-8 space-y-12">
-            {/* Unlock Plans Section */}
-            <section>
-                <h3 className="text-2xl font-semibold text-center text-primary mb-6">Unlock Contact Details</h3>
+
+        <Tabs defaultValue="unlock" className="w-full flex flex-col flex-1 min-h-0">
+           <div className="px-6 py-4 border-b">
+             <TabsList className="grid w-full grid-cols-2 h-12">
+               <TabsTrigger value="unlock" className="text-base">Unlock Contact Details</TabsTrigger>
+               <TabsTrigger value="list" className="text-base">List Your Property</TabsTrigger>
+             </TabsList>
+           </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <TabsContent value="unlock" className="mt-0">
+              <div className="p-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {unlockPlans.map(p => (
                         <Card key={p.title} className="flex flex-col border-primary/50 hover:shadow-lg transition-shadow">
@@ -71,43 +79,44 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
                         </Card>
                     ))}
                 </div>
-            </section>
+              </div>
+            </TabsContent>
 
-            {/* Listing Plans Section */}
-            <section>
-                <h3 className="text-2xl font-semibold text-center text-accent mb-6">List Your Property</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {listingPlans.map(p => (
-                        <Card key={p.title} className="flex flex-col border-accent/50 hover:shadow-lg transition-shadow">
-                            <CardHeader className="items-center text-center">
-                                <div className="p-3 bg-accent/10 rounded-full mb-2 text-accent">{p.icon}</div>
-                                <CardTitle>{p.title}</CardTitle>
-                                <CardDescription>
-                                    <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
-                                    <span className="text-muted-foreground">/listing</span>
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                {p.features.map(feature => (
-                                    <li key={feature} className="flex items-start gap-2">
-                                        <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
-                                        <span>{feature}</span>
-                                    </li>
-                                ))}
-                                </ul>
-                            </CardContent>
-                            <CardFooter>
-                                <Button className="w-full" variant="secondary" onClick={onNavigateToListProperty}>
-                                    List your {p.type}
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
+            <TabsContent value="list" className="mt-0">
+                <div className="p-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {listingPlans.map(p => (
+                            <Card key={p.title} className="flex flex-col border-accent/50 hover:shadow-lg transition-shadow">
+                                <CardHeader className="items-center text-center">
+                                    <div className="p-3 bg-accent/10 rounded-full mb-2 text-accent">{p.icon}</div>
+                                    <CardTitle>{p.title}</CardTitle>
+                                    <CardDescription>
+                                        <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
+                                        <span className="text-muted-foreground">/listing</span>
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <ul className="space-y-2 text-sm text-muted-foreground">
+                                    {p.features.map(feature => (
+                                        <li key={feature} className="flex items-start gap-2">
+                                            <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                    </ul>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full" variant="secondary" onClick={onNavigateToListProperty}>
+                                        List your {p.type}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-            </section>
+            </TabsContent>
           </div>
-        </div>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
