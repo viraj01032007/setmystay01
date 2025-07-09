@@ -45,7 +45,6 @@ export default function Home() {
   const [isChatModalOpen, setChatModalOpen] = useState(false);
   const [isRateUsModalOpen, setRateUsModalOpen] = useState(false);
   const [chattingWith, setChattingWith] = useState<string | null>(null);
-  const [searchFilters, setSearchFilters] = useState<Partial<FilterState> | null>(null);
 
   const [unlocks, setUnlocks] = useState({ count: 0, isUnlimited: false, unlockedIds: new Set<string>() });
   const [postPurchaseToast, setPostPurchaseToast] = useState<ToastInfo | null>(null);
@@ -72,14 +71,6 @@ export default function Home() {
     const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
     setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
   }, []);
-
-  useEffect(() => {
-    // Clear search filters when navigating away from listing pages
-    if (activePage === 'home' || activePage === 'list') {
-      setSearchFilters(null);
-    }
-  }, [activePage]);
-
 
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
@@ -260,11 +251,6 @@ export default function Home() {
     }
   };
   
-  const handleSearch = (filters: { state: string; city: string; locality: string }) => {
-    setSearchFilters(filters);
-    setActivePage('rentals'); // Default to rentals, can be changed
-  };
-
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
@@ -290,7 +276,6 @@ export default function Home() {
             featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
             onNavigate={setActivePage}
-            onSearch={handleSearch}
           />
         )}
         {(activePage === 'pg' || activePage === 'rentals' || activePage === 'roommates') && (
@@ -308,7 +293,7 @@ export default function Home() {
               }
               onViewDetails={handleViewDetails}
               onSmartSort={handleSmartSort}
-              initialSearchFilters={searchFilters}
+              initialSearchFilters={null}
             />
         )}
         {activePage === 'list' && (

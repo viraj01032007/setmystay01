@@ -1,25 +1,20 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import type { Listing, RoommateProfile, Page, FilterState } from "@/lib/types";
+import React from "react";
+import type { Listing, RoommateProfile, Page } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Home as HomeIcon, BedDouble, Search } from "lucide-react";
+import { Users, Home as HomeIcon, BedDouble } from "lucide-react";
 import { PropertyCard } from "@/components/shared/property-card";
 import { RoommateCard } from "@/components/shared/roommate-card";
 import Image from "next/image";
-import { AutocompleteInput } from "@/components/shared/autocomplete-input";
-import { indianStates } from "@/lib/states";
-import { indianCitiesByState, allIndianCities } from "@/lib/cities";
-import { indianAreas } from "@/lib/areas";
 
 interface HomeSectionProps {
   featuredProperties: Listing[];
   featuredRoommates: RoommateProfile[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
   onNavigate: (page: Page) => void;
-  onSearch: (filters: { state: string; city: string; locality: string }) => void;
 }
 
 const features = [
@@ -40,36 +35,7 @@ const features = [
   },
 ];
 
-export function HomeSection({ featuredProperties, featuredRoommates, onViewDetails, onNavigate, onSearch }: HomeSectionProps) {
-  const [stateQuery, setStateQuery] = useState("");
-  const [cityQuery, setCityQuery] = useState("");
-  const [areaQuery, setAreaQuery] = useState("");
-
-  const [citySuggestions, setCitySuggestions] = useState<string[]>(allIndianCities);
-  const [areaSuggestions, setAreaSuggestions] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (stateQuery && indianCitiesByState[stateQuery]) {
-      setCitySuggestions(indianCitiesByState[stateQuery]);
-    } else {
-      setCitySuggestions(allIndianCities);
-    }
-    setCityQuery("");
-  }, [stateQuery]);
-
-  useEffect(() => {
-    if (cityQuery && indianAreas[cityQuery]) {
-      setAreaSuggestions(indianAreas[cityQuery]);
-    } else {
-      setAreaSuggestions([]);
-    }
-    setAreaQuery("");
-  }, [cityQuery]);
-  
-  const handleSearchClick = () => {
-    onSearch({ state: stateQuery, city: cityQuery, locality: areaQuery });
-  };
-
+export function HomeSection({ featuredProperties, featuredRoommates, onViewDetails, onNavigate }: HomeSectionProps) {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
       {/* Hero Section */}
@@ -90,43 +56,6 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
           <p className="text-lg sm:text-xl text-slate-200">
             Discover roommates, rental properties, and PG accommodations with transparent pricing.
           </p>
-          
-          <div className="max-w-3xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-10 gap-2 bg-white rounded-full shadow-lg p-2">
-              <div className="md:col-span-3 relative">
-                <AutocompleteInput
-                  placeholder="State"
-                  value={stateQuery}
-                  onChange={setStateQuery}
-                  suggestions={indianStates}
-                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
-                />
-              </div>
-              <div className="md:col-span-3 relative">
-                 <AutocompleteInput
-                  placeholder="City"
-                  value={cityQuery}
-                  onChange={setCityQuery}
-                  suggestions={citySuggestions}
-                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
-                />
-              </div>
-              <div className="md:col-span-2 relative">
-                <AutocompleteInput
-                  placeholder="Area"
-                  value={areaQuery}
-                  onChange={setAreaQuery}
-                  suggestions={areaSuggestions}
-                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Button size="lg" className="rounded-full w-full" onClick={handleSearchClick}>
-                  <Search className="mr-2 h-5 w-5" /> Search
-                </Button>
-              </div>
-            </div>
-          </div>
 
           <div className="flex flex-wrap gap-4 justify-center pt-4">
             <Button size="lg" variant="secondary" onClick={() => onNavigate('roommates')}>
