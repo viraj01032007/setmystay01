@@ -17,7 +17,8 @@ import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
 import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
-import { Heart } from 'lucide-react';
+import { Heart, Filter } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface ListingsSectionProps {
   type: ListingType;
@@ -42,6 +43,125 @@ const initialFilters: FilterState = {
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden', 'Piped Gas'];
 const roommatePreferencesList = ['Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'];
 const allFeaturesList = [...new Set([...amenitiesList, ...roommatePreferencesList])];
+
+
+const FilterPanel = ({
+  filters,
+  handleFilterChange,
+  handleAmenityChange,
+  citySuggestions,
+  areaSuggestions,
+  type,
+}: {
+  filters: FilterState;
+  handleFilterChange: <K extends keyof FilterState>(
+    key: K,
+    value: FilterState[K]
+  ) => void;
+  handleAmenityChange: (amenity: string, checked: boolean) => void;
+  citySuggestions: string[];
+  areaSuggestions: string[];
+  type: ListingType;
+}) => (
+  <div className="space-y-6">
+    {/* Common Filter: Budget */}
+    <div className="space-y-2">
+      <Label>Max Budget: ₹{filters.budget.toLocaleString()}</Label>
+      <Slider
+        min={5000} max={100000} step={1000}
+        value={[filters.budget]}
+        onValueChange={([val]) => handleFilterChange('budget', val)}
+      />
+    </div>
+    
+    {/* Common Geographic Filters */}
+    <div className="space-y-4">
+        <AutocompleteInput 
+          placeholder="Enter State"
+          value={filters.state}
+          onChange={(val) => handleFilterChange('state', val)}
+          suggestions={indianStates}
+        />
+        <AutocompleteInput 
+          placeholder="Enter City"
+          value={filters.city}
+          onChange={(val) => handleFilterChange('city', val)}
+          suggestions={citySuggestions}
+        />
+        <AutocompleteInput
+          placeholder="Enter Area / Locality"
+          value={filters.locality}
+          onChange={(val) => handleFilterChange('locality', val)}
+          suggestions={areaSuggestions}
+        />
+    </div>
+
+    <div className="space-y-4">
+      {type === 'rental' && (
+        <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
+          <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="any">Any BHK</SelectItem>
+            <SelectItem value="1 BHK">1 BHK</SelectItem>
+            <SelectItem value="2 BHK">2 BHK</SelectItem>
+            <SelectItem value="3 BHK">3 BHK</SelectItem>
+              <SelectItem value="4 BHK">4 BHK</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+      {type === 'pg' && (
+        <Select value={filters.roomType} onValueChange={(val) => handleFilterChange('roomType', val)}>
+          <SelectTrigger><SelectValue placeholder="Room Type" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="any">Any Type</SelectItem>
+            <SelectItem value="Single Room">Single Room</SelectItem>
+            <SelectItem value="Double Sharing">Double Sharing</SelectItem>
+            <SelectItem value="Triple Sharing">Triple Sharing</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+      
+      <div className="space-y-2">
+          <Label>Furnishing</Label>
+          <RadioGroup value={filters.furnishedStatus} onValueChange={(val) => handleFilterChange('furnishedStatus', val as 'any' | 'Furnished' | 'Semi-Furnished' | 'Unfurnished')} className="flex gap-2">
+              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
+              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Full</Label>
+              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Semi-Furnished" className="sr-only"/>Semi</Label>
+          </RadioGroup>
+      </div>
+
+      <div className="space-y-2">
+          <Label>Contact Type</Label>
+          <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
+              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
+              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
+              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
+          </RadioGroup>
+      </div>
+        <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
+          <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
+          <SelectContent>
+              <SelectItem value="any">Any Gender</SelectItem>
+              <SelectItem value="Male">Male</SelectItem>
+              <SelectItem value="Female">Female</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
+          </SelectContent>
+      </Select>
+      <div className="space-y-2">
+          <Label>Features &amp; Preferences</Label>
+          <div className="grid grid-cols-2 gap-2">
+          {allFeaturesList.map(a => (
+              <div key={a} className="flex items-center space-x-2">
+              <Checkbox id={`amenity-${a}`} checked={filters.amenities.includes(a)} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
+              <Label htmlFor={`amenity-${a}`} className="text-sm font-normal">{a}</Label>
+              </div>
+          ))}
+          </div>
+      </div>
+    </div>
+  </div>
+);
+
 
 export function ListingsSection({ 
   type, 
@@ -124,6 +244,15 @@ export function ListingsSection({
     });
   }, [listings, filters]);
 
+  const filterPanelProps = {
+    filters,
+    handleFilterChange,
+    handleAmenityChange,
+    citySuggestions,
+    areaSuggestions,
+    type,
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-12">
@@ -132,113 +261,34 @@ export function ListingsSection({
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
-        <aside className="md:w-1/3 lg:w-1/4">
+        <aside className="hidden md:block md:w-1/3 lg:w-1/4">
             <div className="sticky top-24">
               <ScrollArea className="h-[calc(100vh-8rem)] pr-4">
                 <div className="p-4 bg-card rounded-xl shadow-sm space-y-6">
                   <h3 className="text-xl font-semibold">Filters</h3>
-                  
-                  {/* Common Filter: Budget */}
-                  <div className="space-y-2">
-                    <Label>Max Budget: ₹{filters.budget.toLocaleString()}</Label>
-                    <Slider
-                      min={5000} max={100000} step={1000}
-                      value={[filters.budget]}
-                      onValueChange={([val]) => handleFilterChange('budget', val)}
-                    />
-                  </div>
-                  
-                  {/* Common Geographic Filters */}
-                  <div className="space-y-4">
-                      <AutocompleteInput 
-                        placeholder="Enter State"
-                        value={filters.state}
-                        onChange={(val) => handleFilterChange('state', val)}
-                        suggestions={indianStates}
-                      />
-                      <AutocompleteInput 
-                        placeholder="Enter City"
-                        value={filters.city}
-                        onChange={(val) => handleFilterChange('city', val)}
-                        suggestions={citySuggestions}
-                      />
-                      <AutocompleteInput
-                        placeholder="Enter Area / Locality"
-                        value={filters.locality}
-                        onChange={(val) => handleFilterChange('locality', val)}
-                        suggestions={areaSuggestions}
-                      />
-                  </div>
-
-                  <div className="space-y-4">
-                    {type === 'rental' && (
-                      <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
-                        <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any">Any BHK</SelectItem>
-                          <SelectItem value="1 BHK">1 BHK</SelectItem>
-                          <SelectItem value="2 BHK">2 BHK</SelectItem>
-                          <SelectItem value="3 BHK">3 BHK</SelectItem>
-                            <SelectItem value="4 BHK">4 BHK</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {type === 'pg' && (
-                      <Select value={filters.roomType} onValueChange={(val) => handleFilterChange('roomType', val)}>
-                        <SelectTrigger><SelectValue placeholder="Room Type" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any">Any Type</SelectItem>
-                          <SelectItem value="Single Room">Single Room</SelectItem>
-                          <SelectItem value="Double Sharing">Double Sharing</SelectItem>
-                          <SelectItem value="Triple Sharing">Triple Sharing</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    
-                    <div className="space-y-2">
-                        <Label>Furnishing</Label>
-                        <RadioGroup value={filters.furnishedStatus} onValueChange={(val) => handleFilterChange('furnishedStatus', val as 'any' | 'Furnished' | 'Semi-Furnished' | 'Unfurnished')} className="flex gap-2">
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Full</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Semi-Furnished" className="sr-only"/>Semi</Label>
-                        </RadioGroup>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Contact Type</Label>
-                        <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
-                        </RadioGroup>
-                    </div>
-                     <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
-                        <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="any">Any Gender</SelectItem>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <div className="space-y-2">
-                        <Label>Features &amp; Preferences</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                        {allFeaturesList.map(a => (
-                            <div key={a} className="flex items-center space-x-2">
-                            <Checkbox id={`amenity-${a}`} checked={filters.amenities.includes(a)} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
-                            <Label htmlFor={`amenity-${a}`} className="text-sm font-normal">{a}</Label>
-                            </div>
-                        ))}
-                        </div>
-                    </div>
-                  </div>
+                  <FilterPanel {...filterPanelProps} />
                 </div>
               </ScrollArea>
             </div>
           </aside>
 
         <main className={'md:w-2/3 lg:w-3/4'}>
+           <div className="md:hidden mb-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0">
+                <ScrollArea className="h-full p-6">
+                  <h3 className="text-xl font-semibold mb-6">Filters</h3>
+                  <FilterPanel {...filterPanelProps} />
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+          </div>
           <div className="flex justify-between items-center mb-6">
             <p className="text-sm text-muted-foreground">{filteredListings.length} results found</p>
           </div>

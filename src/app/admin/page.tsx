@@ -208,7 +208,7 @@ export default function AdminDashboard() {
     return (
         <div className="bg-slate-50 min-h-screen">
             <header className="bg-white shadow-sm">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 h-auto sm:h-20 py-4 sm:py-0">
                      <h1 className="text-2xl font-bold text-slate-800">SetMyStay Admin</h1>
                      <div className="flex items-center gap-4">
                         <Button asChild>
@@ -358,12 +358,12 @@ export default function AdminDashboard() {
                     <CardContent>
                         {pendingListings.length > 0 ? (
                             pendingListings.map(item => (
-                                <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex justify-between items-center">
-                                    <div>
+                                <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                    <div className="w-full">
                                         <p className="font-semibold">{item.title || item.name} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
                                         <p className="text-sm text-slate-600">{item.locality}</p>
                                     </div>
-                                    <Button onClick={() => handleViewDetails(item.id, item.itemType)}>View Details</Button>
+                                    <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">View Details</Button>
                                 </div>
                             ))
                         ) : (
