@@ -5,12 +5,35 @@ import { cn } from "@/lib/utils";
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-        <rect width="120" height="120" rx="24" fill="#4582EF"/>
-        <g transform="translate(0, -5)">
-            <path d="M60 25C48.9543 25 40 33.9543 40 45C40 59.2494 60 85 60 85C60 85 80 59.2494 80 45C80 33.9543 71.0457 25 60 25Z" fill="white"/>
-            <path d="M60 25L45 40V60H55V50H65V60H75V40L60 25Z" fill="#4582EF"/>
+      <circle cx="60" cy="60" r="60" fill="#2A5A9A"/>
+      <g transform="translate(0, -5)">
+        {/* Shadow */}
+        <ellipse cx="60" cy="73" rx="12" ry="3" fill="#FFFFFF" opacity="0.3"/>
+        
+        {/* Location Pin */}
+        <path d="M60 20C46.7452 20 36 30.7452 36 44C36 61.6274 60 75 60 75C60 75 84 61.6274 84 44C84 30.7452 73.2548 20 60 20Z" fill="white"/>
+        
+        {/* House inside Pin */}
+        <g transform="translate(0, -2)">
+          <path d="M60 34L50 42V54H70V42L60 34Z" fill="#2A5A9A"/>
+          <rect x="54" y="46" width="5" height="5" fill="white"/>
+          <rect x="61" y="46" width="5" height="5" fill="white"/>
         </g>
-        <text x="60" y="108" fontFamily="Inter, sans-serif" fontWeight="bold" fontSize="18" fill="white" textAnchor="middle">SetMyStay</text>
+      </g>
+      
+      {/* Text "SetMyStay" */}
+      <text 
+        x="60" 
+        y="100" 
+        fontFamily="Inter, sans-serif" 
+        fontSize="17" 
+        fontWeight="600" 
+        fill="white" 
+        textAnchor="middle"
+        letterSpacing="0.2"
+      >
+        SetMyStay
+      </text>
     </svg>
   );
 }
