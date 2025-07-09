@@ -260,10 +260,6 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort, in
         <main className="md:w-2/3 lg:w-3/4">
           <div className="flex justify-between items-center mb-6">
             <p className="text-sm text-muted-foreground">{filteredListings.length} results found</p>
-            <Button variant="outline" onClick={() => onSmartSort(type, filteredListings)}>
-              <Wand2 className="w-4 h-4 mr-2" />
-              AI Smart Sort
-            </Button>
           </div>
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {type === 'roommate' 
