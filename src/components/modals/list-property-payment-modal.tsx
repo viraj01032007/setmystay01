@@ -6,12 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import type { Listing, RoommateProfile } from "@/lib/types";
 
 interface ListPropertyPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: () => void;
+  onProceedToPayment: (plan: { title: string; price: number }) => void;
 }
 
 const listingPlans = {
@@ -22,13 +21,14 @@ const listingPlans = {
 
 type PlanKey = keyof typeof listingPlans;
 
-export function ListPropertyPaymentModal({ isOpen, onClose, onSubmit }: ListPropertyPaymentModalProps) {
+export function ListPropertyPaymentModal({ isOpen, onClose, onProceedToPayment }: ListPropertyPaymentModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>('roommate');
 
   const handleSubmit = () => {
-    // The data is already in the parent component's state.
-    // This component's only job now is to trigger the submission.
-    onSubmit();
+    onProceedToPayment({
+      title: listingPlans[selectedPlan].title,
+      price: listingPlans[selectedPlan].price,
+    });
   };
 
   return (
@@ -55,7 +55,7 @@ export function ListPropertyPaymentModal({ isOpen, onClose, onSubmit }: ListProp
           </RadioGroup>
         </div>
         <Button size="lg" className="w-full" onClick={handleSubmit}>
-          Pay ₹{listingPlans[selectedPlan].price} & List Property
+          Proceed to Confirmation
         </Button>
         <p className="text-xs text-muted-foreground text-center mt-2">Secure payment powered by SetMyStay</p>
       </DialogContent>

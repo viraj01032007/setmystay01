@@ -23,6 +23,7 @@ import { RateUsModal } from "@/components/modals/rate-us-modal";
 import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 import { FloatingCta } from "@/components/shared/floating-cta";
 import { AdvertisementModal } from "@/components/modals/advertisement-modal";
+import { PaymentConfirmationModal } from "@/components/modals/payment-confirmation-modal";
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
@@ -50,6 +51,10 @@ export default function Home() {
 
   const [adToShow, setAdToShow] = useState<Advertisement | null>(null);
   const [isAdModalOpen, setIsAdModalOpen] = useState(false);
+
+  const [isPaymentConfirmationOpen, setIsPaymentConfirmationOpen] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState<{ planName: string; amount: number; onConfirm: () => void; } | null>(null);
+
 
   const { toast } = useToast();
 
@@ -108,7 +113,6 @@ export default function Home() {
       
       return newUnlocks;
     });
-    setUnlockModalOpen(false);
     
     toast({
       title: "Purchase Successful!",
@@ -247,6 +251,19 @@ export default function Home() {
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
   };
   
+  const handleOpenConfirmationModal = (planName: string, amount: number, onConfirm: () => void) => {
+    setPaymentDetails({ planName, amount, onConfirm });
+    setIsPaymentConfirmationOpen(true);
+  };
+
+  const handleConfirmPayment = () => {
+    if (paymentDetails) {
+        paymentDetails.onConfirm();
+    }
+    setIsPaymentConfirmationOpen(false);
+    setPaymentDetails(null);
+  };
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
@@ -320,7 +337,10 @@ export default function Home() {
       <UnlockDetailsModal 
         isOpen={isUnlockModalOpen}
         onClose={() => setUnlockModalOpen(false)}
-        onPurchase={handleUnlockPurchase}
+        onPlanSelect={(plan) => {
+          setUnlockModalOpen(false);
+          handleOpenConfirmationModal(plan.title, plan.price, () => handleUnlockPurchase(plan.plan));
+        }}
         onNavigateToListProperty={() => {
           setUnlockModalOpen(false);
           setActivePage('list');
@@ -329,7 +349,10 @@ export default function Home() {
       <ListPropertyPaymentModal
         isOpen={isListPaymentModalOpen}
         onClose={() => setListPaymentModalOpen(false)}
-        onSubmit={handleListProperty}
+        onProceedToPayment={(plan) => {
+          setListPaymentModalOpen(false);
+          handleOpenConfirmationModal(plan.title, plan.price, handleListProperty);
+        }}
       />
        <AuthModal
         isOpen={isAuthModalOpen}
@@ -357,6 +380,13 @@ export default function Home() {
         title={adToShow?.title || ''}
         description={adToShow?.description || ''}
         imageUrl={adToShow?.imageUrl || ''}
+      />
+      <PaymentConfirmationModal
+        isOpen={isPaymentConfirmationOpen}
+        onClose={() => setIsPaymentConfirmationOpen(false)}
+        onConfirm={handleConfirmPayment}
+        planName={paymentDetails?.planName || ''}
+        amount={paymentDetails?.amount || 0}
       />
     </div>
   );

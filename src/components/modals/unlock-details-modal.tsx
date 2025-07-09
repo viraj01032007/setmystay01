@@ -11,7 +11,7 @@ import type { UnlockPlan } from "@/lib/types";
 interface UnlockDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPurchase: (plan: UnlockPlan) => void;
+  onPlanSelect: (plan: { plan: UnlockPlan, title: string, price: number }) => void;
   onNavigateToListProperty: () => void;
 }
 
@@ -28,7 +28,7 @@ const listingPlans = [
   { title: 'Rental Listing', price: 999, features: ['30-day listing', 'Premium support'], icon: <Crown className="w-5 h-5" />, type: 'Rental' },
 ];
 
-export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToListProperty }: UnlockDetailsModalProps) {
+export function UnlockDetailsModal({ isOpen, onClose, onPlanSelect, onNavigateToListProperty }: UnlockDetailsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl p-0 max-h-[90vh] flex flex-col">
@@ -72,8 +72,8 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" onClick={() => onPurchase(p.plan)}>
-                            Choose Plan
+                            <Button className="w-full" onClick={() => onPlanSelect({plan: p.plan, title: p.title, price: p.price})}>
+                              Choose Plan
                             </Button>
                         </CardFooter>
                         </Card>

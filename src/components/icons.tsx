@@ -8,8 +8,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
         <rect width="120" height="120" rx="24" fill="#4582EF"/>
         <g transform="translate(0, -5)">
             <path d="M60 25C48.9543 25 40 33.9543 40 45C40 59.2494 60 85 60 85C60 85 80 59.2494 80 45C80 33.9543 71.0457 25 60 25Z" fill="white"/>
-            <path d="M46 60V35H74V60" stroke="#4582EF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M44 35L60 25L76 35" stroke="#4582EF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M60 25L45 40V60H55V50H65V60H75V40L60 25Z" fill="#4582EF"/>
         </g>
         <text x="60" y="108" fontFamily="Inter, sans-serif" fontWeight="bold" fontSize="18" fill="white" textAnchor="middle">SetMyStay</text>
     </svg>
