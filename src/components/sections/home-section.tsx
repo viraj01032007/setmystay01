@@ -1,6 +1,7 @@
 
 "use client";
 
+import React, { useState, useEffect, useRef } from "react";
 import type { Listing, RoommateProfile, Page } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { PropertyCard } from "@/components/shared/property-card";
 import { RoommateCard } from "@/components/shared/roommate-card";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
+import { indianCities } from "@/lib/cities";
 
 interface HomeSectionProps {
   featuredProperties: Listing[];
@@ -36,6 +38,41 @@ const features = [
 ];
 
 export function HomeSection({ featuredProperties, featuredRoommates, onViewDetails, onNavigate }: HomeSectionProps) {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    if (value.length > 0) {
+      const filteredSuggestions = indianCities
+        .filter(city => city.toLowerCase().startsWith(value.toLowerCase()))
+        .slice(0, 7); // Limit suggestions
+      setSuggestions(filteredSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuery(suggestion);
+    setSuggestions([]);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSuggestions([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
       {/* Hero Section */}
@@ -57,17 +94,33 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
             Discover roommates, rental properties, and PG accommodations with transparent pricing.
           </p>
           
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto relative" ref={searchContainerRef}>
             <div className="flex items-center bg-white rounded-full shadow-lg p-2">
               <Input
                 type="text"
                 placeholder="Search for a location, e.g., 'Mumbai'"
                 className="flex-grow bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
+                value={query}
+                onChange={handleInputChange}
+                onFocus={handleInputChange}
               />
               <Button size="lg" className="rounded-full">
                 <Search className="mr-2 h-5 w-5" /> Search
               </Button>
             </div>
+            {suggestions.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white mt-2 rounded-lg shadow-lg max-h-60 overflow-y-auto text-left">
+                {suggestions.map((suggestion, index) => (
+                  <li
+                    key={index}
+                    className="px-4 py-2 cursor-pointer hover:bg-muted text-gray-800"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center pt-4">
