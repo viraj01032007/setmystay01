@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Crown, User, Home, Users, Building, BedDouble, PlusCircle } from "lucide-react";
+import { Menu, X, Crown, User, Home, Users, Building, BedDouble, PlusCircle, Heart, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Logo } from "@/components/icons";
@@ -57,9 +58,11 @@ interface HeaderProps {
   setActivePage: (page: Page) => void;
   onSignInClick: () => void;
   onSubscriptionClick: () => void;
+  isLoggedIn: boolean;
+  onLogout: () => void;
 }
 
-export function Header({ activePage, setActivePage, onSignInClick, onSubscriptionClick }: HeaderProps) {
+export function Header({ activePage, setActivePage, onSignInClick, onSubscriptionClick, isLoggedIn, onLogout }: HeaderProps) {
   const navItems = [
     { page: 'home' as Page, label: 'Home', icon: <Home className="w-5 h-5" /> },
     { page: 'pg' as Page, label: 'PG Listings', icon: <BedDouble className="w-5 h-5" /> },
@@ -67,6 +70,10 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
     { page: 'roommates' as Page, label: 'Roommates', icon: <Users className="w-5 h-5" /> },
     { page: 'list' as Page, label: 'List Property', icon: <PlusCircle className="w-5 h-5" /> },
   ];
+
+  if (isLoggedIn) {
+    navItems.push({ page: 'liked' as Page, label: 'Liked Properties', icon: <Heart className="w-5 h-5" /> });
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
@@ -89,10 +96,17 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
             <Crown className="w-4 h-4 mr-2" />
             Pricing
           </Button>
-          <Button variant="default" size="sm" onClick={onSignInClick}>
-            <User className="w-4 h-4 mr-2" />
-            Sign In
-          </Button>
+          {isLoggedIn ? (
+            <Button variant="outline" size="sm" onClick={onLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          ) : (
+            <Button variant="default" size="sm" onClick={onSignInClick}>
+              <User className="w-4 h-4 mr-2" />
+              Sign In
+            </Button>
+          )}
           
           <Sheet>
             <SheetTrigger asChild>

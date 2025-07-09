@@ -1,17 +1,27 @@
+
 "use client";
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { RoommateProfile } from "@/lib/types";
-import { MapPin, IndianRupee, Eye, User, Briefcase } from "lucide-react";
+import { MapPin, IndianRupee, Eye, User, Briefcase, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface RoommateCardProps {
   profile: RoommateProfile;
   onViewDetails: (profile: RoommateProfile) => void;
+  isLoggedIn: boolean;
+  isLiked: boolean;
+  onLikeToggle: (id: string) => void;
 }
 
-export function RoommateCard({ profile, onViewDetails }: RoommateCardProps) {
+export function RoommateCard({ profile, onViewDetails, isLoggedIn, isLiked, onLikeToggle }: RoommateCardProps) {
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click event from firing
+    onLikeToggle(profile.id);
+  };
+
   return (
     <div 
       className="bg-card rounded-xl shadow-md overflow-hidden border border-transparent hover:border-primary/50 hover:shadow-xl transition-all duration-300 group cursor-pointer"
@@ -25,7 +35,18 @@ export function RoommateCard({ profile, onViewDetails }: RoommateCardProps) {
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           data-ai-hint={profile['data-ai-hint'] as string | undefined}
         />
-        <Badge variant="secondary" className="absolute top-3 right-3">
+        {isLoggedIn && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute top-2 right-2 h-9 w-9 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm"
+            onClick={handleLikeClick}
+          >
+            <Heart className={cn("w-5 h-5 transition-all", isLiked ? "fill-red-500 text-red-500" : "text-white")} />
+            <span className="sr-only">Like profile</span>
+          </Button>
+        )}
+        <Badge variant="secondary" className="absolute top-3 left-3">
           <User className="w-3 h-3 mr-1.5" />
           Roommate
         </Badge>

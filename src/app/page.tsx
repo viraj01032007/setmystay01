@@ -1,10 +1,9 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, FilterState } from "@/lib/types";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed } from "@/lib/types";
 import { dummyProperties, dummyRoommates } from "@/lib/data";
-import { smartSortListings } from "@/ai/flows/smart-sort";
 import { useToast } from "@/hooks/use-toast";
 
 import { Header } from "@/components/layout/header";
@@ -23,7 +22,6 @@ import { LoadingSpinner } from "@/components/icons";
 import { RateUsModal } from "@/components/modals/rate-us-modal";
 import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 import { FloatingCta } from "@/components/shared/floating-cta";
-import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 
 type ToastInfo = {
     title: string;
@@ -54,8 +52,8 @@ export default function Home() {
   const [inquiryData, setInquiryData] = useState<{ listing: Listing; bed: Bed } | null>(null);
   const [pendingListingData, setPendingListingData] = useState<any>(null);
 
-  const [isAdModalOpen, setAdModalOpen] = useState(false);
-  const [adContent, setAdContent] = useState({ title: '', description: '', imageUrl: '' });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
 
   const { toast } = useToast();
 
@@ -75,17 +73,10 @@ export default function Home() {
     const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
     setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
 
-    const adAlreadyShown = sessionStorage.getItem('ad_shown');
-    if (!adAlreadyShown) {
-        const savedPopupSettings = localStorage.getItem('popup_settings');
-        if (savedPopupSettings) {
-            const settings = JSON.parse(savedPopupSettings);
-            if (settings.enabled) {
-                setAdContent(settings);
-                setAdModalOpen(true);
-            }
-        }
-    }
+    const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
+    setIsLoggedIn(loggedInStatus);
+    const savedLikedItems = new Set<string>(JSON.parse(localStorage.getItem('setmystay_likedItems') || '[]'));
+    setLikedItems(savedLikedItems);
   }, []);
 
   const handleRateUsClose = (rated: boolean) => {
@@ -238,41 +229,43 @@ export default function Home() {
     setIsBookingModalOpen(true);
     setSelectedItem(null); 
   };
-  
-  const handleSmartSort = async (type: ListingType, currentItems: (Listing | RoommateProfile)[]) => {
-    toast({ title: 'AI sorting in progress...', description: 'Please wait while we reorder the listings for you.' });
-    try {
-      const input = {
-        listings: currentItems,
-        userPreferences: 'prefers 2BHK, non-smoker, budget under 25000', 
-        viewingPatterns: 'has viewed properties in Kharghar and Vashi', 
-        hasUnlockedDetails: unlocks.unlockedIds.size > 0,
-      };
-      const sortedListings = await smartSortListings(input);
-      
-      if (type === 'rental' || type === 'pg') {
-        setAllListings(prev => {
-          const otherListings = prev.filter(l => !currentItems.some(ci => ci.id === l.id));
-          return [...(sortedListings as Listing[]), ...otherListings];
-        });
-      } else if (type === 'roommate') {
-        setAllRoommates(prev => {
-          const otherRoommates = prev.filter(r => !currentItems.some(ci => ci.id === r.id));
-          return [...(sortedListings as RoommateProfile[]), ...otherRoommates];
-        });
-      }
 
-      toast({ title: 'AI Sort Complete!', description: 'Listings have been reordered based on your preferences.' });
-    } catch (error) {
-      console.error('AI Sort failed:', error);
-      toast({ title: 'AI Sort Failed', description: 'Could not sort listings. Please try again.', variant: 'destructive' });
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('setmystay_isLoggedIn', 'true');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('setmystay_isLoggedIn');
+    setActivePage('home');
+    toast({ title: "Logged Out", description: "You have been successfully logged out." });
+  };
+
+  const handleLikeToggle = (itemId: string) => {
+    if (!isLoggedIn) {
+      setAuthModalOpen(true);
+      toast({ title: "Please sign in", description: "You need to be logged in to like properties.", variant: 'destructive' });
+      return;
     }
+    setLikedItems(prev => {
+      const newLikedItems = new Set(prev);
+      if (newLikedItems.has(itemId)) {
+        newLikedItems.delete(itemId);
+        toast({ title: "Removed from Liked", description: "This item is no longer in your liked list." });
+      } else {
+        newLikedItems.add(itemId);
+        toast({ title: "Added to Liked", description: "You can find this item in your liked list." });
+      }
+      localStorage.setItem('setmystay_likedItems', JSON.stringify(Array.from(newLikedItems)));
+      return newLikedItems;
+    });
   };
 
-  const handleAdClose = () => {
-    setAdModalOpen(false);
-    sessionStorage.setItem('ad_shown', 'true');
-  };
+  const likedListingsAndRoommates = useMemo(() => {
+    const allItems = [...allListings, ...allRoommates];
+    return allItems.filter(item => likedItems.has(item.id));
+  }, [likedItems, allListings, allRoommates]);
   
   if (isLoading) {
     return (
@@ -290,6 +283,8 @@ export default function Home() {
         setActivePage={setActivePage} 
         onSignInClick={() => setAuthModalOpen(true)}
         onSubscriptionClick={() => setUnlockModalOpen(true)}
+        isLoggedIn={isLoggedIn}
+        onLogout={handleLogout}
       />
       
       <main className="flex-grow">
@@ -299,6 +294,9 @@ export default function Home() {
             featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
             onNavigate={setActivePage}
+            isLoggedIn={isLoggedIn}
+            likedItems={likedItems}
+            onLikeToggle={handleLikeToggle}
           />
         )}
         {(activePage === 'pg' || activePage === 'rentals' || activePage === 'roommates') && (
@@ -315,8 +313,23 @@ export default function Home() {
                     })
               }
               onViewDetails={handleViewDetails}
-              onSmartSort={handleSmartSort}
               initialSearchFilters={null}
+              isLoggedIn={isLoggedIn}
+              likedItems={likedItems}
+              onLikeToggle={handleLikeToggle}
+            />
+        )}
+        {activePage === 'liked' && (
+            <ListingsSection
+              key="liked"
+              type={'rental'} 
+              listings={likedListingsAndRoommates}
+              onViewDetails={handleViewDetails}
+              initialSearchFilters={null}
+              isLoggedIn={isLoggedIn}
+              likedItems={likedItems}
+              onLikeToggle={handleLikeToggle}
+              isLikedPage={true}
             />
         )}
         {activePage === 'list' && (
@@ -360,6 +373,7 @@ export default function Home() {
        <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setAuthModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
        <ChatModal
         isOpen={isChatModalOpen}
@@ -375,13 +389,6 @@ export default function Home() {
         onClose={() => setIsBookingModalOpen(false)}
         listing={inquiryData?.listing || null}
         bed={inquiryData?.bed || null}
-      />
-       <AdvertisementModal
-        isOpen={isAdModalOpen}
-        onClose={handleAdClose}
-        title={adContent.title}
-        description={adContent.description}
-        imageUrl={adContent.imageUrl}
       />
     </div>
   );

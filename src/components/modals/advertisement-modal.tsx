@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -16,10 +17,11 @@ interface AdvertisementModalProps {
 export function AdvertisementModal({ isOpen, onClose, title, description, imageUrl }: AdvertisementModalProps) {
   if (!isOpen) return null;
   
+  // This component is no longer in use, reverted to a basic modal structure.
   return (
-    <div className="fixed bottom-6 left-6 z-50 animate-in fade-in-0 slide-in-from-bottom-10 duration-500">
-      <Card className="w-full max-w-sm shadow-2xl">
-        <Button
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-sm">
+         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
@@ -28,17 +30,13 @@ export function AdvertisementModal({ isOpen, onClose, title, description, imageU
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </Button>
-        <CardHeader className="p-0">
-            {imageUrl && (
-              <div className="relative h-32 w-full">
-                <Image src={imageUrl} alt={title || 'Advertisement'} layout="fill" objectFit="cover" className="rounded-t-lg" data-ai-hint="promotion sale"/>
-              </div>
-            )}
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent className="p-4 pt-2">
-           <CardTitle className="text-lg mt-2">{title || 'Special Offer!'}</CardTitle>
-           {description && <CardDescription className="mt-1">{description}</CardDescription>}
-           <Button onClick={onClose} className="mt-4 w-full" size="sm">Claim Offer</Button>
+        <CardContent>
+          {imageUrl && <Image src={imageUrl} alt={title} width={400} height={200} className="rounded-md" />}
+          <Button onClick={onClose} className="mt-4 w-full">Close</Button>
         </CardContent>
       </Card>
     </div>

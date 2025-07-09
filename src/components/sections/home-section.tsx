@@ -15,6 +15,9 @@ interface HomeSectionProps {
   featuredRoommates: RoommateProfile[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
   onNavigate: (page: Page) => void;
+  isLoggedIn: boolean;
+  likedItems: Set<string>;
+  onLikeToggle: (id: string) => void;
 }
 
 const features = [
@@ -35,7 +38,15 @@ const features = [
   },
 ];
 
-export function HomeSection({ featuredProperties, featuredRoommates, onViewDetails, onNavigate }: HomeSectionProps) {
+export function HomeSection({ 
+  featuredProperties, 
+  featuredRoommates, 
+  onViewDetails, 
+  onNavigate,
+  isLoggedIn,
+  likedItems,
+  onLikeToggle,
+}: HomeSectionProps) {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
       {/* Hero Section */}
@@ -90,7 +101,14 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Properties</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProperties.map(listing => (
-                <PropertyCard key={listing.id} listing={listing} onViewDetails={(item) => onViewDetails(item, 'listing')} />
+                <PropertyCard 
+                  key={listing.id} 
+                  listing={listing} 
+                  onViewDetails={(item) => onViewDetails(item, 'listing')}
+                  isLoggedIn={isLoggedIn}
+                  isLiked={likedItems.has(listing.id)}
+                  onLikeToggle={onLikeToggle}
+                />
             ))}
         </div>
       </div>
@@ -100,7 +118,14 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Roommate Profiles</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
            {featuredRoommates.map(profile => (
-                <RoommateCard key={profile.id} profile={profile} onViewDetails={(item) => onViewDetails(item, 'roommate')} />
+                <RoommateCard 
+                  key={profile.id} 
+                  profile={profile} 
+                  onViewDetails={(item) => onViewDetails(item, 'roommate')} 
+                  isLoggedIn={isLoggedIn}
+                  isLiked={likedItems.has(profile.id)}
+                  onLikeToggle={onLikeToggle}
+                />
            ))}
         </div>
       </div>

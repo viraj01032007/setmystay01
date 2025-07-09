@@ -68,13 +68,6 @@ export default function AdminDashboard() {
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-    
-    const [popupSettings, setPopupSettings] = useState({
-        enabled: false,
-        title: 'Limited Time Offer!',
-        description: 'Get 10% off on your first listing plan!',
-        imageUrl: 'https://placehold.co/400x200',
-    });
 
     const [isMounted, setIsMounted] = useState(false);
 
@@ -92,10 +85,6 @@ export default function AdminDashboard() {
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
                 lastUpdated: new Date().toLocaleString()
             });
-            const savedPopupSettings = localStorage.getItem('popup_settings');
-            if (savedPopupSettings) {
-                setPopupSettings(JSON.parse(savedPopupSettings));
-            }
         }
     }, [router]);
 
@@ -159,15 +148,6 @@ export default function AdminDashboard() {
         console.log("Saving new prices:", pricing);
         toast({ title: "Pricing Updated", description: "The new prices have been saved." });
     }
-
-    const handlePopupSettingsChange = (field, value) => {
-        setPopupSettings(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleSavePopupSettings = () => {
-        localStorage.setItem('popup_settings', JSON.stringify(popupSettings));
-        toast({ title: "Popup Settings Saved", description: "The new popup configuration has been saved." });
-    };
 
     const StatusBadge = ({ status }) => {
         const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold";
@@ -247,57 +227,6 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <p className="text-sm text-slate-500 mt-4 text-right">Last Updated: {analytics.lastUpdated}</p>
-                    </CardContent>
-                </Card>
-
-                {/* Popup Management Card */}
-                <Card className="mb-8">
-                    <CardHeader>
-                        <CardTitle className="text-2xl">Popup Advertisement</CardTitle>
-                        <CardDescription>Control the promotional popup on the main site.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <Label htmlFor="popup-enabled" className="text-lg font-medium">Popup Enabled</Label>
-                            <Switch
-                                id="popup-enabled"
-                                checked={popupSettings.enabled}
-                                onCheckedChange={(checked) => handlePopupSettingsChange('enabled', checked)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="popup-title">Title</Label>
-                            <Input
-                                id="popup-title"
-                                value={popupSettings.title}
-                                onChange={(e) => handlePopupSettingsChange('title', e.target.value)}
-                                placeholder="e.g., Summer Sale!"
-                                disabled={!popupSettings.enabled}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="popup-description">Description</Label>
-                            <Textarea
-                                id="popup-description"
-                                value={popupSettings.description}
-                                onChange={(e) => handlePopupSettingsChange('description', e.target.value)}
-                                placeholder="e.g., Get 50% off on all listing plans."
-                                disabled={!popupSettings.enabled}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="popup-image">Image URL</Label>
-                            <Input
-                                id="popup-image"
-                                value={popupSettings.imageUrl}
-                                onChange={(e) => handlePopupSettingsChange('imageUrl', e.target.value)}
-                                placeholder="https://placehold.co/600x400"
-                                disabled={!popupSettings.enabled}
-                            />
-                        </div>
-                        <div className="flex justify-end">
-                            <Button onClick={handleSavePopupSettings}>Save Popup Settings</Button>
-                        </div>
                     </CardContent>
                 </Card>
                 
@@ -481,5 +410,3 @@ export default function AdminDashboard() {
         </div>
     );
 }
-
-    

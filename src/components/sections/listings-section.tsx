@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -13,19 +12,22 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { PropertyCard } from "@/components/shared/property-card";
 import { RoommateCard } from "@/components/shared/roommate-card";
-import { Wand2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
 import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
+import { Heart } from 'lucide-react';
 
 interface ListingsSectionProps {
   type: ListingType;
   listings: (Listing | RoommateProfile)[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
-  onSmartSort: (type: ListingType, items: (Listing | RoommateProfile)[]) => void;
   initialSearchFilters: Partial<FilterState> | null;
+  isLoggedIn: boolean;
+  likedItems: Set<string>;
+  onLikeToggle: (id: string) => void;
+  isLikedPage?: boolean;
 }
 
 const initialFilters: FilterState = {
@@ -44,23 +46,41 @@ const initialFilters: FilterState = {
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 const roommatePreferencesList = ['Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'];
 
-export function ListingsSection({ type, listings, onViewDetails, onSmartSort, initialSearchFilters }: ListingsSectionProps) {
+export function ListingsSection({ 
+  type, 
+  listings, 
+  onViewDetails, 
+  initialSearchFilters,
+  isLoggedIn,
+  likedItems,
+  onLikeToggle,
+  isLikedPage = false,
+}: ListingsSectionProps) {
   const [filters, setFilters] = useState<FilterState>({ ...initialFilters, ...initialSearchFilters });
+  const [pageTitle, setPageTitle] = useState('');
+  const [pageDescription, setPageDescription] = useState('');
   
   useEffect(() => {
     if (initialSearchFilters) {
       setFilters(prev => ({ ...prev, ...initialSearchFilters }));
     }
-  }, [initialSearchFilters]);
 
-  const { title, description } = useMemo(() => {
     const pageConfig = {
       pg: { title: 'PG Accommodations', description: 'Comfortable and modern paying guest options.' },
       rental: { title: 'Premium Rentals', description: 'Find your next home from our verified rental properties.' },
       roommate: { title: 'Find Your Roommates', description: 'Connect with like-minded people to share a space.' }
     };
-    return pageConfig[type] || { title: 'Listings', description: 'Browse our listings.' };
-  }, [type]);
+
+    if (isLikedPage) {
+        setPageTitle('Your Liked Properties');
+        setPageDescription('Here are all the properties and profiles you have saved.');
+    } else {
+        const config = pageConfig[type] || { title: 'Listings', description: 'Browse our listings.' };
+        setPageTitle(config.title);
+        setPageDescription(config.description);
+    }
+  }, [initialSearchFilters, type, isLikedPage]);
+
   
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters(prev => {
@@ -91,6 +111,8 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort, in
 
   const filteredListings = useMemo(() => {
     return listings.filter(item => {
+      if (isLikedPage) return true; // Don't filter on the liked page
+
       // Common budget filter
       if (item.rent > filters.budget) return false;
 
@@ -116,156 +138,161 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort, in
       }
       return true;
     });
-  }, [listings, filters, type]);
+  }, [listings, filters, type, isLikedPage]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">{description}</p>
+        <h1 className="text-4xl font-bold tracking-tight">{pageTitle}</h1>
+        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">{pageDescription}</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
-        <aside className="md:w-1/3 lg:w-1/4">
-          <div className="sticky top-24">
-             <ScrollArea className="h-[calc(100vh-7rem)] pr-4">
-              <div className="p-1 bg-card rounded-xl shadow-sm space-y-6">
-                <h3 className="text-xl font-semibold px-6 pt-6">Filters</h3>
-                
-                {/* Common Filter: Budget */}
-                <div className="space-y-2 px-6">
-                  <Label>Max Budget: ₹{filters.budget.toLocaleString()}</Label>
-                  <Slider
-                    min={5000} max={100000} step={1000}
-                    value={[filters.budget]}
-                    onValueChange={([val]) => handleFilterChange('budget', val)}
-                  />
-                </div>
-                
-                {/* Common Geographic Filters */}
-                <div className="space-y-4 px-6">
-                    <AutocompleteInput 
-                      placeholder="Enter State"
-                      value={filters.state}
-                      onChange={(val) => handleFilterChange('state', val)}
-                      suggestions={indianStates}
+        {!isLikedPage && (
+          <aside className="md:w-1/3 lg:w-1/4">
+            <div className="sticky top-24">
+              <ScrollArea className="h-[calc(100vh-7rem)] pr-4">
+                <div className="p-1 bg-card rounded-xl shadow-sm space-y-6">
+                  <h3 className="text-xl font-semibold px-6 pt-6">Filters</h3>
+                  
+                  {/* Common Filter: Budget */}
+                  <div className="space-y-2 px-6">
+                    <Label>Max Budget: ₹{filters.budget.toLocaleString()}</Label>
+                    <Slider
+                      min={5000} max={100000} step={1000}
+                      value={[filters.budget]}
+                      onValueChange={([val]) => handleFilterChange('budget', val)}
                     />
-                    <AutocompleteInput 
-                      placeholder="Enter City"
-                      value={filters.city}
-                      onChange={(val) => handleFilterChange('city', val)}
-                      suggestions={citySuggestions}
-                    />
-                    <AutocompleteInput
-                      placeholder="Enter Area / Locality"
-                      value={filters.locality}
-                      onChange={(val) => handleFilterChange('locality', val)}
-                      suggestions={areaSuggestions}
-                    />
-                </div>
-                
-                {/* Rental & PG Filters */}
-                {(type === 'rental' || type === 'pg') && (
-                  <div className="space-y-4 px-6 pb-6">
-                    {type === 'rental' && (
-                      <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
-                        <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any">Any BHK</SelectItem>
-                          <SelectItem value="1 BHK">1 BHK</SelectItem>
-                          <SelectItem value="2 BHK">2 BHK</SelectItem>
-                          <SelectItem value="3 BHK">3 BHK</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {type === 'pg' && (
-                      <Select value={filters.roomType} onValueChange={(val) => handleFilterChange('roomType', val)}>
-                        <SelectTrigger><SelectValue placeholder="Room Type" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any">Any Type</SelectItem>
-                          <SelectItem value="Single Room">Single Room</SelectItem>
-                          <SelectItem value="Double Sharing">Double Sharing</SelectItem>
-                          <SelectItem value="Triple Sharing">Triple Sharing</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    
-                    <div className="space-y-2">
-                        <Label>Furnishing</Label>
-                        <RadioGroup value={filters.furnishedStatus} onValueChange={(val) => handleFilterChange('furnishedStatus', val as 'any' | 'Furnished' | 'Semi-Furnished' | 'Unfurnished')} className="flex gap-2">
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Furnished</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Semi-Furnished" className="sr-only"/>Semi</Label>
-                        </RadioGroup>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Contact Type</Label>
-                        <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
-                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
-                        </RadioGroup>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Amenities</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                        {amenitiesList.map(a => (
-                            <div key={a} className="flex items-center space-x-2">
-                            <Checkbox id={`amenity-${a}`} checked={filters.amenities.includes(a)} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
-                            <Label htmlFor={`amenity-${a}`} className="text-sm font-normal">{a}</Label>
-                            </div>
-                        ))}
-                        </div>
-                    </div>
                   </div>
-                )}
-                
-                {/* Roommate Filters */}
-                {type === 'roommate' && (
-                  <div className="space-y-4 px-6 pb-6">
-                     <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
-                        <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="any">Any Gender</SelectItem>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <div className="space-y-2">
-                        <Label>Lifestyle Preferences</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                        {roommatePreferencesList.map(p => (
-                            <div key={p} className="flex items-center space-x-2">
-                                <Checkbox id={`amenity-${p}`} onCheckedChange={(checked) => handleAmenityChange(p, !!checked)} checked={filters.amenities.includes(p)} />
-                                <Label htmlFor={`amenity-${p}`} className="text-sm font-normal">{p}</Label>
-                            </div>
-                        ))}
-                        </div>
-                    </div>
+                  
+                  {/* Common Geographic Filters */}
+                  <div className="space-y-4 px-6">
+                      <AutocompleteInput 
+                        placeholder="Enter State"
+                        value={filters.state}
+                        onChange={(val) => handleFilterChange('state', val)}
+                        suggestions={indianStates}
+                      />
+                      <AutocompleteInput 
+                        placeholder="Enter City"
+                        value={filters.city}
+                        onChange={(val) => handleFilterChange('city', val)}
+                        suggestions={citySuggestions}
+                      />
+                      <AutocompleteInput
+                        placeholder="Enter Area / Locality"
+                        value={filters.locality}
+                        onChange={(val) => handleFilterChange('locality', val)}
+                        suggestions={areaSuggestions}
+                      />
                   </div>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-        </aside>
+                  
+                  {/* Rental & PG Filters */}
+                  {(type === 'rental' || type === 'pg') && (
+                    <div className="space-y-4 px-6 pb-6">
+                      {type === 'rental' && (
+                        <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
+                          <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="any">Any BHK</SelectItem>
+                            <SelectItem value="1 BHK">1 BHK</SelectItem>
+                            <SelectItem value="2 BHK">2 BHK</SelectItem>
+                            <SelectItem value="3 BHK">3 BHK</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      {type === 'pg' && (
+                        <Select value={filters.roomType} onValueChange={(val) => handleFilterChange('roomType', val)}>
+                          <SelectTrigger><SelectValue placeholder="Room Type" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="any">Any Type</SelectItem>
+                            <SelectItem value="Single Room">Single Room</SelectItem>
+                            <SelectItem value="Double Sharing">Double Sharing</SelectItem>
+                            <SelectItem value="Triple Sharing">Triple Sharing</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      
+                      <div className="space-y-2">
+                          <Label>Furnishing</Label>
+                          <RadioGroup value={filters.furnishedStatus} onValueChange={(val) => handleFilterChange('furnishedStatus', val as 'any' | 'Furnished' | 'Semi-Furnished' | 'Unfurnished')} className="flex gap-2">
+                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
+                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Furnished</Label>
+                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Semi-Furnished" className="sr-only"/>Semi</Label>
+                          </RadioGroup>
+                      </div>
 
-        <main className="md:w-2/3 lg:w-3/4">
+                      <div className="space-y-2">
+                          <Label>Contact Type</Label>
+                          <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
+                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
+                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
+                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
+                          </RadioGroup>
+                      </div>
+
+                      <div className="space-y-2">
+                          <Label>Amenities</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                          {amenitiesList.map(a => (
+                              <div key={a} className="flex items-center space-x-2">
+                              <Checkbox id={`amenity-${a}`} checked={filters.amenities.includes(a)} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
+                              <Label htmlFor={`amenity-${a}`} className="text-sm font-normal">{a}</Label>
+                              </div>
+                          ))}
+                          </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Roommate Filters */}
+                  {type === 'roommate' && (
+                    <div className="space-y-4 px-6 pb-6">
+                      <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
+                          <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="any">Any Gender</SelectItem>
+                              <SelectItem value="Male">Male</SelectItem>
+                              <SelectItem value="Female">Female</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                      </Select>
+                      <div className="space-y-2">
+                          <Label>Lifestyle Preferences</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                          {roommatePreferencesList.map(p => (
+                              <div key={p} className="flex items-center space-x-2">
+                                  <Checkbox id={`amenity-${p}`} onCheckedChange={(checked) => handleAmenityChange(p, !!checked)} checked={filters.amenities.includes(p)} />
+                                  <Label htmlFor={`amenity-${p}`} className="text-sm font-normal">{p}</Label>
+                              </div>
+                          ))}
+                          </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          </aside>
+        )}
+
+        <main className={isLikedPage ? 'w-full' : 'md:w-2/3 lg:w-3/4'}>
           <div className="flex justify-between items-center mb-6">
             <p className="text-sm text-muted-foreground">{filteredListings.length} results found</p>
           </div>
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {type === 'roommate' 
-              ? filteredListings.map(item => <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} />)
-              : filteredListings.map(item => <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} />)
-            }
+            {filteredListings.map(item => {
+              const itemType = item.propertyType === 'Roommate' ? 'roommate' : 'listing';
+              return itemType === 'roommate' 
+                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLoggedIn={isLoggedIn} isLiked={likedItems.has(item.id)} onLikeToggle={onLikeToggle} />
+                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLoggedIn={isLoggedIn} isLiked={likedItems.has(item.id)} onLikeToggle={onLikeToggle} />
+            })}
           </div>
           {filteredListings.length === 0 && (
             <div className="text-center py-16 bg-card rounded-xl">
-                <h3 className="text-xl font-semibold">No results found</h3>
-                <p className="text-muted-foreground mt-2">Try adjusting your filters to find what you're looking for.</p>
+                <Heart className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mt-4">No liked items yet</h3>
+                <p className="text-muted-foreground mt-2">Click the heart icon on any property or profile to save it here.</p>
             </div>
           )}
         </main>

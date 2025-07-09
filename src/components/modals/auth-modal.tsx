@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -11,9 +12,10 @@ import { Smartphone, Mail, KeyRound, Lock, LogIn } from "lucide-react";
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onLoginSuccess: () => void;
 }
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -41,6 +43,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       title: "Login Successful!",
       description: "Welcome back to SetMyStay! (Simulated)",
     });
+    onLoginSuccess();
     onClose();
   };
   
@@ -49,6 +52,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       title: `Signing in with ${provider}...`,
       description: `You are being redirected to sign in. (Simulated)`,
     });
+    onLoginSuccess();
     onClose();
   }
 
