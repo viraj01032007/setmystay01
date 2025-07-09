@@ -24,12 +24,6 @@ import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 import { FloatingCta } from "@/components/shared/floating-cta";
 import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 
-type ToastInfo = {
-    title: string;
-    description: string;
-    variant?: "default" | "destructive";
-}
-
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
   const [allListings, setAllListings] = useState<Listing[]>([]);
@@ -122,7 +116,7 @@ export default function Home() {
       variant: "default",
     });
 
-    setRateUsModalOpen(true);
+    setTimeout(() => setRateUsModalOpen(true), 500);
   }, [toast]);
 
   const useUnlock = useCallback((itemId: string) => {
@@ -226,7 +220,7 @@ export default function Home() {
       title: "Listing Submitted!",
       description: "Your property is now live.",
     });
-    setRateUsModalOpen(true);
+    setTimeout(() => setRateUsModalOpen(true), 500);
   };
   
   const handleChat = (name: string) => {
