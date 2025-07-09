@@ -138,15 +138,17 @@ const FilterPanel = ({
               <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
           </RadioGroup>
       </div>
-        <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
-          <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
-          <SelectContent>
-              <SelectItem value="any">Any Gender</SelectItem>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
-          </SelectContent>
-      </Select>
+        {type !== 'rental' && (
+          <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
+            <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
+            <SelectContent>
+                <SelectItem value="any">Any Gender</SelectItem>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       <div className="space-y-2">
           <Label>Features &amp; Preferences</Label>
           <div className="grid grid-cols-2 gap-2">
