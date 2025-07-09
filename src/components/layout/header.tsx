@@ -74,9 +74,16 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex flex-shrink-0 items-center gap-2" onClick={() => setActivePage('home')}>
-          <Logo className="w-10 h-10" />
-          <span className="hidden sm:inline text-xl font-semibold text-gray-800">SetMyStay</span>
+        <Link href="/" className="flex-shrink-0" onClick={() => setActivePage('home')}>
+            {/* Mobile view: Only Text */}
+            <div className="flex sm:hidden items-center">
+                <span className="text-xl font-semibold text-gray-800">SetMyStay</span>
+            </div>
+            {/* Desktop view: Logo + Text */}
+            <div className="hidden sm:flex items-center gap-2">
+                <Logo className="w-10 h-10" />
+                <span className="text-xl font-semibold text-gray-800">SetMyStay</span>
+            </div>
         </Link>
 
         <nav className="hidden md:flex items-center space-x-6">
