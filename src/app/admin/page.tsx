@@ -53,32 +53,29 @@ const chartData = [
 
 export default function AdminDashboard() {
     const router = useRouter();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const { toast } = useToast();
     
     // State management
     const [properties, setProperties] = useState([]);
     const [roommates, setRoommates] = useState([]);
-    const [pricing, setPricing] = useState(initialPricing);
-
-    const [analytics, setAnalytics] = useState({
-        totalPageViews: 0,
-        totalUnlocks: 0,
-        lastUpdated: ''
-    });
+    const [pricing, setPricing] = useState(null);
+    const [analytics, setAnalytics] = useState(null);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
+    const [isMounted, setIsMounted] = useState(false);
+
     useEffect(() => {
+        setIsMounted(true);
         const authStatus = localStorage.getItem('admin_authenticated');
         if (authStatus !== 'true') {
             router.replace('/admin/login');
         } else {
-            setIsAuthenticated(true);
             setProperties(initialProperties);
             setRoommates(initialRoommates);
+            setPricing(initialPricing);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
@@ -93,6 +90,7 @@ export default function AdminDashboard() {
     };
 
     const pendingListings = useMemo(() => {
+        if (!properties.length && !roommates.length) return [];
         return [
             ...properties.filter(p => p.status === 'pending').map(p => ({ ...p, itemType: p.type })),
             ...roommates.filter(r => r.status === 'pending').map(r => ({ ...r, itemType: 'roommate' }))
@@ -132,6 +130,7 @@ export default function AdminDashboard() {
     };
 
     const handlePriceChange = (category, plan, value) => {
+        if (!pricing) return;
         setPricing(prev => ({
             ...prev,
             [category]: {
@@ -156,14 +155,14 @@ export default function AdminDashboard() {
         return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
     };
 
-    if (!isAuthenticated) {
+    if (!isMounted || !analytics || !pricing) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-100">
                 <LoadingSpinner className="w-12 h-12 text-primary" />
             </div>
         );
     }
-
+    
     return (
         <div className="bg-slate-50 min-h-screen">
             <header className="bg-white shadow-sm">
@@ -218,7 +217,7 @@ export default function AdminDashboard() {
                                         <XAxis dataKey="name" />
                                         <YAxis />
                                         <Tooltip />
-                                        <Bar dataKey="views" fill="#4582EF" />
+                                        <Bar dataKey="views" fill="#2563eb" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -341,7 +340,7 @@ export default function AdminDashboard() {
                         <DialogTitle>{currentItem?.title || currentItem?.name}</DialogTitle>
                     </DialogHeader>
                     {currentItem && (
-                        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                        <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
                              {currentItem.media?.length > 0 && (
                                 <div className="relative w-full h-64 bg-slate-200 rounded-lg overflow-hidden">
                                      <Image 
