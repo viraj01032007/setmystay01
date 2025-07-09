@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -37,12 +36,31 @@ const amenityIcons: { [key: string]: React.ReactNode } = {
 
 const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isUnlocked: boolean; onUnlock: () => void; }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const media = [...listing.images, ...(listing.videoUrl ? [listing.videoUrl] : [])];
 
-  const nextMedia = () => setCurrentIndex((prev) => (prev + 1) % media.length);
-  const prevMedia = () => setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
+  const allImages = listing.images || [];
+  const allMedia = [...allImages, ...(listing.videoUrl ? [listing.videoUrl] : [])];
+  const hasMoreMedia = allMedia.length > 2;
 
-  if (media.length === 0) {
+  // If not unlocked, show only up to 2 images. If there are more media, add a placeholder to unlock.
+  const mediaToShow = isUnlocked
+    ? allMedia
+    : hasMoreMedia
+      ? [...allImages.slice(0, 2), 'unlock_placeholder']
+      : allImages.slice(0, 2);
+
+  const nextMedia = () => {
+    if (currentIndex < mediaToShow.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+  const prevMedia = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+
+  if (mediaToShow.length === 0) {
     return (
       <div className="w-full h-80 bg-muted rounded-lg flex items-center justify-center">
         <p>No media available</p>
@@ -52,7 +70,29 @@ const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isU
 
   return (
     <div className="relative w-full h-80 bg-muted rounded-lg overflow-hidden">
-      {media.map((src, index) => {
+      {mediaToShow.map((src, index) => {
+        // The placeholder slide
+        if (src === 'unlock_placeholder') {
+          return (
+            <div
+              key="unlock-placeholder"
+              className={`absolute inset-0 bg-slate-300 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+            >
+              {allImages.length > 1 && (
+                <Image src={allImages[1]} alt="Blurred background" fill className="object-cover filter blur-md scale-110" />
+              )}
+              <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center rounded-lg text-center p-4">
+                <h3 className="text-lg font-semibold">See All Photos & Videos</h3>
+                <p className="text-muted-foreground mb-4">Unlock details to view all media for this property.</p>
+                <Button onClick={onUnlock}>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Unlock to View All
+                </Button>
+              </div>
+            </div>
+          )
+        }
+        
         const isVideo = listing.videoUrl && src === listing.videoUrl;
         return (
           <div
@@ -60,36 +100,21 @@ const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isU
             className={`absolute inset-0 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
           >
             {isVideo ? (
-              isUnlocked ? (
-                <video src={src} controls className="w-full h-full object-contain bg-black" />
-              ) : (
-                <div className="w-full h-full bg-slate-300 flex items-center justify-center">
-                  <PlayCircle className="w-20 h-20 text-slate-500" />
-                </div>
-              )
+              // This part is only reachable if isUnlocked is true
+              <video src={src as string} controls className="w-full h-full object-contain bg-black" />
             ) : (
-              <Image src={src} alt={`${listing.title} media ${index + 1}`} fill className="object-cover" />
-            )}
-            
-            {isVideo && !isUnlocked && index === currentIndex && (
-              <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center rounded-lg text-center p-4">
-                  <h3 className="text-lg font-semibold">Video Tour Available</h3>
-                  <p className="text-muted-foreground mb-4">Unlock details to watch the video tour of this property.</p>
-                  <Button onClick={onUnlock}>
-                      <Lock className="w-4 h-4 mr-2" />
-                      Unlock to Watch
-                  </Button>
-              </div>
+              <Image src={src as string} alt={`${listing.title} media ${index + 1}`} fill className="object-cover" />
             )}
           </div>
         );
       })}
-      {media.length > 1 && (
+      
+      {mediaToShow.length > 1 && (
         <>
-          <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={prevMedia}>
+          <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={prevMedia} disabled={currentIndex === 0}>
             <ChevronLeft />
           </Button>
-          <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={nextMedia}>
+          <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={nextMedia} disabled={currentIndex === mediaToShow.length - 1}>
             <ChevronRight />
           </Button>
         </>
