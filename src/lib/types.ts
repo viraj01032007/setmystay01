@@ -8,6 +8,15 @@ export interface Bed {
   status: 'vacant' | 'occupied';
 }
 
+export interface Advertisement {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  isActive: boolean;
+  'data-ai-hint'?: string;
+}
+
 export interface Listing {
   id: string;
   propertyType: 'PG' | 'Rental';

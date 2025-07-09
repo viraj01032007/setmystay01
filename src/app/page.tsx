@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed } from "@/lib/types";
-import { dummyProperties, dummyRoommates } from "@/lib/data";
+import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement } from "@/lib/types";
+import { dummyProperties, dummyRoommates, dummyAdvertisements } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
 import { Header } from "@/components/layout/header";
@@ -22,6 +22,7 @@ import { LoadingSpinner } from "@/components/icons";
 import { RateUsModal } from "@/components/modals/rate-us-modal";
 import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 import { FloatingCta } from "@/components/shared/floating-cta";
+import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 
 type ToastInfo = {
     title: string;
@@ -54,6 +55,9 @@ export default function Home() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const [adToShow, setAdToShow] = useState<Advertisement | null>(null);
+  const [isAdModalOpen, setIsAdModalOpen] = useState(false);
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -74,6 +78,20 @@ export default function Home() {
 
     const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
     setIsLoggedIn(loggedInStatus);
+    
+    // Advertisement Pop-up logic
+    const activeAd = dummyAdvertisements.find(ad => ad.isActive);
+    const adShown = sessionStorage.getItem('setmystay_ad_shown');
+
+    if (activeAd && !adShown) {
+        const timer = setTimeout(() => {
+            setAdToShow(activeAd);
+            setIsAdModalOpen(true);
+            sessionStorage.setItem('setmystay_ad_shown', 'true');
+        }, 5000); // Show after 5 seconds
+
+        return () => clearTimeout(timer);
+    }
   }, []);
 
   const handleRateUsClose = (rated: boolean) => {
@@ -274,7 +292,7 @@ export default function Home() {
               type={activePage as ListingType}
               listings={
                 activePage === 'roommates'
-                  ? allRoommates.filter(r => r.hasProperty)
+                  ? allRoommates
                   : allListings.filter(l => {
                       if (activePage === 'pg') return l.propertyType === 'PG';
                       if (activePage === 'rentals') return l.propertyType === 'Rental';
@@ -342,6 +360,13 @@ export default function Home() {
         onClose={() => setIsBookingModalOpen(false)}
         listing={inquiryData?.listing || null}
         bed={inquiryData?.bed || null}
+      />
+      <AdvertisementModal
+        isOpen={isAdModalOpen}
+        onClose={() => setIsAdModalOpen(false)}
+        title={adToShow?.title || ''}
+        description={adToShow?.description || ''}
+        imageUrl={adToShow?.imageUrl || ''}
       />
     </div>
   );

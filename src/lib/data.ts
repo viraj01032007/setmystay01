@@ -1,5 +1,24 @@
 
-import type { Listing, RoommateProfile } from './types';
+import type { Listing, RoommateProfile, Advertisement } from './types';
+
+export const dummyAdvertisements: Advertisement[] = [
+    {
+        id: 'ad001',
+        title: 'Grand Opening Offer!',
+        description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50',
+        imageUrl: 'https://placehold.co/600x400',
+        isActive: true,
+        'data-ai-hint': 'sale promotion',
+    },
+    {
+        id: 'ad002',
+        title: 'Unlock Unlimited Connections',
+        description: 'Subscribe to our unlimited plan and find your perfect roommate today.',
+        imageUrl: 'https://placehold.co/600x400',
+        isActive: false,
+        'data-ai-hint': 'people connecting',
+    }
+];
 
 export const dummyProperties: Listing[] = [
     {

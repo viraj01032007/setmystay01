@@ -8,12 +8,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import type { Advertisement } from '@/lib/types';
 
 // Mock data similar to the provided script
 const initialProperties = [
@@ -33,6 +34,10 @@ const initialProperties = [
 const initialRoommates = [
     { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], 'data-ai-hint': 'male portrait' },
     { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait' }
+];
+const initialAdvertisements: Advertisement[] = [
+    { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true, 'data-ai-hint': 'sale promotion' },
+    { id: 'ad002', title: 'Unlock Unlimited Connections', description: 'Subscribe to our unlimited plan and find your perfect roommate today.', imageUrl: 'https://placehold.co/600x400', isActive: false, 'data-ai-hint': 'people connecting' }
 ];
 
 const initialPricing = {
@@ -64,10 +69,14 @@ export default function AdminDashboard() {
     const [roommates, setRoommates] = useState([]);
     const [pricing, setPricing] = useState(null);
     const [analytics, setAnalytics] = useState(null);
+    const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+
+    const [isAdFormModalOpen, setAdFormModalOpen] = useState(false);
+    const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
 
     const [isMounted, setIsMounted] = useState(false);
 
@@ -80,6 +89,7 @@ export default function AdminDashboard() {
             setProperties(initialProperties);
             setRoommates(initialRoommates);
             setPricing(initialPricing);
+            setAdvertisements(initialAdvertisements);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
@@ -149,16 +159,44 @@ export default function AdminDashboard() {
         toast({ title: "Pricing Updated", description: "The new prices have been saved." });
     }
 
+    const handleOpenAdForm = (ad: Advertisement | null) => {
+        setEditingAd(ad);
+        setAdFormModalOpen(true);
+    };
+
+    const handleSaveAd = (adData) => {
+        if (editingAd) {
+            setAdvertisements(ads => ads.map(ad => ad.id === editingAd.id ? { ...editingAd, ...adData } : ad));
+            toast({ title: "Advertisement Updated" });
+        } else {
+            const newAd: Advertisement = { id: `ad_${Date.now()}`, ...adData };
+            setAdvertisements(ads => [newAd, ...ads]);
+            toast({ title: "Advertisement Added" });
+        }
+        setAdFormModalOpen(false);
+        setEditingAd(null);
+    };
+
+    const handleDeleteAd = (adId: string) => {
+        setAdvertisements(ads => ads.filter(ad => ad.id !== adId));
+        toast({ title: "Advertisement Deleted", variant: 'destructive' });
+    };
+
     const StatusBadge = ({ status }) => {
-        const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold";
+        const isBoolean = typeof status === 'boolean';
+        const currentStatus = isBoolean ? (status ? 'active' : 'inactive') : status;
+    
+        const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold capitalize";
         const statusClasses = {
             pending: "bg-yellow-200 text-yellow-800",
             approved: "bg-green-200 text-green-800",
             rejected: "bg-red-200 text-red-800",
+            active: "bg-blue-200 text-blue-800",
+            inactive: "bg-slate-200 text-slate-800",
         };
-        return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
+        return <span className={`${baseClasses} ${statusClasses[currentStatus]}`}>{currentStatus}</span>;
     };
-
+    
     if (!isMounted || !analytics || !pricing) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-100">
@@ -267,6 +305,53 @@ export default function AdminDashboard() {
                     </CardContent>
                 </Card>
 
+                {/* Advertisement Management */}
+                <Card className="mb-8">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle className="text-2xl">Pop-up Advertisement Management</CardTitle>
+                            <CardDescription>Manage the pop-up shown to users.</CardDescription>
+                        </div>
+                        <Button onClick={() => handleOpenAdForm(null)}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add New
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Title</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {advertisements.map(ad => (
+                                    <TableRow key={ad.id}>
+                                        <TableCell className="font-medium">{ad.title}</TableCell>
+                                        <TableCell><StatusBadge status={ad.isActive} /></TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleOpenAdForm(ad)}><Edit className="h-4 w-4" /></Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader><AlertDialogTitle>Delete Advertisement?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. Are you sure you want to delete this ad?</AlertDialogDescription></AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteAd(ad.id)}>Confirm</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+
                 {/* Pending Listings Section */}
                 <Card className="mb-8">
                     <CardHeader><CardTitle className="text-2xl">Pending Listings</CardTitle></CardHeader>
@@ -336,6 +421,14 @@ export default function AdminDashboard() {
                     </Card>
                 </div>
             </main>
+
+            {/* Ad Form Modal */}
+            <AdFormDialog
+                isOpen={isAdFormModalOpen}
+                onClose={() => setAdFormModalOpen(false)}
+                onSave={handleSaveAd}
+                ad={editingAd}
+            />
 
             {/* Details Modal */}
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
@@ -410,3 +503,61 @@ export default function AdminDashboard() {
         </div>
     );
 }
+
+const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        if (ad) {
+            setTitle(ad.title);
+            setDescription(ad.description);
+            setImageUrl(ad.imageUrl);
+            setIsActive(ad.isActive);
+        } else {
+            setTitle('');
+            setDescription('');
+            setImageUrl('');
+            setIsActive(false);
+        }
+    }, [ad, isOpen]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ title, description, imageUrl, isActive });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{ad ? 'Edit' : 'Add'} Advertisement</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="ad-title">Title</Label>
+                        <Input id="ad-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="ad-description">Description</Label>
+                        <Textarea id="ad-description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="ad-image-url">Image URL</Label>
+                        <Input id="ad-image-url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} required />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="ad-is-active" checked={isActive} onCheckedChange={setIsActive} />
+                        <Label htmlFor="ad-is-active">Set as active Pop-up</Label>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit">Save</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
