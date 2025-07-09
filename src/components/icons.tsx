@@ -5,19 +5,20 @@ import { cn } from "@/lib/utils";
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <circle cx="60" cy="60" r="60" fill="#2A5A9A"/>
-      <g transform="translate(0, -5)">
-        {/* Shadow */}
-        <ellipse cx="60" cy="73" rx="12" ry="3" fill="#FFFFFF" opacity="0.3"/>
+      <rect width="120" height="120" rx="20" fill="hsl(var(--primary))"/>
+      <circle cx="60" cy="60" r="45" stroke="white" strokeWidth="1.5" fill="none"/>
+      
+      <g transform="translate(0, -8)">
+        <ellipse cx="60" cy="78" rx="12" ry="3" fill="white" opacity="0.3"/>
         
         {/* Location Pin */}
-        <path d="M60 20C46.7452 20 36 30.7452 36 44C36 61.6274 60 75 60 75C60 75 84 61.6274 84 44C84 30.7452 73.2548 20 60 20Z" fill="white"/>
+        <path d="M60 32C49.507 32 41 40.507 41 51C41 65.5 60 78 60 78C60 78 79 65.5 79 51C79 40.507 70.493 32 60 32Z" fill="white"/>
         
-        {/* House inside Pin */}
-        <g transform="translate(0, -2)">
-          <path d="M60 34L50 42V54H70V42L60 34Z" fill="#2A5A9A"/>
-          <rect x="54" y="46" width="5" height="5" fill="white"/>
-          <rect x="61" y="46" width="5" height="5" fill="white"/>
+        {/* House inside Pin (as cutout) */}
+        <g fill="hsl(var(--primary))">
+            <path d="M60 43.5L53 49.5V58.5H67V49.5L60 43.5Z"/>
+            <rect x="55.5" y="52" width="4" height="4" rx="0.5"/>
+            <rect x="60.5" y="52" width="4" height="4" rx="0.5"/>
         </g>
       </g>
       
@@ -27,7 +28,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
         y="100" 
         fontFamily="Inter, sans-serif" 
         fontSize="17" 
-        fontWeight="600" 
+        fontWeight="500" 
         fill="white" 
         textAnchor="middle"
         letterSpacing="0.2"
