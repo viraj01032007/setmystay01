@@ -71,6 +71,5 @@ export type FilterState = {
   locality: string;
   roomType: string;
   gender: string;
-  locationQuery: string;
   brokerStatus: string;
 };

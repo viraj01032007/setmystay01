@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -30,11 +31,11 @@ const initialFilters: FilterState = {
   locality: "any",
   roomType: "any",
   gender: "any",
-  locationQuery: "",
   brokerStatus: "any",
 };
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
+const roommatePreferencesList = ['Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'];
 const cities = ["Navi Mumbai", "Mumbai", "Pune", "Delhi", "Bangalore"];
 const localities: {[key: string]: string[]} = {
     "Navi Mumbai": ["Kharghar", "CBD Belapur", "Vashi", "Nerul"],
@@ -62,24 +63,27 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
 
   const filteredListings = useMemo(() => {
     return listings.filter(item => {
+      // Common budget filter
+      if (item.rent > filters.budget) return false;
+
+      // Common geo filter
+      if (filters.city !== 'any' && item.city !== 'any' && filters.city !== item.city) return false;
+      if (filters.locality !== 'any' && item.locality !== 'any' && filters.locality !== item.locality) return false;
+
       if ('propertyType' in item && item.propertyType !== 'Roommate') { // It's a Listing
         if (type === 'roommate') return false;
         const l = item as Listing;
-        if (filters.budget < l.rent) return false;
         if (filters.furnishedStatus !== 'any' && filters.furnishedStatus !== l.furnishedStatus) return false;
         if (filters.brokerStatus !== 'any' && filters.brokerStatus !== l.brokerStatus) return false;
-        if (filters.city !== 'any' && filters.city !== l.city) return false;
-        if (filters.locality !== 'any' && filters.locality !== l.locality) return false;
         if (type === 'rental' && filters.propertyType !== 'any' && filters.propertyType !== l.size) return false;
         if (type === 'pg' && filters.roomType !== 'any' && filters.roomType !== l.size) return false;
         if (filters.amenities.length > 0 && !filters.amenities.every(a => l.amenities.includes(a))) return false;
       } else { // It's a RoommateProfile
         if (type !== 'roommate') return false;
         const r = item as RoommateProfile;
-        if (filters.budget < r.rent) return false;
         if (filters.gender !== 'any' && filters.gender !== r.gender) return false;
-        const fullLocation = `${r.locality}, ${r.city}`.toLowerCase();
-        if (filters.locationQuery && !fullLocation.includes(filters.locationQuery.toLowerCase())) return false;
+        // The check for amenities here is for roommate PREFERENCES
+        if (filters.amenities.length > 0 && !filters.amenities.every(a => r.preferences.includes(a))) return false;
       }
       return true;
     });
@@ -117,9 +121,8 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                   />
                 </div>
                 
-                {/* Rental & PG Filters */}
-                {(type === 'rental' || type === 'pg') && (
-                  <div className="space-y-4 px-6 pb-6">
+                {/* Common Geographic Filters */}
+                <div className="space-y-4 px-6">
                     <Select value={filters.city} onValueChange={(val) => { handleFilterChange('city', val); handleFilterChange('locality', 'any'); }}>
                       <SelectTrigger><SelectValue placeholder="Select City" /></SelectTrigger>
                       <SelectContent>
@@ -133,7 +136,11 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                         {(localities[filters.city] || []).map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
                       </SelectContent>
                     </Select>
-
+                </div>
+                
+                {/* Rental & PG Filters */}
+                {(type === 'rental' || type === 'pg') && (
+                  <div className="space-y-4 px-6 pb-6">
                     {type === 'rental' && (
                       <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
                         <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
@@ -180,7 +187,7 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                         <div className="grid grid-cols-2 gap-2">
                         {amenitiesList.map(a => (
                             <div key={a} className="flex items-center space-x-2">
-                            <Checkbox id={`amenity-${a}`} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
+                            <Checkbox id={`amenity-${a}`} checked={filters.amenities.includes(a)} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
                             <Label htmlFor={`amenity-${a}`} className="text-sm font-normal">{a}</Label>
                             </div>
                         ))}
@@ -192,11 +199,6 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                 {/* Roommate Filters */}
                 {type === 'roommate' && (
                   <div className="space-y-4 px-6 pb-6">
-                     <Input 
-                       placeholder="Search by location..."
-                       value={filters.locationQuery}
-                       onChange={(e) => handleFilterChange('locationQuery', e.target.value)}
-                     />
                      <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
                         <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
                         <SelectContent>
@@ -205,6 +207,17 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                             <SelectItem value="Female">Female</SelectItem>
                         </SelectContent>
                     </Select>
+                    <div className="space-y-2">
+                        <Label>Lifestyle Preferences</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                        {roommatePreferencesList.map(p => (
+                            <div key={p} className="flex items-center space-x-2">
+                                <Checkbox id={`amenity-${p}`} onCheckedChange={(checked) => handleAmenityChange(p, !!checked)} checked={filters.amenities.includes(p)} />
+                                <Label htmlFor={`amenity-${p}`} className="text-sm font-normal">{p}</Label>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
                   </div>
                 )}
               </div>

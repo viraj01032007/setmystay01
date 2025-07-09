@@ -32,7 +32,9 @@ const formSchema = z.object({
   locality: z.string().min(1, 'Locality is required'),
   address: z.string().min(10, 'Full address is required'),
   ownerName: z.string().min(2, 'Name is required'),
-  phone: z.string().regex(/^\d{10}$/, 'Must be a valid 10-digit phone number'),
+  phone: z.string().refine((val) => val === "" || /^\d{10}$/.test(val), {
+    message: "Phone number must be 10 digits.",
+  }),
   description: z.string().optional(),
   amenities: z.array(z.string()).optional(),
   brokerStatus: z.enum(['With Broker', 'Without Broker']),
@@ -65,6 +67,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       brokerStatus: 'Without Broker',
       rent: 15000,
       amenities: [],
+      phone: '',
     },
   });
   
@@ -311,7 +314,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                   <FormItem><FormLabel>Your Name</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="phone" render={({ field }) => (
-                  <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" placeholder="9876543210" {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Phone Number (Optional)</FormLabel><FormControl><Input type="tel" placeholder="9876543210" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
               </CardContent>
             </Card>
