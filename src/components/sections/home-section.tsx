@@ -46,12 +46,12 @@ export function HomeSection({
       {/* Hero Section */}
       <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center p-6">
         <Image
-          src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2070&auto=format&fit=crop"
-          alt="Modern apartment interior"
+          src="https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=2070&auto=format&fit=crop"
+          alt="Modern living room"
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="apartment interior"
+          data-ai-hint="living room"
         />
         <div className="relative text-white max-w-4xl space-y-6 w-full bg-black/60 p-8 rounded-xl shadow-2xl">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
