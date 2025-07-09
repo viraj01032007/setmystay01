@@ -39,8 +39,9 @@ const initialFilters: FilterState = {
   brokerStatus: "any",
 };
 
-const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
+const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden', 'Piped Gas'];
 const roommatePreferencesList = ['Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'];
+const allFeaturesList = [...new Set([...amenitiesList, ...roommatePreferencesList])];
 
 export function ListingsSection({ 
   type, 
@@ -58,9 +59,9 @@ export function ListingsSection({
     }
 
     const pageConfig = {
-      pg: { title: 'PG Accommodations', description: 'Comfortable and modern paying guest options.' },
-      rental: { title: 'Premium Rentals', description: "Explore a wide range of verified rental properties. From cozy apartments to spacious houses, find the perfect place to call home with detailed information and transparent pricing." },
-      roommate: { title: 'Find Your Ideal Roommate', description: "Connect with potential roommates who match your lifestyle and budget. Browse profiles to find the perfect person to share your next home with." }
+      pg: { title: 'PG & Co-living Spaces', description: 'Explore the best PG and co-living spaces in your city. We offer a variety of options, from single private rooms to shared accommodations, complete with modern amenities for a hassle-free living experience. Filter by budget and location to find your perfect spot.' },
+      rental: { title: 'Find Your Next Home', description: "Find your next home from our curated selection of rental properties. Whether you're looking for a cozy studio or a spacious family house, our verified listings provide all the details you need. Use the filters to narrow down by price, location, amenities, and more to find a space that feels like it was made for you." },
+      roommate: { title: 'Find Your Ideal Roommate', description: "Discover your next great roommate with SetMyStay. Browse through detailed profiles to find people who match your lifestyle, budget, and living preferences. Our platform makes it easy to connect with compatible individuals to start your shared living adventure." }
     };
     
     const config = pageConfig[type] || { title: 'Our Listings', description: 'Browse our collection of properties and roommate profiles to find your perfect match.' };
@@ -112,22 +113,22 @@ export function ListingsSection({
           if (filters.brokerStatus !== 'any' && filters.brokerStatus !== l.brokerStatus) return false;
           if (l.propertyType === 'Rental' && filters.propertyType !== 'any' && filters.propertyType !== l.size) return false;
           if (l.propertyType === 'PG' && filters.roomType !== 'any' && filters.roomType !== l.size) return false;
-          if ((type === 'rental' || type === 'pg') && filters.amenities.length > 0 && !filters.amenities.every(a => l.amenities.includes(a))) return false;
+          if (filters.amenities.length > 0 && !filters.amenities.every(a => l.amenities.includes(a))) return false;
       } else { // Is a RoommateProfile
           const r = item as RoommateProfile;
           if (filters.gender !== 'any' && filters.gender !== r.gender) return false;
-          if (type === 'roommate' && filters.amenities.length > 0 && !filters.amenities.every(a => r.preferences.includes(a))) return false;
+          if (filters.amenities.length > 0 && !filters.amenities.every(a => r.preferences.includes(a))) return false;
       }
 
       return true;
     });
-  }, [listings, filters, type]);
+  }, [listings, filters]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight">{pageTitle}</h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">{pageDescription}</p>
+        <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">{pageDescription}</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -168,91 +169,70 @@ export function ListingsSection({
                         suggestions={areaSuggestions}
                       />
                   </div>
-                  
-                  {/* Rental & PG Filters */}
-                  {(type === 'rental' || type === 'pg') && (
-                    <div className="space-y-4">
-                      {type === 'rental' && (
-                        <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
-                          <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="any">Any BHK</SelectItem>
-                            <SelectItem value="1 BHK">1 BHK</SelectItem>
-                            <SelectItem value="2 BHK">2 BHK</SelectItem>
-                            <SelectItem value="3 BHK">3 BHK</SelectItem>
-                             <SelectItem value="4 BHK">4 BHK</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                      {type === 'pg' && (
-                        <Select value={filters.roomType} onValueChange={(val) => handleFilterChange('roomType', val)}>
-                          <SelectTrigger><SelectValue placeholder="Room Type" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="any">Any Type</SelectItem>
-                            <SelectItem value="Single Room">Single Room</SelectItem>
-                            <SelectItem value="Double Sharing">Double Sharing</SelectItem>
-                            <SelectItem value="Triple Sharing">Triple Sharing</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                      
-                      <div className="space-y-2">
-                          <Label>Furnishing</Label>
-                          <RadioGroup value={filters.furnishedStatus} onValueChange={(val) => handleFilterChange('furnishedStatus', val as 'any' | 'Furnished' | 'Semi-Furnished' | 'Unfurnished')} className="flex gap-2">
-                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Full</Label>
-                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Semi-Furnished" className="sr-only"/>Semi</Label>
-                          </RadioGroup>
-                      </div>
 
-                      <div className="space-y-2">
-                          <Label>Contact Type</Label>
-                          <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
-                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
-                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
-                          </RadioGroup>
-                      </div>
-
-                      <div className="space-y-2">
-                          <Label>Amenities</Label>
-                          <div className="grid grid-cols-2 gap-2">
-                          {amenitiesList.map(a => (
-                              <div key={a} className="flex items-center space-x-2">
-                              <Checkbox id={`amenity-${a}`} checked={filters.amenities.includes(a)} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
-                              <Label htmlFor={`amenity-${a}`} className="text-sm font-normal">{a}</Label>
-                              </div>
-                          ))}
-                          </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Roommate Filters */}
-                  {type === 'roommate' && (
-                    <div className="space-y-4">
-                      <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
-                          <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="any">Any Gender</SelectItem>
-                              <SelectItem value="Male">Male</SelectItem>
-                              <SelectItem value="Female">Female</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                          </SelectContent>
+                  <div className="space-y-4">
+                    {type === 'rental' && (
+                      <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
+                        <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Any BHK</SelectItem>
+                          <SelectItem value="1 BHK">1 BHK</SelectItem>
+                          <SelectItem value="2 BHK">2 BHK</SelectItem>
+                          <SelectItem value="3 BHK">3 BHK</SelectItem>
+                            <SelectItem value="4 BHK">4 BHK</SelectItem>
+                        </SelectContent>
                       </Select>
-                      <div className="space-y-2">
-                          <Label>Lifestyle Preferences</Label>
-                          <div className="grid grid-cols-2 gap-2">
-                          {roommatePreferencesList.map(p => (
-                              <div key={p} className="flex items-center space-x-2">
-                                  <Checkbox id={`amenity-${p}`} onCheckedChange={(checked) => handleAmenityChange(p, !!checked)} checked={filters.amenities.includes(p)} />
-                                  <Label htmlFor={`amenity-${p}`} className="text-sm font-normal">{p}</Label>
-                              </div>
-                          ))}
-                          </div>
-                      </div>
+                    )}
+                    {type === 'pg' && (
+                      <Select value={filters.roomType} onValueChange={(val) => handleFilterChange('roomType', val)}>
+                        <SelectTrigger><SelectValue placeholder="Room Type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Any Type</SelectItem>
+                          <SelectItem value="Single Room">Single Room</SelectItem>
+                          <SelectItem value="Double Sharing">Double Sharing</SelectItem>
+                          <SelectItem value="Triple Sharing">Triple Sharing</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    
+                    <div className="space-y-2">
+                        <Label>Furnishing</Label>
+                        <RadioGroup value={filters.furnishedStatus} onValueChange={(val) => handleFilterChange('furnishedStatus', val as 'any' | 'Furnished' | 'Semi-Furnished' | 'Unfurnished')} className="flex gap-2">
+                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
+                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Full</Label>
+                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Semi-Furnished" className="sr-only"/>Semi</Label>
+                        </RadioGroup>
                     </div>
-                  )}
+
+                    <div className="space-y-2">
+                        <Label>Contact Type</Label>
+                        <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
+                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
+                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
+                            <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
+                        </RadioGroup>
+                    </div>
+                     <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
+                        <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="any">Any Gender</SelectItem>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <div className="space-y-2">
+                        <Label>Features &amp; Preferences</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                        {allFeaturesList.map(a => (
+                            <div key={a} className="flex items-center space-x-2">
+                            <Checkbox id={`amenity-${a}`} checked={filters.amenities.includes(a)} onCheckedChange={(checked) => handleAmenityChange(a, !!checked)} />
+                            <Label htmlFor={`amenity-${a}`} className="text-sm font-normal">{a}</Label>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                  </div>
                 </div>
               </ScrollArea>
             </div>

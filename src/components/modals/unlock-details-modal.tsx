@@ -38,7 +38,7 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
             Choose a plan that's right for you.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0">
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Unlock Plans */}
@@ -110,7 +110,7 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
                 </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
