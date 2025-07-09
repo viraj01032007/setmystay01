@@ -126,6 +126,7 @@ export function RoommateDetails({ profile, onClose, isUnlocked, onUnlock, onChat
                 <p><strong>Name:</strong> {profile.ownerName}</p>
                 <p><strong>Phone:</strong> {profile.contactPhone}</p>
                 <p><strong>Email:</strong> {profile.contactEmail || 'Not provided'}</p>
+                 <p className="text-xs text-muted-foreground pt-2">Contact details are visible for 30 days after unlocking.</p>
               </div>
             ) : (
               <div className="blur-sm select-none">

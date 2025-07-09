@@ -16,10 +16,10 @@ interface UnlockDetailsModalProps {
 }
 
 const unlockPlans = [
-  { plan: 1 as UnlockPlan, title: 'Single Unlock', price: 49, features: ['1 Listing Unlock', 'Complete Address', 'Direct Contact Details'], icon: <Rocket className="w-5 h-5"/> },
-  { plan: 5 as UnlockPlan, title: 'Value Pack', price: 199, features: ['5 Listing Unlocks', 'Complete Address', 'Direct Contact Details', 'Best Value!'], icon: <Star className="w-5 h-5"/> },
-  { plan: 10 as UnlockPlan, title: 'Pro Pack', price: 399, features: ['10 Listing Unlocks', 'Complete Address', 'Direct Contact Details', 'Great Deal!'], icon: <Gem className="w-5 h-5"/> },
-  { plan: 'unlimited' as UnlockPlan, title: 'Ultimate Subscription', price: 999, features: ['Unlimited unlocks for 1 month', 'View all contact details', 'Chat with owners directly', 'Cancel anytime'], icon: <Crown className="w-5 h-5"/> },
+    { plan: 1 as UnlockPlan, title: 'Single Unlock', price: 49, features: ['1 Listing Unlock', 'Complete Address', 'Direct Contact Details', 'Valid for 30 days'], icon: <Rocket className="w-5 h-5"/>, suffix: 'one-time' },
+    { plan: 5 as UnlockPlan, title: 'Value Pack', price: 199, features: ['5 Listing Unlocks', 'Complete Address', 'Direct Contact Details', 'Valid for 30 days', 'Best Value!'], icon: <Star className="w-5 h-5"/>, suffix: 'one-time' },
+    { plan: 10 as UnlockPlan, title: 'Pro Pack', price: 399, features: ['10 Listing Unlocks', 'Complete Address', 'Direct Contact Details', 'Valid for 30 days', 'Great Deal!'], icon: <Gem className="w-5 h-5"/>, suffix: 'one-time' },
+    { plan: 'unlimited' as UnlockPlan, title: 'Ultimate Subscription', price: 999, features: ['Unlimited unlocks for 1 month', 'View all contact details', 'Chat with owners directly', 'Cancel anytime'], icon: <Crown className="w-5 h-5"/>, suffix: 'month' },
 ];
 
 const listingPlans = [
@@ -52,7 +52,7 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
                                 <CardTitle>{p.title}</CardTitle>
                                 <CardDescription>
                                 <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
-                                <span className="text-muted-foreground">/{typeof p.plan === 'number' ? `unlock${p.plan > 1 ? 's':''}`: 'month'}</span>
+                                <span className="text-muted-foreground">/{p.suffix}</span>
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow">

@@ -189,6 +189,7 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
                 <p><strong>Phone:</strong> {listing.contactPhone}</p>
                 <p><strong>Email:</strong> {listing.contactEmail || 'Not provided'}</p>
                 <p><strong>Address:</strong> {listing.completeAddress}</p>
+                <p className="text-xs text-muted-foreground pt-2">Contact details are visible for 30 days after unlocking.</p>
               </div>
             ) : (
               <div className="blur-sm select-none">
