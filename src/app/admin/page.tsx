@@ -1,4 +1,5 @@
 
+
 // @ts-nocheck
 'use client';
 
@@ -70,9 +71,9 @@ export default function AdminDashboard() {
     
     const [popupSettings, setPopupSettings] = useState({
         enabled: false,
-        title: '',
-        description: '',
-        imageUrl: '',
+        title: 'Limited Time Offer!',
+        description: 'Get 10% off on your first listing plan!',
+        imageUrl: 'https://placehold.co/400x200',
     });
 
     const [isMounted, setIsMounted] = useState(false);
@@ -240,7 +241,7 @@ export default function AdminDashboard() {
                                         <XAxis dataKey="name" />
                                         <YAxis />
                                         <Tooltip />
-                                        <Bar dataKey="views" fill="#2563eb" />
+                                        <Bar dataKey="views" fill="#4582EF" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -313,7 +314,7 @@ export default function AdminDashboard() {
                                 <div className="space-y-4">
                                     {Object.entries(pricing.unlocks).map(([plan, price]) => (
                                         <div key={plan} className="flex items-center gap-4">
-                                            <Label htmlFor={`price-unlock-${plan}`} className="w-28 capitalize">{plan} Unlock{plan !== '1' && plan !== 'unlimited' ? 's' : ''}</Label>
+                                            <strong className="w-28 capitalize">{plan} Unlock{plan !== '1' && plan !== 'unlimited' ? 's' : ''}</strong>
                                             <Input id={`price-unlock-${plan}`} type="number" value={price} onChange={(e) => handlePriceChange('unlocks', plan, parseInt(e.target.value))} className="max-w-xs" />
                                         </div>
                                     ))}
@@ -324,7 +325,7 @@ export default function AdminDashboard() {
                                 <div className="space-y-4">
                                      {Object.entries(pricing.listings).map(([plan, price]) => (
                                         <div key={plan} className="flex items-center gap-4">
-                                            <Label htmlFor={`price-listing-${plan}`} className="w-28 capitalize">{plan} Listing</Label>
+                                            <strong className="w-28 capitalize">{plan} Listing</strong>
                                             <Input id={`price-listing-${plan}`} type="number" value={price} onChange={(e) => handlePriceChange('listings', plan, parseInt(e.target.value))} className="max-w-xs" />
                                         </div>
                                     ))}

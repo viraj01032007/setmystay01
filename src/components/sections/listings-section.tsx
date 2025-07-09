@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -45,26 +46,20 @@ const roommatePreferencesList = ['Non-Smoker', 'Vegetarian', 'Non-Vegetarian', '
 
 export function ListingsSection({ type, listings, onViewDetails, onSmartSort, initialSearchFilters }: ListingsSectionProps) {
   const [filters, setFilters] = useState<FilterState>({ ...initialFilters, ...initialSearchFilters });
-  const [pageTitle, setPageTitle] = useState('');
-  const [pageDescription, setPageDescription] = useState('');
-
+  
   useEffect(() => {
     if (initialSearchFilters) {
       setFilters(prev => ({ ...prev, ...initialSearchFilters }));
     }
   }, [initialSearchFilters]);
 
-  useEffect(() => {
+  const { title, description } = useMemo(() => {
     const pageConfig = {
-        pg: { title: 'PG Accommodations', description: 'Comfortable and modern paying guest options.'},
-        rental: { title: 'Premium Rentals', description: 'Find your next home from our verified rental properties.'},
-        roommate: { title: 'Find Your Roommate', description: 'Connect with like-minded people to share a space.'}
+      pg: { title: 'PG Accommodations', description: 'Comfortable and modern paying guest options.' },
+      rental: { title: 'Premium Rentals', description: 'Find your next home from our verified rental properties.' },
+      roommate: { title: 'Find Your Roommates', description: 'Connect with like-minded people to share a space.' }
     };
-    const currentConfig = pageConfig[type];
-    if (currentConfig) {
-        setPageTitle(currentConfig.title);
-        setPageDescription(currentConfig.description);
-    }
+    return pageConfig[type] || { title: 'Listings', description: 'Browse our listings.' };
   }, [type]);
   
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
@@ -126,8 +121,8 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort, in
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight">{pageTitle || 'Loading...'}</h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">{pageDescription}</p>
+        <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
+        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">{description}</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">

@@ -1,8 +1,9 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { X } from "lucide-react";
 
 interface AdvertisementModalProps {
   isOpen: boolean;
@@ -16,19 +17,30 @@ export function AdvertisementModal({ isOpen, onClose, title, description, imageU
   if (!isOpen) return null;
   
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-2xl text-center">{title || 'Special Offer!'}</DialogTitle>
-          {description && <DialogDescription className="text-center">{description}</DialogDescription>}
-        </DialogHeader>
-        {imageUrl && (
-          <div className="relative w-full h-64 mt-4 rounded-lg overflow-hidden">
-            <Image src={imageUrl} alt={title || 'Advertisement'} layout="fill" objectFit="cover" data-ai-hint="advertisement graphic"/>
-          </div>
-        )}
-        <Button onClick={onClose} className="mt-4 w-full">Close</Button>
-      </DialogContent>
-    </Dialog>
+    <div className="fixed bottom-6 left-6 z-50 animate-in fade-in-0 slide-in-from-bottom-10 duration-500">
+      <Card className="w-full max-w-sm shadow-2xl">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="absolute top-2 right-2 h-6 w-6 z-10"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+        <CardHeader className="p-0">
+            {imageUrl && (
+              <div className="relative h-32 w-full">
+                <Image src={imageUrl} alt={title || 'Advertisement'} layout="fill" objectFit="cover" className="rounded-t-lg" data-ai-hint="promotion sale"/>
+              </div>
+            )}
+        </CardHeader>
+        <CardContent className="p-4 pt-2">
+           <CardTitle className="text-lg mt-2">{title || 'Special Offer!'}</CardTitle>
+           {description && <CardDescription className="mt-1">{description}</CardDescription>}
+           <Button onClick={onClose} className="mt-4 w-full" size="sm">Claim Offer</Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
