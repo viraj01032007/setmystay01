@@ -24,10 +24,6 @@ interface ListingsSectionProps {
   listings: (Listing | RoommateProfile)[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
   initialSearchFilters: Partial<FilterState> | null;
-  isLoggedIn: boolean;
-  likedItems: Set<string>;
-  onLikeToggle: (id: string) => void;
-  isLikedPage?: boolean;
 }
 
 const initialFilters: FilterState = {
@@ -51,10 +47,6 @@ export function ListingsSection({
   listings, 
   onViewDetails, 
   initialSearchFilters,
-  isLoggedIn,
-  likedItems,
-  onLikeToggle,
-  isLikedPage = false,
 }: ListingsSectionProps) {
   const [filters, setFilters] = useState<FilterState>({ ...initialFilters, ...initialSearchFilters });
   const [pageTitle, setPageTitle] = useState('');
@@ -68,18 +60,14 @@ export function ListingsSection({
     const pageConfig = {
       pg: { title: 'PG Accommodations', description: 'Comfortable and modern paying guest options.' },
       rental: { title: 'Premium Rentals', description: "Explore a wide range of verified rental properties. From cozy apartments to spacious houses, find the perfect place to call home with detailed information and transparent pricing." },
-      roommate: { title: 'Find Your Roommates', description: "Connect with potential roommates who match your lifestyle and budget. Browse profiles to find the perfect person to share your next home with." }
+      roommate: { title: 'Find Your Ideal Roommate', description: "Connect with potential roommates who match your lifestyle and budget. Browse profiles to find the perfect person to share your next home with." }
     };
+    
+    const config = pageConfig[type] || { title: 'Our Listings', description: 'Browse our collection of properties and roommate profiles to find your perfect match.' };
+    setPageTitle(config.title);
+    setPageDescription(config.description);
 
-    if (isLikedPage) {
-        setPageTitle('Your Liked Properties');
-        setPageDescription('Here are all the properties and profiles you have saved.');
-    } else {
-        const config = pageConfig[type] || { title: 'Listings', description: 'Browse our listings.' };
-        setPageTitle(config.title);
-        setPageDescription(config.description);
-    }
-  }, [initialSearchFilters, type, isLikedPage]);
+  }, [initialSearchFilters, type]);
 
   
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
@@ -143,8 +131,7 @@ export function ListingsSection({
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
-        {!isLikedPage && (
-          <aside className="md:w-1/3 lg:w-1/4">
+        <aside className="md:w-1/3 lg:w-1/4">
             <div className="sticky top-24">
               <ScrollArea className="h-[calc(100vh-8rem)] pr-4">
                 <div className="p-4 bg-card rounded-xl shadow-sm space-y-6">
@@ -270,9 +257,8 @@ export function ListingsSection({
               </ScrollArea>
             </div>
           </aside>
-        )}
 
-        <main className={isLikedPage ? 'w-full' : 'md:w-2/3 lg:w-3/4'}>
+        <main className={'md:w-2/3 lg:w-3/4'}>
           <div className="flex justify-between items-center mb-6">
             <p className="text-sm text-muted-foreground">{filteredListings.length} results found</p>
           </div>
@@ -280,15 +266,15 @@ export function ListingsSection({
             {filteredListings.map(item => {
               const itemType = item.propertyType === 'Roommate' ? 'roommate' : 'listing';
               return itemType === 'roommate' 
-                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLoggedIn={isLoggedIn} isLiked={likedItems.has(item.id)} onLikeToggle={onLikeToggle} />
-                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLoggedIn={isLoggedIn} isLiked={likedItems.has(item.id)} onLikeToggle={onLikeToggle} />
+                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} />
+                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} />
             })}
           </div>
           {filteredListings.length === 0 && (
             <div className="text-center py-16 bg-card rounded-xl">
                 <Heart className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="text-xl font-semibold mt-4">No {isLikedPage ? 'liked items yet' : 'results found'}</h3>
-                <p className="text-muted-foreground mt-2">{isLikedPage ? 'Click the heart icon on any property or profile to save it here.' : 'Try adjusting your filters to find what you\'re looking for.'}</p>
+                <h3 className="text-xl font-semibold mt-4">No results found</h3>
+                <p className="text-muted-foreground mt-2">Try adjusting your filters to find what you're looking for.</p>
             </div>
           )}
         </main>

@@ -23,8 +23,10 @@ export default function AdminLoginPage() {
   const [otp, setOtp] = useState('');
   const [answer, setAnswer] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     // If user is already logged in, redirect them to the dashboard
     if (localStorage.getItem('admin_authenticated') === 'true') {
       router.replace('/admin');
@@ -64,6 +66,14 @@ export default function AdminLoginPage() {
       setIsLoading(false);
     }
   };
+  
+  if (!isMounted) {
+    return (
+        <div className="flex min-h-screen items-center justify-center bg-slate-100">
+            <LoadingSpinner className="w-12 h-12 text-primary" />
+        </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
@@ -71,9 +81,9 @@ export default function AdminLoginPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Admin Panel Access</CardTitle>
           <CardDescription>
-            {step === 'password' && 'Factor 1: Enter your password.'}
+            {step === 'password' && 'Factor 1: Enter your password. (Hint: Bluechip@123)'}
             {step === 'otp' && 'Factor 2: Enter your PIN. (Hint: 16082007)'}
-            {step === 'question' && 'Factor 3: Answer your security question.'}
+            {step === 'question' && 'Factor 3: Answer your security question. (e.g., Rohan Kholi)'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -135,7 +145,7 @@ export default function AdminLoginPage() {
                         type="text"
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
-                        placeholder="Your answer (e.g., Rohan Kholi)"
+                        placeholder="Your answer"
                         required
                         className="pl-10"
                     />

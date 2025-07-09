@@ -15,9 +15,6 @@ interface HomeSectionProps {
   featuredRoommates: RoommateProfile[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
   onNavigate: (page: Page) => void;
-  isLoggedIn: boolean;
-  likedItems: Set<string>;
-  onLikeToggle: (id: string) => void;
 }
 
 const features = [
@@ -43,9 +40,6 @@ export function HomeSection({
   featuredRoommates, 
   onViewDetails, 
   onNavigate,
-  isLoggedIn,
-  likedItems,
-  onLikeToggle,
 }: HomeSectionProps) {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
@@ -105,9 +99,6 @@ export function HomeSection({
                   key={listing.id} 
                   listing={listing} 
                   onViewDetails={(item) => onViewDetails(item, 'listing')}
-                  isLoggedIn={isLoggedIn}
-                  isLiked={likedItems.has(listing.id)}
-                  onLikeToggle={onLikeToggle}
                 />
             ))}
         </div>
@@ -122,9 +113,6 @@ export function HomeSection({
                   key={profile.id} 
                   profile={profile} 
                   onViewDetails={(item) => onViewDetails(item, 'roommate')} 
-                  isLoggedIn={isLoggedIn}
-                  isLiked={likedItems.has(profile.id)}
-                  onLikeToggle={onLikeToggle}
                 />
            ))}
         </div>

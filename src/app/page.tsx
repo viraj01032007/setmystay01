@@ -53,7 +53,6 @@ export default function Home() {
   const [pendingListingData, setPendingListingData] = useState<any>(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
 
   const { toast } = useToast();
 
@@ -75,8 +74,6 @@ export default function Home() {
 
     const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
     setIsLoggedIn(loggedInStatus);
-    const savedLikedItems = new Set<string>(JSON.parse(localStorage.getItem('setmystay_likedItems') || '[]'));
-    setLikedItems(savedLikedItems);
   }, []);
 
   const handleRateUsClose = (rated: boolean) => {
@@ -241,31 +238,6 @@ export default function Home() {
     setActivePage('home');
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
   };
-
-  const handleLikeToggle = (itemId: string) => {
-    if (!isLoggedIn) {
-      setAuthModalOpen(true);
-      toast({ title: "Please sign in", description: "You need to be logged in to like properties.", variant: 'destructive' });
-      return;
-    }
-    setLikedItems(prev => {
-      const newLikedItems = new Set(prev);
-      if (newLikedItems.has(itemId)) {
-        newLikedItems.delete(itemId);
-        toast({ title: "Removed from Liked", description: "This item is no longer in your liked list." });
-      } else {
-        newLikedItems.add(itemId);
-        toast({ title: "Added to Liked", description: "You can find this item in your liked list." });
-      }
-      localStorage.setItem('setmystay_likedItems', JSON.stringify(Array.from(newLikedItems)));
-      return newLikedItems;
-    });
-  };
-
-  const likedListingsAndRoommates = useMemo(() => {
-    const allItems = [...allListings, ...allRoommates];
-    return allItems.filter(item => likedItems.has(item.id));
-  }, [likedItems, allListings, allRoommates]);
   
   if (isLoading) {
     return (
@@ -294,9 +266,6 @@ export default function Home() {
             featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
             onNavigate={setActivePage}
-            isLoggedIn={isLoggedIn}
-            likedItems={likedItems}
-            onLikeToggle={handleLikeToggle}
           />
         )}
         {(activePage === 'pg' || activePage === 'rentals' || activePage === 'roommates') && (
@@ -314,22 +283,6 @@ export default function Home() {
               }
               onViewDetails={handleViewDetails}
               initialSearchFilters={null}
-              isLoggedIn={isLoggedIn}
-              likedItems={likedItems}
-              onLikeToggle={handleLikeToggle}
-            />
-        )}
-        {activePage === 'liked' && (
-            <ListingsSection
-              key="liked"
-              type={'rental'} 
-              listings={likedListingsAndRoommates}
-              onViewDetails={handleViewDetails}
-              initialSearchFilters={null}
-              isLoggedIn={isLoggedIn}
-              likedItems={likedItems}
-              onLikeToggle={handleLikeToggle}
-              isLikedPage={true}
             />
         )}
         {activePage === 'list' && (

@@ -62,7 +62,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">Welcome Back</DialogTitle>
           <DialogDescription className="text-center">
-            Sign in to manage your listings and unlock details.
+            Sign in to manage your listings. For testing, use any 10-digit mobile number and any 6-digit OTP.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

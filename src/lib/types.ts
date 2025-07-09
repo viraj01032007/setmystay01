@@ -1,5 +1,5 @@
 
-export type Page = 'home' | 'pg' | 'rentals' | 'roommates' | 'list' | 'your-properties' | 'liked';
+export type Page = 'home' | 'pg' | 'rentals' | 'roommates' | 'list' | 'your-properties';
 
 export type ListingType = 'pg' | 'rental' | 'roommate';
 

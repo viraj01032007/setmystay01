@@ -71,10 +71,6 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
     { page: 'list' as Page, label: 'List Property', icon: <PlusCircle className="w-5 h-5" /> },
   ];
 
-  if (isLoggedIn) {
-    navItems.push({ page: 'liked' as Page, label: 'Liked Properties', icon: <Heart className="w-5 h-5" /> });
-  }
-
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
