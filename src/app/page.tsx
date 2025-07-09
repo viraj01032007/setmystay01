@@ -196,7 +196,7 @@ export default function Home() {
         contactPhone: pendingListingData.phone,
         description: pendingListingData.description,
         preferences: [], // Default
-        gender: 'Any', // Default
+        gender: pendingListingData.gender || 'Any',
         views: 0,
         ownerId: 'newUser',
         hasProperty: true, 

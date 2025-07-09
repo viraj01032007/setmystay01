@@ -27,8 +27,8 @@ const initialFilters: FilterState = {
   amenities: [],
   furnishedStatus: "any",
   propertyType: "any",
-  city: "Navi Mumbai",
-  locality: "any",
+  city: "",
+  locality: "",
   roomType: "any",
   gender: "any",
   brokerStatus: "any",
@@ -36,14 +36,6 @@ const initialFilters: FilterState = {
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 const roommatePreferencesList = ['Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'];
-const cities = ["Navi Mumbai", "Mumbai", "Pune", "Delhi", "Bangalore"];
-const localities: {[key: string]: string[]} = {
-    "Navi Mumbai": ["Kharghar", "CBD Belapur", "Vashi", "Nerul"],
-    "Mumbai": ["Andheri", "Bandra", "Dadar"],
-    "Pune": ["Kothrud", "Hinjewadi", "Baner"],
-    "Delhi": ["Saket", "Dwarka", "Rohini"],
-    "Bangalore": ["Koramangala", "Whitefield", "Indiranagar"]
-};
 
 export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: ListingsSectionProps) {
   const [filters, setFilters] = useState<FilterState>(initialFilters);
@@ -67,8 +59,8 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
       if (item.rent > filters.budget) return false;
 
       // Common geo filter
-      if (filters.city !== 'any' && item.city !== 'any' && filters.city !== item.city) return false;
-      if (filters.locality !== 'any' && item.locality !== 'any' && filters.locality !== item.locality) return false;
+      if (filters.city && !item.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
+      if (filters.locality && !item.locality.toLowerCase().includes(filters.locality.toLowerCase())) return false;
 
       if ('propertyType' in item && item.propertyType !== 'Roommate') { // It's a Listing
         if (type === 'roommate') return false;
@@ -123,19 +115,16 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                 
                 {/* Common Geographic Filters */}
                 <div className="space-y-4 px-6">
-                    <Select value={filters.city} onValueChange={(val) => { handleFilterChange('city', val); handleFilterChange('locality', 'any'); }}>
-                      <SelectTrigger><SelectValue placeholder="Select City" /></SelectTrigger>
-                      <SelectContent>
-                        {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                     <Select value={filters.locality} onValueChange={(val) => handleFilterChange('locality', val)}>
-                      <SelectTrigger><SelectValue placeholder="Select Locality" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="any">All Localities</SelectItem>
-                        {(localities[filters.city] || []).map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      placeholder="Enter City"
+                      value={filters.city}
+                      onChange={(e) => handleFilterChange('city', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Enter Locality / Area"
+                      value={filters.locality}
+                      onChange={(e) => handleFilterChange('locality', e.target.value)}
+                    />
                 </div>
                 
                 {/* Rental & PG Filters */}
@@ -205,6 +194,7 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                             <SelectItem value="any">Any Gender</SelectItem>
                             <SelectItem value="Male">Male</SelectItem>
                             <SelectItem value="Female">Female</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                     </Select>
                     <div className="space-y-2">

@@ -47,6 +47,15 @@ const formSchema = z.object({
       (file) => file?.type ? ACCEPTED_VIDEO_TYPES.includes(file.type) : false,
       ".mp4, .webm and .ogg formats are supported."
     ),
+  gender: z.string().optional(),
+}).refine(data => {
+    if (data.propertyType === 'Roommate') {
+        return !!data.gender;
+    }
+    return true;
+}, {
+    message: 'Gender is required when looking for a roommate.',
+    path: ['gender'],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -68,9 +77,12 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       rent: 15000,
       amenities: [],
       phone: '',
+      gender: undefined,
     },
   });
   
+  const propertyType = form.watch('propertyType');
+
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
     onSubmit({ ...data, images: mediaFiles });
   };
@@ -131,6 +143,24 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 <FormField control={form.control} name="rent" render={({ field }) => (
                   <FormItem><FormLabel>Monthly Rent (₹)</FormLabel><FormControl><Input type="number" placeholder="25000" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
+                
+                {propertyType === 'Roommate' && (
+                    <FormField control={form.control} name="gender" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Gender</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    <SelectItem value="Male">Male</SelectItem>
+                                    <SelectItem value="Female">Female</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}/>
+                )}
+                
                 <FormField control={form.control} name="brokerStatus" render={({ field }) => (
                   <FormItem className="space-y-3">
                     <FormLabel>Are you a broker or owner?</FormLabel>

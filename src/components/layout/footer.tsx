@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -22,7 +23,7 @@ export function Footer({ onYourPropertiesClick }: FooterProps) {
   return (
     <footer className="bg-slate-800 text-slate-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
@@ -73,15 +74,6 @@ export function Footer({ onYourPropertiesClick }: FooterProps) {
                 <span>+91 8210552902</span>
               </a>
             </div>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-white mb-4">Newsletter</h3>
-            <p className="text-sm mb-2">Subscribe to our newsletter for the latest listings and offers.</p>
-            <form className="flex gap-2">
-              <Input type="email" placeholder="Your email" className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"/>
-              <Button type="submit" variant="default">Subscribe</Button>
-            </form>
           </div>
           
         </div>

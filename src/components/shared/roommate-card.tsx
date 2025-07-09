@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -40,7 +41,7 @@ export function RoommateCard({ profile, onViewDetails }: RoommateCardProps) {
         
         <div className="flex items-center text-lg font-bold text-primary">
           <IndianRupee className="w-5 h-5 mr-1" />
-          <span>Budget: {profile.rent.toLocaleString()}</span>
+          <span>Monthly Rent: {profile.rent.toLocaleString()}</span>
         </div>
         
         <div className="flex flex-wrap gap-2 text-xs">

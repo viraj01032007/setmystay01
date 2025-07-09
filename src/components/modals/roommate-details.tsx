@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -79,7 +80,7 @@ export function RoommateDetails({ profile, onClose, isUnlocked, onUnlock, onChat
             <IndianRupee className="w-6 h-6 text-primary"/>
             <div>
               <p className="font-semibold text-lg">{profile.rent.toLocaleString()}</p>
-              <p className="text-muted-foreground">Monthly Budget</p>
+              <p className="text-muted-foreground">Monthly Rent</p>
             </div>
           </div>
           <div className="p-4 bg-muted rounded-lg flex items-center gap-3">
