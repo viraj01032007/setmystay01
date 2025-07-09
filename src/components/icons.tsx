@@ -4,13 +4,9 @@ import { cn } from "@/lib/utils";
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-        <rect width="120" height="120" rx="24" fill="#4582EF"/>
-        <g transform="translate(0, -5)">
-            <path d="M60 25C48.9543 25 40 33.9543 40 45C40 59.2494 60 85 60 85C60 85 80 59.2494 80 45C80 33.9543 71.0457 25 60 25Z" fill="white"/>
-            <path d="M54 52V46H66V52" stroke="#4582EF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M52 46L60 41L68 46" stroke="#4582EF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </g>
-        <text x="60" y="108" fontFamily="Inter, sans-serif" fontWeight="bold" fontSize="18" fill="white" textAnchor="middle">SetMyStay</text>
+      <rect width="120" height="120" rx="24" fill="#4582EF"/>
+      <path d="M30 65L60 35L90 65" stroke="white" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M40 65V90H80V65" stroke="white" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }

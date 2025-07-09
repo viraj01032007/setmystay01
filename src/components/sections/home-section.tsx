@@ -21,17 +21,17 @@ const features = [
   {
     icon: <BedDouble className="w-8 h-8 text-white" />,
     title: "PG Accommodations",
-    description: "Discover comfortable paying guest accommodations with modern amenities and flexible lease terms.",
+    description: "Comfortable and modern paying guest options.",
   },
   {
     icon: <HomeIcon className="w-8 h-8 text-white" />,
     title: "Premium Rentals",
-    description: "Explore verified rental properties with detailed amenities, photos, and transparent pricing information.",
+    description: "Explore verified rental properties with detailed amenities, photos, and transparent pricing.",
   },
   {
     icon: <Users className="w-8 h-8 text-white" />,
     title: "Find Roommates",
-    description: "Connect with compatible roommates based on lifestyle preferences, location, and budget requirements.",
+    description: "Connect with compatible roommates based on lifestyle preferences, location, and budget.",
   },
 ];
 
@@ -46,12 +46,12 @@ export function HomeSection({
       {/* Hero Section */}
       <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center p-6">
         <Image
-          src="https://placehold.co/1200x600.png"
-          alt="Modern city skyline with residential buildings"
+          src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop"
+          alt="Modern apartment interior"
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="modern cityscape"
+          data-ai-hint="apartment interior"
         />
         <div className="relative text-white max-w-4xl space-y-6 w-full bg-black/60 p-8 rounded-xl shadow-2xl">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
