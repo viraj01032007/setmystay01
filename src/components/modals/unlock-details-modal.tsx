@@ -22,9 +22,9 @@ const unlockPlans = [
 ];
 
 const listingPlans = [
-  { title: 'Roommate Listing', price: 149, features: ['30-day listing', 'Reach thousands of users'], icon: <User className="w-5 h-5" /> },
-  { title: 'PG/Co-living Listing', price: 349, features: ['30-day listing', 'Featured for 7 days'], icon: <Building className="w-5 h-5" /> },
-  { title: 'Rental Listing', price: 999, features: ['30-day listing', 'Premium support'], icon: <Crown className="w-5 h-5" /> },
+  { title: 'Roommate Listing', price: 149, features: ['30-day listing', 'Reach thousands of users'], icon: <User className="w-5 h-5" />, type: 'Roommate' },
+  { title: 'PG/Co-living Listing', price: 349, features: ['30-day listing', 'Featured for 7 days'], icon: <Building className="w-5 h-5" />, type: 'PG/Co-living' },
+  { title: 'Rental Listing', price: 999, features: ['30-day listing', 'Premium support'], icon: <Crown className="w-5 h-5" />, type: 'Rental' },
 ];
 
 export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToListProperty }: UnlockDetailsModalProps) {
@@ -77,32 +77,32 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
                 {/* Listing Plans Section */}
                 <div className="space-y-4">
                     <h3 className="text-2xl font-semibold text-center text-accent">List Your Property</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {listingPlans.slice(0, 4).map(p => ( // Ensure only 4 items for a 2x2 grid
+                    <div className="space-y-6">
+                        {listingPlans.map(p => (
                             <Card key={p.title} className="flex flex-col border-accent/50">
-                            <CardHeader className="items-center text-center">
-                                <div className="p-3 bg-accent/10 rounded-full mb-2 text-accent">{p.icon}</div>
-                                <CardTitle>{p.title}</CardTitle>
-                                <CardDescription>
-                                    <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
-                                    <span className="text-muted-foreground">/listing</span>
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                {p.features.map(feature => (
-                                    <li key={feature} className="flex items-start gap-2">
-                                        <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
-                                        <span>{feature}</span>
-                                    </li>
-                                ))}
-                                </ul>
-                            </CardContent>
-                            <CardFooter>
-                                <Button className="w-full" variant="secondary" onClick={onNavigateToListProperty}>
-                                    List Your Property
-                                </Button>
-                            </CardFooter>
+                                <CardHeader className="items-center text-center">
+                                    <div className="p-3 bg-accent/10 rounded-full mb-2 text-accent">{p.icon}</div>
+                                    <CardTitle>{p.title}</CardTitle>
+                                    <CardDescription>
+                                        <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
+                                        <span className="text-muted-foreground">/listing</span>
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <ul className="space-y-2 text-sm text-muted-foreground">
+                                    {p.features.map(feature => (
+                                        <li key={feature} className="flex items-start gap-2">
+                                            <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                    </ul>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full" variant="secondary" onClick={onNavigateToListProperty}>
+                                        List your {p.type}
+                                    </Button>
+                                </CardFooter>
                             </Card>
                         ))}
                     </div>
