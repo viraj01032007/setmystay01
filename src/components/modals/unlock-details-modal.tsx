@@ -40,7 +40,7 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
         <div className="flex-1 overflow-y-auto">
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Unlock Plans */}
+                {/* Unlock Plans Section */}
                 <div className="space-y-4">
                     <h3 className="text-2xl font-semibold text-center text-primary">Unlock Contact Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -74,11 +74,11 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
                     </div>
                 </div>
 
-                {/* Listing Plans */}
+                {/* Listing Plans Section */}
                 <div className="space-y-4">
                     <h3 className="text-2xl font-semibold text-center text-accent">List Your Property</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {listingPlans.map(p => (
+                        {listingPlans.slice(0, 4).map(p => ( // Ensure only 4 items for a 2x2 grid
                             <Card key={p.title} className="flex flex-col border-accent/50">
                             <CardHeader className="items-center text-center">
                                 <div className="p-3 bg-accent/10 rounded-full mb-2 text-accent">{p.icon}</div>
