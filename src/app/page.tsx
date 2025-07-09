@@ -47,7 +47,6 @@ export default function Home() {
   const [chattingWith, setChattingWith] = useState<string | null>(null);
 
   const [unlocks, setUnlocks] = useState({ count: 0, isUnlimited: false, unlockedIds: new Set<string>() });
-  const [postPurchaseToast, setPostPurchaseToast] = useState<ToastInfo | null>(null);
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [inquiryData, setInquiryData] = useState<{ listing: Listing; bed: Bed } | null>(null);
@@ -96,10 +95,6 @@ export default function Home() {
 
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
-    if (postPurchaseToast) {
-        toast(postPurchaseToast);
-        setPostPurchaseToast(null);
-    }
   }
 
   const handleUnlockPurchase = useCallback((plan: UnlockPlan) => {
@@ -117,17 +112,18 @@ export default function Home() {
       localStorage.setItem('setmystay_unlocks', newUnlocks.count.toString());
       localStorage.setItem('setmystay_isUnlimited', newUnlocks.isUnlimited.toString());
       
-      setPostPurchaseToast({
-        title: "Purchase Successful!",
-        description: plan === 'unlimited' ? "You've subscribed to unlimited unlocks for one month." : `You've added ${plan} unlocks.`,
-        variant: "default",
-      });
-      
       return newUnlocks;
     });
     setUnlockModalOpen(false);
+    
+    toast({
+      title: "Purchase Successful!",
+      description: plan === 'unlimited' ? "You've subscribed to unlimited unlocks for one month." : `You've added ${plan} unlocks.`,
+      variant: "default",
+    });
+
     setRateUsModalOpen(true);
-  }, []);
+  }, [toast]);
 
   const useUnlock = useCallback((itemId: string) => {
     if (unlocks.isUnlimited) {
@@ -226,7 +222,7 @@ export default function Home() {
       setAllRoommates(prev => [mappedRoommate, ...prev]);
     }
     setPendingListingData(null);
-    setPostPurchaseToast({
+    toast({
       title: "Listing Submitted!",
       description: "Your property is now live.",
     });
