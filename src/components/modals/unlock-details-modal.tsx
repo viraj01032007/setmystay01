@@ -32,25 +32,25 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl p-0 max-h-[90vh] flex flex-col">
-        <DialogHeader className="p-6 pb-4 border-b shrink-0">
-          <DialogTitle className="text-3xl font-bold text-center">Our Pricing Plans</DialogTitle>
-          <DialogDescription className="text-center text-lg">
+        <DialogHeader className="p-4 md:p-6 pb-4 border-b shrink-0">
+          <DialogTitle className="text-2xl sm:text-3xl font-bold text-center">Our Pricing Plans</DialogTitle>
+          <DialogDescription className="text-center text-base sm:text-lg">
             Choose a plan that's right for you.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="unlock" className="w-full flex flex-col flex-1 min-h-0">
-           <div className="px-6 py-4 border-b">
+           <div className="px-4 md:px-6 py-4 border-b">
              <TabsList className="grid w-full grid-cols-2 h-12">
-               <TabsTrigger value="unlock" className="text-base">Unlock Contact Details</TabsTrigger>
-               <TabsTrigger value="list" className="text-base">List Your Property</TabsTrigger>
+               <TabsTrigger value="unlock" className="text-sm sm:text-base">Unlock Contact Details</TabsTrigger>
+               <TabsTrigger value="list" className="text-sm sm:text-base">List Your Property</TabsTrigger>
              </TabsList>
            </div>
 
           <div className="flex-1 overflow-y-auto">
             <TabsContent value="unlock" className="mt-0">
-              <div className="p-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-4 md:p-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     {unlockPlans.map(p => (
                         <Card key={p.title} className="flex flex-col border-primary/50 hover:shadow-lg transition-shadow">
                         <CardHeader className="items-center text-center">
@@ -83,8 +83,8 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
             </TabsContent>
 
             <TabsContent value="list" className="mt-0">
-                <div className="p-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="p-4 md:p-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {listingPlans.map(p => (
                             <Card key={p.title} className="flex flex-col border-accent/50 hover:shadow-lg transition-shadow">
                                 <CardHeader className="items-center text-center">
