@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Check, Star, Gem, Rocket, Crown, Building, User } from "lucide-react";
 import type { UnlockPlan } from "@/lib/types";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface UnlockDetailsModalProps {
   isOpen: boolean;
@@ -38,7 +37,7 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
             Choose a plan that's right for you.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Unlock Plans */}
@@ -110,7 +109,7 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
                 </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
