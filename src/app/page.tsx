@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed } from "@/lib/types";
+import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, FilterState } from "@/lib/types";
 import { dummyProperties, dummyRoommates } from "@/lib/data";
 import { smartSortListings } from "@/ai/flows/smart-sort";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +44,7 @@ export default function Home() {
   const [isChatModalOpen, setChatModalOpen] = useState(false);
   const [isRateUsModalOpen, setRateUsModalOpen] = useState(false);
   const [chattingWith, setChattingWith] = useState<string | null>(null);
+  const [searchFilters, setSearchFilters] = useState<Partial<FilterState> | null>(null);
 
   const [unlocks, setUnlocks] = useState({ count: 0, isUnlimited: false, unlockedIds: new Set<string>() });
   const [postPurchaseToast, setPostPurchaseToast] = useState<ToastInfo | null>(null);
@@ -55,7 +56,6 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Only load data on the client side to prevent hydration mismatches
     const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
     const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
     const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
@@ -66,12 +66,18 @@ export default function Home() {
     setAllRoommates(dummyRoommates);
     setIsLoading(false);
 
-    // Load unlocks from local storage
     const savedCount = parseInt(localStorage.getItem('setmystay_unlocks') || '0');
     const savedIsUnlimited = localStorage.getItem('setmystay_isUnlimited') === 'true';
     const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
     setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
   }, []);
+
+  useEffect(() => {
+    // Clear search filters when navigating away from listing pages
+    if (activePage === 'home' || activePage === 'list') {
+      setSearchFilters(null);
+    }
+  }, [activePage]);
 
 
   const handleRateUsClose = (rated: boolean) => {
@@ -138,7 +144,6 @@ export default function Home() {
   const handleUnlockClick = () => {
     if (selectedItem?.data.id && !unlocks.unlockedIds.has(selectedItem.data.id)) {
        if (useUnlock(selectedItem.data.id)) {
-        // Re-select item to refresh modal content
         handleViewDetails(selectedItem.data, selectedItem.type);
        } else {
         setUnlockModalOpen(true);
@@ -162,7 +167,7 @@ export default function Home() {
           propertyType: pendingListingData.propertyType,
           title: pendingListingData.title,
           rent: pendingListingData.rent,
-          area: 1200, // Default value, form field can be added
+          area: 1200, 
           state: pendingListingData.state,
           city: pendingListingData.city,
           locality: pendingListingData.locality,
@@ -171,9 +176,9 @@ export default function Home() {
           ownerName: pendingListingData.ownerName,
           contactPhone: pendingListingData.phone,
           description: pendingListingData.description,
-          furnishedStatus: 'Furnished', // Default value, form field can be added
+          furnishedStatus: 'Furnished', 
           amenities: pendingListingData.amenities,
-          size: '2 BHK', // Default value, form field can be added
+          size: '2 BHK', 
           images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/600x400'],
           videoUrl: pendingListingData.videoFile ? URL.createObjectURL(pendingListingData.videoFile) : undefined,
           views: 0,
@@ -186,7 +191,7 @@ export default function Home() {
         id: newId,
         propertyType: 'Roommate',
         ownerName: pendingListingData.ownerName,
-        age: 30, // Default
+        age: 30, 
         rent: pendingListingData.rent,
         state: pendingListingData.state,
         city: pendingListingData.city,
@@ -195,7 +200,7 @@ export default function Home() {
         partialAddress: `${pendingListingData.locality}, ${pendingListingData.city}`,
         contactPhone: pendingListingData.phone,
         description: pendingListingData.description,
-        preferences: [], // Default
+        preferences: [], 
         gender: pendingListingData.gender || 'Any',
         views: 0,
         ownerId: 'newUser',
@@ -214,14 +219,14 @@ export default function Home() {
   
   const handleChat = (name: string) => {
     setChattingWith(name);
-    setSelectedItem(null); // Close details modal
+    setSelectedItem(null); 
     setChatModalOpen(true);
   }
 
   const handleBookInquiry = (listing: Listing, bed: Bed) => {
     setInquiryData({ listing, bed });
     setIsBookingModalOpen(true);
-    setSelectedItem(null); // Close the details modal
+    setSelectedItem(null); 
   };
   
   const handleSmartSort = async (type: ListingType, currentItems: (Listing | RoommateProfile)[]) => {
@@ -229,8 +234,8 @@ export default function Home() {
     try {
       const input = {
         listings: currentItems,
-        userPreferences: 'prefers 2BHK, non-smoker, budget under 25000', // Example
-        viewingPatterns: 'has viewed properties in Kharghar and Vashi', // Example
+        userPreferences: 'prefers 2BHK, non-smoker, budget under 25000', 
+        viewingPatterns: 'has viewed properties in Kharghar and Vashi', 
         hasUnlockedDetails: unlocks.unlockedIds.size > 0,
       };
       const sortedListings = await smartSortListings(input);
@@ -252,6 +257,11 @@ export default function Home() {
       console.error('AI Sort failed:', error);
       toast({ title: 'AI Sort Failed', description: 'Could not sort listings. Please try again.', variant: 'destructive' });
     }
+  };
+  
+  const handleSearch = (filters: { state: string; city: string; locality: string }) => {
+    setSearchFilters(filters);
+    setActivePage('rentals'); // Default to rentals, can be changed
   };
 
   if (isLoading) {
@@ -279,34 +289,26 @@ export default function Home() {
             featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
             onNavigate={setActivePage}
+            onSearch={handleSearch}
           />
         )}
-        {activePage === 'pg' && (
-          <ListingsSection
-            key="pg"
-            type="pg"
-            listings={allListings.filter(l => l.propertyType === 'PG')}
-            onViewDetails={handleViewDetails}
-            onSmartSort={handleSmartSort}
-          />
-        )}
-        {activePage === 'rentals' && (
-          <ListingsSection
-            key="rentals"
-            type="rental"
-            listings={allListings.filter(l => l.propertyType === 'Rental')}
-            onViewDetails={handleViewDetails}
-            onSmartSort={handleSmartSort}
-          />
-        )}
-        {activePage === 'roommates' && (
-          <ListingsSection
-            key="roommates"
-            type="roommate"
-            listings={allRoommates.filter(r => r.hasProperty)}
-            onViewDetails={handleViewDetails}
-            onSmartSort={handleSmartSort}
-          />
+        {(activePage === 'pg' || activePage === 'rentals' || activePage === 'roommates') && (
+            <ListingsSection
+              key={activePage} // Re-mount component on page change
+              type={activePage as ListingType}
+              listings={
+                activePage === 'roommates'
+                  ? allRoommates.filter(r => r.hasProperty)
+                  : allListings.filter(l => {
+                      if (activePage === 'pg') return l.propertyType === 'PG';
+                      if (activePage === 'rentals') return l.propertyType === 'Rental';
+                      return false;
+                    })
+              }
+              onViewDetails={handleViewDetails}
+              onSmartSort={handleSmartSort}
+              initialSearchFilters={searchFilters}
+            />
         )}
         {activePage === 'list' && (
           <ListPropertySection onSubmit={handleInitiateListing} />

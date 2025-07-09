@@ -16,7 +16,7 @@ import { Wand2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
-import { indianCities } from '@/lib/cities';
+import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
 
 interface ListingsSectionProps {
@@ -24,6 +24,7 @@ interface ListingsSectionProps {
   listings: (Listing | RoommateProfile)[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
   onSmartSort: (type: ListingType, items: (Listing | RoommateProfile)[]) => void;
+  initialSearchFilters: Partial<FilterState> | null;
 }
 
 const initialFilters: FilterState = {
@@ -42,8 +43,14 @@ const initialFilters: FilterState = {
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 const roommatePreferencesList = ['Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'];
 
-export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: ListingsSectionProps) {
-  const [filters, setFilters] = useState<FilterState>(initialFilters);
+export function ListingsSection({ type, listings, onViewDetails, onSmartSort, initialSearchFilters }: ListingsSectionProps) {
+  const [filters, setFilters] = useState<FilterState>({ ...initialFilters, ...initialSearchFilters });
+
+  useEffect(() => {
+    if (initialSearchFilters) {
+      setFilters(prev => ({ ...prev, ...initialSearchFilters }));
+    }
+  }, [initialSearchFilters]);
   
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters(prev => {
@@ -67,6 +74,10 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
         : prev.amenities.filter(a => a !== amenity)
     }));
   };
+
+  const citySuggestions = filters.state ? indianCitiesByState[filters.state] || [] : allIndianCities;
+  const areaSuggestions = filters.city ? indianAreas[filters.city] || [] : [];
+
 
   const filteredListings = useMemo(() => {
     return listings.filter(item => {
@@ -141,13 +152,13 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                       placeholder="Enter City"
                       value={filters.city}
                       onChange={(val) => handleFilterChange('city', val)}
-                      suggestions={indianCities}
+                      suggestions={citySuggestions}
                     />
                     <AutocompleteInput
                       placeholder="Enter Area / Locality"
                       value={filters.locality}
                       onChange={(val) => handleFilterChange('locality', val)}
-                      suggestions={indianAreas[filters.city] || []}
+                      suggestions={areaSuggestions}
                     />
                 </div>
                 

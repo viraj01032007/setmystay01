@@ -17,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
 import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
-import { indianCities } from '@/lib/cities';
+import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
@@ -90,12 +90,14 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   });
   
   const propertyType = form.watch('propertyType');
-  const cityValue = form.watch('city');
   const stateValue = form.watch('state');
+  const cityValue = form.watch('city');
+
+  const citySuggestions = stateValue ? indianCitiesByState[stateValue] || [] : allIndianCities;
+  const areaSuggestions = cityValue ? indianAreas[cityValue] || [] : [];
 
   useEffect(() => {
     form.setValue('city', '');
-    form.setValue('locality', '');
   }, [stateValue, form]);
 
   useEffect(() => {
@@ -363,7 +365,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                 placeholder="e.g., Navi Mumbai"
                                 value={field.value}
                                 onChange={field.onChange}
-                                suggestions={indianCities}
+                                suggestions={citySuggestions}
                             />
                         </FormControl>
                         <FormMessage />
@@ -377,7 +379,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                 placeholder="e.g., Kharghar"
                                 value={field.value}
                                 onChange={field.onChange}
-                                suggestions={indianAreas[cityValue] || []}
+                                suggestions={areaSuggestions}
                             />
                         </FormControl>
                         <FormMessage />
