@@ -3,26 +3,17 @@ import { cn } from "@/lib/utils";
 
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <rect width="48" height="48" rx="12" fill="#4582EF"/>
-      <g stroke="white" strokeWidth="2">
-        <path 
-          d="M24 14C19.5817 14 16 17.5817 16 22C16 28.35 24 38 24 38C24 38 32 28.35 32 22C32 17.5817 28.4183 14 24 14Z" 
-          fill="#4582EF" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
-        <path 
-          d="M21 26V21H27V26" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
-        <path 
-          d="M20 22L24 18L28 22" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
-      </g>
+    <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+        <rect width="120" height="120" rx="24" fill="#4285F4"/>
+        <circle cx="60" cy="55" r="45" stroke="white" strokeWidth="2.5"/>
+        <g transform="translate(0, -5)">
+            <path d="M60 28C51.72 28 45 34.72 45 43C45 53.75 60 75 60 75C60 75 75 53.75 75 43C75 34.72 68.28 28 60 28Z" fill="#4285F4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <g stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M54 52V46H66V52"/>
+                <path d="M52 46L60 41L68 46"/>
+            </g>
+        </g>
+        <text x="60" y="108" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="15" fill="white" textAnchor="middle">SetMyStay</text>
     </svg>
   );
 }
