@@ -30,7 +30,7 @@ const listingPlans = [
 export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToListProperty }: UnlockDetailsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl p-0 max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-5xl p-0 max-h-[90vh] flex flex-col">
         <DialogHeader className="p-6 pb-4 border-b shrink-0">
           <DialogTitle className="text-3xl font-bold text-center">Our Pricing Plans</DialogTitle>
           <DialogDescription className="text-center text-lg">
@@ -38,76 +38,74 @@ export function UnlockDetailsModal({ isOpen, onClose, onPurchase, onNavigateToLi
           </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Unlock Plans Section */}
-                <div className="space-y-4">
-                    <h3 className="text-2xl font-semibold text-center text-primary">Unlock Contact Details</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {unlockPlans.map(p => (
-                            <Card key={p.title} className="flex flex-col border-primary/50">
+          <div className="p-8 space-y-12">
+            {/* Unlock Plans Section */}
+            <section>
+                <h3 className="text-2xl font-semibold text-center text-primary mb-6">Unlock Contact Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {unlockPlans.map(p => (
+                        <Card key={p.title} className="flex flex-col border-primary/50 hover:shadow-lg transition-shadow">
+                        <CardHeader className="items-center text-center">
+                            <div className="p-3 bg-primary/10 rounded-full mb-2 text-primary">{p.icon}</div>
+                            <CardTitle>{p.title}</CardTitle>
+                            <CardDescription>
+                            <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
+                            <span className="text-muted-foreground">/{p.suffix}</span>
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <ul className="space-y-2 text-sm text-muted-foreground">
+                            {p.features.map(feature => (
+                                <li key={feature} className="flex items-start gap-2">
+                                <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
+                                <span>{feature}</span>
+                                </li>
+                            ))}
+                            </ul>
+                        </CardContent>
+                        <CardFooter>
+                            <Button className="w-full" onClick={() => onPurchase(p.plan)}>
+                            Choose Plan
+                            </Button>
+                        </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+            </section>
+
+            {/* Listing Plans Section */}
+            <section>
+                <h3 className="text-2xl font-semibold text-center text-accent mb-6">List Your Property</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {listingPlans.map(p => (
+                        <Card key={p.title} className="flex flex-col border-accent/50 hover:shadow-lg transition-shadow">
                             <CardHeader className="items-center text-center">
-                                <div className="p-3 bg-primary/10 rounded-full mb-2 text-primary">{p.icon}</div>
+                                <div className="p-3 bg-accent/10 rounded-full mb-2 text-accent">{p.icon}</div>
                                 <CardTitle>{p.title}</CardTitle>
                                 <CardDescription>
-                                <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
-                                <span className="text-muted-foreground">/{p.suffix}</span>
+                                    <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
+                                    <span className="text-muted-foreground">/listing</span>
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow">
                                 <ul className="space-y-2 text-sm text-muted-foreground">
                                 {p.features.map(feature => (
                                     <li key={feature} className="flex items-start gap-2">
-                                    <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
-                                    <span>{feature}</span>
+                                        <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
+                                        <span>{feature}</span>
                                     </li>
                                 ))}
                                 </ul>
                             </CardContent>
                             <CardFooter>
-                                <Button className="w-full" onClick={() => onPurchase(p.plan)}>
-                                Choose Plan
+                                <Button className="w-full" variant="secondary" onClick={onNavigateToListProperty}>
+                                    List your {p.type}
                                 </Button>
                             </CardFooter>
-                            </Card>
-                        ))}
-                    </div>
+                        </Card>
+                    ))}
                 </div>
-
-                {/* Listing Plans Section */}
-                <div className="space-y-4">
-                    <h3 className="text-2xl font-semibold text-center text-accent">List Your Property</h3>
-                    <div className="space-y-6">
-                        {listingPlans.map(p => (
-                            <Card key={p.title} className="flex flex-col border-accent/50">
-                                <CardHeader className="items-center text-center">
-                                    <div className="p-3 bg-accent/10 rounded-full mb-2 text-accent">{p.icon}</div>
-                                    <CardTitle>{p.title}</CardTitle>
-                                    <CardDescription>
-                                        <span className="text-3xl font-bold text-foreground">₹{p.price}</span>
-                                        <span className="text-muted-foreground">/listing</span>
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <ul className="space-y-2 text-sm text-muted-foreground">
-                                    {p.features.map(feature => (
-                                        <li key={feature} className="flex items-start gap-2">
-                                            <Check className="w-4 h-4 text-green-500 mt-1 shrink-0"/>
-                                            <span>{feature}</span>
-                                        </li>
-                                    ))}
-                                    </ul>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button className="w-full" variant="secondary" onClick={onNavigateToListProperty}>
-                                        List your {p.type}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
-                    </div>
-                </div>
-            </div>
+            </section>
           </div>
         </div>
       </DialogContent>
