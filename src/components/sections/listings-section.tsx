@@ -31,7 +31,7 @@ interface ListingsSectionProps {
 }
 
 const initialFilters: FilterState = {
-  budget: 50000,
+  budget: 100000,
   amenities: [],
   furnishedStatus: "any",
   propertyType: "any",
@@ -67,8 +67,8 @@ export function ListingsSection({
 
     const pageConfig = {
       pg: { title: 'PG Accommodations', description: 'Comfortable and modern paying guest options.' },
-      rental: { title: 'Premium Rentals', description: 'Find your next home from our verified rental properties.' },
-      roommate: { title: 'Find Your Roommates', description: 'Connect with like-minded people to share a space.' }
+      rental: { title: 'Premium Rentals', description: "Explore a wide range of verified rental properties. From cozy apartments to spacious houses, find the perfect place to call home with detailed information and transparent pricing." },
+      roommate: { title: 'Find Your Roommates', description: "Connect with potential roommates who match your lifestyle and budget. Browse profiles to find the perfect person to share your next home with." }
     };
 
     if (isLikedPage) {
@@ -111,34 +111,29 @@ export function ListingsSection({
 
   const filteredListings = useMemo(() => {
     return listings.filter(item => {
-      if (isLikedPage) return true; // Don't filter on the liked page
-
-      // Common budget filter
+      // Common filters
       if (item.rent > filters.budget) return false;
-
-      // Common geo filter
       if (filters.state && !item.state.toLowerCase().includes(filters.state.toLowerCase())) return false;
       if (filters.city && !item.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
       if (filters.locality && !item.locality.toLowerCase().includes(filters.locality.toLowerCase())) return false;
 
-      if ('propertyType' in item && item.propertyType !== 'Roommate') { // It's a Listing
-        if (type === 'roommate') return false;
-        const l = item as Listing;
-        if (filters.furnishedStatus !== 'any' && filters.furnishedStatus !== l.furnishedStatus) return false;
-        if (filters.brokerStatus !== 'any' && filters.brokerStatus !== l.brokerStatus) return false;
-        if (type === 'rental' && filters.propertyType !== 'any' && filters.propertyType !== l.size) return false;
-        if (type === 'pg' && filters.roomType !== 'any' && filters.roomType !== l.size) return false;
-        if (filters.amenities.length > 0 && !filters.amenities.every(a => l.amenities.includes(a))) return false;
-      } else { // It's a RoommateProfile
-        if (type !== 'roommate') return false;
-        const r = item as RoommateProfile;
-        if (filters.gender !== 'any' && filters.gender !== r.gender) return false;
-        // The check for amenities here is for roommate PREFERENCES
-        if (filters.amenities.length > 0 && !filters.amenities.every(a => r.preferences.includes(a))) return false;
+      // Type-specific filters
+      if (item.propertyType !== 'Roommate') { // Is a Listing
+          const l = item as Listing;
+          if (filters.furnishedStatus !== 'any' && filters.furnishedStatus !== l.furnishedStatus) return false;
+          if (filters.brokerStatus !== 'any' && filters.brokerStatus !== l.brokerStatus) return false;
+          if (l.propertyType === 'Rental' && filters.propertyType !== 'any' && filters.propertyType !== l.size) return false;
+          if (l.propertyType === 'PG' && filters.roomType !== 'any' && filters.roomType !== l.size) return false;
+          if ((type === 'rental' || type === 'pg') && filters.amenities.length > 0 && !filters.amenities.every(a => l.amenities.includes(a))) return false;
+      } else { // Is a RoommateProfile
+          const r = item as RoommateProfile;
+          if (filters.gender !== 'any' && filters.gender !== r.gender) return false;
+          if (type === 'roommate' && filters.amenities.length > 0 && !filters.amenities.every(a => r.preferences.includes(a))) return false;
       }
+
       return true;
     });
-  }, [listings, filters, type, isLikedPage]);
+  }, [listings, filters, type]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -151,12 +146,12 @@ export function ListingsSection({
         {!isLikedPage && (
           <aside className="md:w-1/3 lg:w-1/4">
             <div className="sticky top-24">
-              <ScrollArea className="h-[calc(100vh-7rem)] pr-4">
-                <div className="p-1 bg-card rounded-xl shadow-sm space-y-6">
-                  <h3 className="text-xl font-semibold px-6 pt-6">Filters</h3>
+              <ScrollArea className="h-[calc(100vh-8rem)] pr-4">
+                <div className="p-4 bg-card rounded-xl shadow-sm space-y-6">
+                  <h3 className="text-xl font-semibold">Filters</h3>
                   
                   {/* Common Filter: Budget */}
-                  <div className="space-y-2 px-6">
+                  <div className="space-y-2">
                     <Label>Max Budget: ₹{filters.budget.toLocaleString()}</Label>
                     <Slider
                       min={5000} max={100000} step={1000}
@@ -166,7 +161,7 @@ export function ListingsSection({
                   </div>
                   
                   {/* Common Geographic Filters */}
-                  <div className="space-y-4 px-6">
+                  <div className="space-y-4">
                       <AutocompleteInput 
                         placeholder="Enter State"
                         value={filters.state}
@@ -189,7 +184,7 @@ export function ListingsSection({
                   
                   {/* Rental & PG Filters */}
                   {(type === 'rental' || type === 'pg') && (
-                    <div className="space-y-4 px-6 pb-6">
+                    <div className="space-y-4">
                       {type === 'rental' && (
                         <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
                           <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
@@ -198,6 +193,7 @@ export function ListingsSection({
                             <SelectItem value="1 BHK">1 BHK</SelectItem>
                             <SelectItem value="2 BHK">2 BHK</SelectItem>
                             <SelectItem value="3 BHK">3 BHK</SelectItem>
+                             <SelectItem value="4 BHK">4 BHK</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
@@ -217,7 +213,7 @@ export function ListingsSection({
                           <Label>Furnishing</Label>
                           <RadioGroup value={filters.furnishedStatus} onValueChange={(val) => handleFilterChange('furnishedStatus', val as 'any' | 'Furnished' | 'Semi-Furnished' | 'Unfurnished')} className="flex gap-2">
                               <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Furnished</Label>
+                              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Furnished" className="sr-only"/>Full</Label>
                               <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Semi-Furnished" className="sr-only"/>Semi</Label>
                           </RadioGroup>
                       </div>
@@ -247,7 +243,7 @@ export function ListingsSection({
                   
                   {/* Roommate Filters */}
                   {type === 'roommate' && (
-                    <div className="space-y-4 px-6 pb-6">
+                    <div className="space-y-4">
                       <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
                           <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
                           <SelectContent>
@@ -291,8 +287,8 @@ export function ListingsSection({
           {filteredListings.length === 0 && (
             <div className="text-center py-16 bg-card rounded-xl">
                 <Heart className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="text-xl font-semibold mt-4">No liked items yet</h3>
-                <p className="text-muted-foreground mt-2">Click the heart icon on any property or profile to save it here.</p>
+                <h3 className="text-xl font-semibold mt-4">No {isLikedPage ? 'liked items yet' : 'results found'}</h3>
+                <p className="text-muted-foreground mt-2">{isLikedPage ? 'Click the heart icon on any property or profile to save it here.' : 'Try adjusting your filters to find what you\'re looking for.'}</p>
             </div>
           )}
         </main>
