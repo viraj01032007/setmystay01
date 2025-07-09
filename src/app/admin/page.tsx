@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -505,28 +505,52 @@ export default function AdminDashboard() {
 }
 
 const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
+    const { toast } = useToast();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isActive, setIsActive] = useState(false);
 
     useEffect(() => {
         if (ad) {
             setTitle(ad.title);
             setDescription(ad.description);
-            setImageUrl(ad.imageUrl);
+            setImagePreview(ad.imageUrl);
+            setImageFile(null);
             setIsActive(ad.isActive);
         } else {
             setTitle('');
             setDescription('');
-            setImageUrl('');
+            setImageFile(null);
+            setImagePreview(null);
             setIsActive(false);
         }
     }, [ad, isOpen]);
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ title, description, imageUrl, isActive });
+        if (!imagePreview) {
+            toast({
+                title: "Image required",
+                description: "Please upload an image for the advertisement.",
+                variant: "destructive",
+            });
+            return;
+        }
+        onSave({ title, description, imageUrl: imagePreview, isActive });
     };
 
     return (
@@ -545,8 +569,30 @@ const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
                         <Textarea id="ad-description" value={description} onChange={(e) => setDescription(e.target.value)} required />
                     </div>
                     <div>
-                        <Label htmlFor="ad-image-url">Image URL</Label>
-                        <Input id="ad-image-url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} required />
+                        <Label htmlFor="ad-image-upload">Image</Label>
+                        <div 
+                            className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md cursor-pointer hover:border-primary"
+                            onClick={() => document.getElementById('ad-image-upload')?.click()}
+                        >
+                            <div className="space-y-1 text-center">
+                                {imagePreview ? (
+                                    <Image src={imagePreview} alt="Preview" width={200} height={100} className="mx-auto h-24 object-contain rounded-md" />
+                                ) : (
+                                    <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                                )}
+                                <div className="flex text-sm text-muted-foreground justify-center">
+                                    <p className="pl-1">{imageFile ? 'Click to change' : 'Click to upload'}</p>
+                                </div>
+                                <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB</p>
+                            </div>
+                        </div>
+                        <Input 
+                            id="ad-image-upload" 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={handleImageChange}
+                        />
                     </div>
                     <div className="flex items-center space-x-2">
                         <Switch id="ad-is-active" checked={isActive} onCheckedChange={setIsActive} />

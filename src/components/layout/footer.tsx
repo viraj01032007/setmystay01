@@ -56,8 +56,7 @@ export function Footer({ onYourPropertiesClick, onNavigate }: FooterProps) {
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:text-white">Home</Link></li>
               <li><button onClick={onYourPropertiesClick} className="hover:text-white text-left w-full">Your Properties</button></li>
-              <li><Link href="#" className="hover:text-white">Contact Us</Link></li>
-              <li><Link href="#" className="hover:text-white">Visit Our Office</Link></li>
+              <li><a href="https://g.co/kgs/Mmk6x3N" target="_blank" rel="noopener noreferrer" className="hover:text-white">Visit Our Office</a></li>
               <li><Link href="/admin" className="hover:text-white">Admin Dashboard</Link></li>
               <li><button onClick={() => onNavigate('list')} className="hover:text-white text-left w-full">Post Your Property</button></li>
             </ul>
