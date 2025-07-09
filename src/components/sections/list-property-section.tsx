@@ -37,9 +37,12 @@ const formSchema = z.object({
   locality: z.string().min(1, 'Locality is required'),
   address: z.string().min(10, 'Full address is required'),
   ownerName: z.string().min(2, 'Name is required'),
-  phone: z.string().refine((val) => val === "" || /^\d{10}$/.test(val), {
-    message: "Phone number must be 10 digits.",
+  phonePrimary: z.string().refine((val) => /^\d{10}$/.test(val), {
+    message: "Primary phone number must be 10 digits.",
   }),
+  phoneSecondary: z.string().refine((val) => val === "" || /^\d{10}$/.test(val), {
+    message: "Secondary phone number must be 10 digits.",
+  }).optional(),
   description: z.string().optional(),
   amenities: z.array(z.string()).optional(),
   brokerStatus: z.enum(['With Broker', 'Without Broker']),
@@ -81,7 +84,8 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       brokerStatus: 'Without Broker',
       rent: 15000,
       amenities: [],
-      phone: '',
+      phonePrimary: '',
+      phoneSecondary: '',
       gender: undefined,
       state: '',
       city: '',
@@ -401,8 +405,11 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 <FormField control={form.control} name="ownerName" render={({ field }) => (
                   <FormItem><FormLabel>Your Name</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
-                <FormField control={form.control} name="phone" render={({ field }) => (
-                  <FormItem><FormLabel>Phone Number (Optional)</FormLabel><FormControl><Input type="tel" placeholder="9876543210" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="phonePrimary" render={({ field }) => (
+                  <FormItem><FormLabel>Primary Phone Number (Required)</FormLabel><FormControl><Input type="tel" placeholder="9876543210" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                 <FormField control={form.control} name="phoneSecondary" render={({ field }) => (
+                  <FormItem><FormLabel>Secondary Phone Number (Optional)</FormLabel><FormControl><Input type="tel" placeholder="9876543211" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
               </CardContent>
             </Card>

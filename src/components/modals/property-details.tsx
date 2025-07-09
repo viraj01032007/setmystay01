@@ -211,7 +211,8 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
             {isUnlocked ? (
               <div className="space-y-2">
                 <p><strong>Owner:</strong> {listing.ownerName}</p>
-                <p><strong>Phone:</strong> {listing.contactPhone}</p>
+                <p><strong>Primary Phone:</strong> {listing.contactPhonePrimary}</p>
+                {listing.contactPhoneSecondary && <p><strong>Secondary Phone:</strong> {listing.contactPhoneSecondary}</p>}
                 <p><strong>Email:</strong> {listing.contactEmail || 'Not provided'}</p>
                 <p><strong>Address:</strong> {listing.completeAddress}</p>
                 <p className="text-xs text-muted-foreground pt-2">Contact details are visible for 30 days after unlocking.</p>
@@ -219,7 +220,8 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
             ) : (
               <div className="blur-sm select-none">
                 <p><strong>Owner:</strong> ************</p>
-                <p><strong>Phone:</strong> **********</p>
+                <p><strong>Primary Phone:</strong> **********</p>
+                <p><strong>Secondary Phone:</strong> **********</p>
                 <p><strong>Email:</strong> *****@*****.com</p>
                 <p><strong>Address:</strong> *******************************</p>
               </div>
@@ -239,7 +241,7 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
           <Button size="lg" className="flex-1" onClick={onChat} disabled={!isUnlocked}>
             <MessageSquare className="w-5 h-5 mr-2" /> Chat with Owner
           </Button>
-           <a href={`tel:${listing.contactPhone}`} className="flex-1">
+           <a href={`tel:${listing.contactPhonePrimary}`} className="flex-1">
             <Button size="lg" variant="outline" className="w-full" disabled={!isUnlocked}>
                 <Phone className="w-5 h-5 mr-2" /> Call Owner
             </Button>

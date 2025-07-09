@@ -15,7 +15,7 @@ interface PropertyCardProps {
 export function PropertyCard({ listing, onViewDetails }: PropertyCardProps) {
   return (
     <div 
-      className="bg-card rounded-xl shadow-md overflow-hidden border border-transparent hover:border-primary/50 hover:shadow-xl transition-all duration-300 group cursor-pointer card-animate-on-scroll"
+      className="bg-card rounded-xl shadow-md overflow-hidden border border-transparent hover:border-primary/50 hover:shadow-xl transition-all duration-300 group cursor-pointer"
       onClick={() => onViewDetails(listing)}
     >
       <div className="relative h-48 w-full">

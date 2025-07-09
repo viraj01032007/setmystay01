@@ -124,14 +124,16 @@ export function RoommateDetails({ profile, onClose, isUnlocked, onUnlock, onChat
             {isUnlocked ? (
               <div className="space-y-2">
                 <p><strong>Name:</strong> {profile.ownerName}</p>
-                <p><strong>Phone:</strong> {profile.contactPhone}</p>
+                <p><strong>Primary Phone:</strong> {profile.contactPhonePrimary}</p>
+                {profile.contactPhoneSecondary && <p><strong>Secondary Phone:</strong> {profile.contactPhoneSecondary}</p>}
                 <p><strong>Email:</strong> {profile.contactEmail || 'Not provided'}</p>
                  <p className="text-xs text-muted-foreground pt-2">Contact details are visible for 30 days after unlocking.</p>
               </div>
             ) : (
               <div className="blur-sm select-none">
                 <p><strong>Name:</strong> ************</p>
-                <p><strong>Phone:</strong> **********</p>
+                <p><strong>Primary Phone:</strong> **********</p>
+                <p><strong>Secondary Phone:</strong> **********</p>
                 <p><strong>Email:</strong> *****@*****.com</p>
               </div>
             )}
@@ -150,7 +152,7 @@ export function RoommateDetails({ profile, onClose, isUnlocked, onUnlock, onChat
           <Button size="lg" className="flex-1" onClick={onChat} disabled={!isUnlocked}>
             <MessageSquare className="w-5 h-5 mr-2" /> Chat
           </Button>
-          <a href={`tel:${profile.contactPhone}`} className="flex-1">
+          <a href={`tel:${profile.contactPhonePrimary}`} className="flex-1">
             <Button size="lg" variant="outline" className="w-full" disabled={!isUnlocked}>
                 <Phone className="w-5 h-5 mr-2" /> Call
             </Button>

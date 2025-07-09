@@ -20,7 +20,8 @@ export interface Listing {
   completeAddress: string;
   partialAddress: string;
   ownerName: string;
-  contactPhone: string;
+  contactPhonePrimary: string;
+  contactPhoneSecondary?: string;
   contactEmail?: string;
   description: string;
   furnishedStatus: 'Furnished' | 'Semi-Furnished' | 'Unfurnished';
@@ -47,7 +48,8 @@ export interface RoommateProfile {
   state: string;
   completeAddress: string;
   partialAddress: string;
-  contactPhone: string;
+  contactPhonePrimary: string;
+  contactPhoneSecondary?: string;
   contactEmail?: string;
   description: string;
   preferences: string[];
