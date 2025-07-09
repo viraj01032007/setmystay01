@@ -1,3 +1,4 @@
+
 // @ts-nocheck
 'use client';
 
@@ -432,12 +433,27 @@ export default function AdminDashboard() {
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-3 bg-slate-50 rounded-md"><Label>ID</Label><p>{currentItem.id}</p></div>
-                                <div className="p-3 bg-slate-50 rounded-md"><Label>Type</Label><p className="capitalize">{currentItem.type}</p></div>
-                                <div className="p-3 bg-slate-50 rounded-md"><Label>Locality</Label><p>{currentItem.locality}</p></div>
-                                <div className="p-3 bg-slate-50 rounded-md"><Label>Status</Label><StatusBadge status={currentItem.status} /></div>
-                                <div className="p-3 bg-slate-50 rounded-md col-span-2"><Label>Description</Label><p>{currentItem.description}</p></div>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground">ID</strong>
+                                    <div>{currentItem.id}</div>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground">Type</strong>
+                                    <div className="capitalize">{currentItem.type}</div>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground">Locality</strong>
+                                    <div>{currentItem.locality}</div>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground">Status</strong>
+                                    <StatusBadge status={currentItem.status} />
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-md col-span-2 space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground">Description</strong>
+                                    <div>{currentItem.description}</div>
+                                </div>
                             </div>
 
                             <div className="flex justify-end space-x-2 pt-4">
@@ -464,3 +480,5 @@ export default function AdminDashboard() {
         </div>
     );
 }
+
+    
