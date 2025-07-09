@@ -46,8 +46,8 @@ export function HomeSection({
       {/* Hero Section */}
       <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center p-6">
         <Image
-          src="src/components/sections/bandra-kurla-complex.jpg"
-          alt="Modern apartment interior"
+          src="https://www.google.com/imgres?q=office%20bkc%20mumbai&=https%3A%2F%2Fweb-assets.bcg.com%2F33%2Fb1%2F27fea7bd4f86b9734ca4e54dce53%2Fbcg-bkc-office.jpg&imgrefurl=https%3A%2F%2Fwww.bcg.com%2Foffices%2Fmumbai-bkc&docid=0i7P1z3dASYgAM&tbnid=ngESRB_4qZY7KM&vet=12ahUKEwi0wqvkj6-OAxUebfUHHabrGoYQM3oECGcQAA..i&w=1344&h=974&hcb=2&ved=2ahUKEwi0wqvkj6-OAxUebfUHHabrGoYQM3oECGcQAA"
+          alt="Modern office interior"
           fill
           className="object-cover -z-10"
           priority
