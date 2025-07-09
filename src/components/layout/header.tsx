@@ -74,9 +74,9 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2" onClick={() => setActivePage('home')}>
+        <Link href="/" className="flex flex-shrink-0 items-center gap-2" onClick={() => setActivePage('home')}>
           <Logo className="w-10 h-10" />
-          <span className="text-xl font-semibold text-gray-800">SetMyStay</span>
+          <span className="hidden sm:inline text-xl font-semibold text-gray-800">SetMyStay</span>
         </Link>
 
         <nav className="hidden md:flex items-center space-x-6">
@@ -88,22 +88,26 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button variant="default" size="sm" onClick={onSubscriptionClick}>
-            <Crown className="w-4 h-4 mr-2" />
-            Pricing
-          </Button>
-          {isLoggedIn ? (
-            <Button variant="outline" size="sm" onClick={onLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+          {/* Desktop buttons */}
+          <div className="hidden md:flex items-center gap-2">
+            <Button variant="default" size="sm" onClick={onSubscriptionClick}>
+              <Crown className="w-4 h-4 mr-2" />
+              Pricing
             </Button>
-          ) : (
-            <Button variant="default" size="sm" onClick={onSignInClick}>
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
-          )}
+            {isLoggedIn ? (
+              <Button variant="outline" size="sm" onClick={onLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            ) : (
+              <Button variant="default" size="sm" onClick={onSignInClick}>
+                <User className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            )}
+          </div>
           
+          {/* Mobile menu */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -111,34 +115,53 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm p-6">
-              <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between mb-8">
+            <SheetContent side="right" className="w-full max-w-sm p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-8">
+                 <SheetClose asChild>
                    <Link href="/" className="flex items-center gap-2" onClick={() => setActivePage('home')}>
                      <Logo className="w-8 h-8" />
                      <span className="text-lg font-semibold text-gray-800">SetMyStay</span>
                    </Link>
+                 </SheetClose>
+                <SheetClose asChild>
+                  <Button variant="ghost" size="icon">
+                    <X className="h-6 w-6" />
+                    <span className="sr-only">Close menu</span>
+                  </Button>
+                </SheetClose>
+              </div>
+
+              <nav className="flex flex-col gap-2 flex-grow">
+                {navItems.map(item => (
+                   <NavLink key={item.page} page={item.page} activePage={activePage} onClick={setActivePage} isMobile>
+                    {item.icon}
+                    <span className="font-medium">{item.label}</span>
+                  </NavLink>
+                ))}
+              </nav>
+              
+              <div className="flex flex-col gap-2 border-t pt-4 mt-4">
+                {isLoggedIn ? (
                   <SheetClose asChild>
-                    <Button variant="ghost" size="icon">
-                      <X className="h-6 w-6" />
-                      <span className="sr-only">Close menu</span>
+                    <Button variant="outline" onClick={onLogout}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
                     </Button>
                   </SheetClose>
-                </div>
-
-                <nav className="flex flex-col gap-2 flex-grow">
-                  {navItems.map(item => (
-                     <NavLink key={item.page} page={item.page} activePage={activePage} onClick={setActivePage} isMobile>
-                      {item.icon}
-                      <span className="font-medium">{item.label}</span>
-                    </NavLink>
-                  ))}
-                </nav>
-                
-                <Button size="lg" className="w-full mt-4" onClick={onSubscriptionClick}>
-                  <Crown className="w-4 h-4 mr-2"/>
-                  Pricing
-                </Button>
+                ) : (
+                  <SheetClose asChild>
+                    <Button variant="default" onClick={onSignInClick}>
+                      <User className="w-4 h-4 mr-2" />
+                      Sign In
+                    </Button>
+                  </SheetClose>
+                )}
+                <SheetClose asChild>
+                  <Button onClick={onSubscriptionClick}>
+                    <Crown className="w-4 h-4 mr-2"/>
+                    Pricing
+                  </Button>
+                </SheetClose>
               </div>
             </SheetContent>
           </Sheet>
