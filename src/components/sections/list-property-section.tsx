@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
 import { indianCities } from '@/lib/cities';
+import { indianAreas } from '@/lib/areas';
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 const amenityIcons: { [key: string]: string } = {
@@ -89,6 +90,18 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   });
   
   const propertyType = form.watch('propertyType');
+  const cityValue = form.watch('city');
+  const stateValue = form.watch('state');
+
+  useEffect(() => {
+    form.setValue('city', '');
+    form.setValue('locality', '');
+  }, [stateValue, form]);
+
+  useEffect(() => {
+    form.setValue('locality', '');
+  }, [cityValue, form]);
+
 
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
     onSubmit({ ...data, images: mediaFiles });
@@ -357,7 +370,18 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     </FormItem>
                   )}/>
                   <FormField control={form.control} name="locality" render={({ field }) => (
-                    <FormItem><FormLabel>Area / Locality</FormLabel><FormControl><Input placeholder="e.g., Kharghar" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem>
+                        <FormLabel>Area / Locality</FormLabel>
+                        <FormControl>
+                           <AutocompleteInput 
+                                placeholder="e.g., Kharghar"
+                                value={field.value}
+                                onChange={field.onChange}
+                                suggestions={indianAreas[cityValue] || []}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
                   )}/>
                   <div className="md:col-span-2">
                     <FormField control={form.control} name="address" render={({ field }) => (

@@ -9,9 +9,10 @@ import { Users, Home as HomeIcon, BedDouble, Search } from "lucide-react";
 import { PropertyCard } from "@/components/shared/property-card";
 import { RoommateCard } from "@/components/shared/roommate-card";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
+import { AutocompleteInput } from "@/components/shared/autocomplete-input";
 import { indianCities } from "@/lib/cities";
 import { indianStates } from "@/lib/states";
+import { indianAreas } from "@/lib/areas";
 
 interface HomeSectionProps {
   featuredProperties: Listing[];
@@ -43,54 +44,22 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
   const [cityQuery, setCityQuery] = useState("");
   const [areaQuery, setAreaQuery] = useState("");
 
-  const [stateSuggestions, setStateSuggestions] = useState<string[]>([]);
-  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
-
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleStateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setStateQuery(value);
-    if (value.length > 0) {
-      setStateSuggestions(
-        indianStates
-          .filter(s => s.toLowerCase().startsWith(value.toLowerCase()))
-          .slice(0, 5)
-      );
-    } else {
-      setStateSuggestions([]);
-    }
-  };
+  useEffect(() => {
+    // Clear city and area if state is cleared or changed
+    setCityQuery("");
+  }, [stateQuery]);
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setCityQuery(value);
-    if (value.length > 0) {
-      setCitySuggestions(
-        indianCities
-          .filter(c => c.toLowerCase().startsWith(value.toLowerCase()))
-          .slice(0, 7)
-      );
-    } else {
-      setCitySuggestions([]);
-    }
-  };
-
-  const handleStateSuggestionClick = (suggestion: string) => {
-    setStateQuery(suggestion);
-    setStateSuggestions([]);
-  };
-
-  const handleCitySuggestionClick = (suggestion: string) => {
-    setCityQuery(suggestion);
-    setCitySuggestions([]);
-  };
+  useEffect(() => {
+    // Clear area if city is changed or cleared
+    setAreaQuery("");
+  }, [cityQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setStateSuggestions([]);
-        setCitySuggestions([]);
+        // This is handled inside the AutocompleteInput component now
       }
     };
 
@@ -124,58 +93,30 @@ export function HomeSection({ featuredProperties, featuredRoommates, onViewDetai
           <div className="max-w-3xl mx-auto" ref={searchContainerRef}>
             <div className="grid grid-cols-1 md:grid-cols-10 gap-2 bg-white rounded-full shadow-lg p-2">
               <div className="md:col-span-3 relative">
-                <Input
-                  type="text"
+                <AutocompleteInput
                   placeholder="State"
-                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
                   value={stateQuery}
-                  onChange={handleStateChange}
-                  onFocus={handleStateChange}
+                  onChange={setStateQuery}
+                  suggestions={indianStates}
+                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
                 />
-                {stateSuggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full bg-white mt-2 rounded-lg shadow-lg max-h-60 overflow-y-auto text-left">
-                    {stateSuggestions.map((suggestion, index) => (
-                      <li
-                        key={index}
-                        className="px-4 py-2 cursor-pointer hover:bg-muted text-gray-800"
-                        onClick={() => handleStateSuggestionClick(suggestion)}
-                      >
-                        {suggestion}
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </div>
               <div className="md:col-span-3 relative">
-                <Input
-                  type="text"
+                 <AutocompleteInput
                   placeholder="City"
-                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
                   value={cityQuery}
-                  onChange={handleCityChange}
-                  onFocus={handleCityChange}
-                />
-                {citySuggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full bg-white mt-2 rounded-lg shadow-lg max-h-60 overflow-y-auto text-left">
-                    {citySuggestions.map((suggestion, index) => (
-                      <li
-                        key={index}
-                        className="px-4 py-2 cursor-pointer hover:bg-muted text-gray-800"
-                        onClick={() => handleCitySuggestionClick(suggestion)}
-                      >
-                        {suggestion}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <div className="md:col-span-2">
-                <Input
-                  type="text"
-                  placeholder="Area"
+                  onChange={setCityQuery}
+                  suggestions={indianCities}
                   className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
+                />
+              </div>
+              <div className="md:col-span-2 relative">
+                <AutocompleteInput
+                  placeholder="Area"
                   value={areaQuery}
-                  onChange={(e) => setAreaQuery(e.target.value)}
+                  onChange={setAreaQuery}
+                  suggestions={indianAreas[cityQuery] || []}
+                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder:text-gray-500"
                 />
               </div>
               <div className="md:col-span-2">

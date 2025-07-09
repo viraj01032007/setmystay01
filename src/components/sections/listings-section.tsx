@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
 import { indianCities } from '@/lib/cities';
+import { indianAreas } from '@/lib/areas';
 
 interface ListingsSectionProps {
   type: ListingType;
@@ -45,7 +46,17 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      const newState = { ...prev, [key]: value };
+      if (key === 'state') {
+        newState.city = '';
+        newState.locality = '';
+      }
+      if (key === 'city') {
+        newState.locality = '';
+      }
+      return newState;
+    });
   };
 
   const handleAmenityChange = (amenity: string, checked: boolean) => {
@@ -132,10 +143,11 @@ export function ListingsSection({ type, listings, onViewDetails, onSmartSort }: 
                       onChange={(val) => handleFilterChange('city', val)}
                       suggestions={indianCities}
                     />
-                    <Input
+                    <AutocompleteInput
                       placeholder="Enter Area / Locality"
                       value={filters.locality}
-                      onChange={(e) => handleFilterChange('locality', e.target.value)}
+                      onChange={(val) => handleFilterChange('locality', val)}
+                      suggestions={indianAreas[filters.city] || []}
                     />
                 </div>
                 
