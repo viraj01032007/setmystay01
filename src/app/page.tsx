@@ -23,6 +23,7 @@ import { LoadingSpinner } from "@/components/icons";
 import { RateUsModal } from "@/components/modals/rate-us-modal";
 import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 import { FloatingCta } from "@/components/shared/floating-cta";
+import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 
 type ToastInfo = {
     title: string;
@@ -53,6 +54,9 @@ export default function Home() {
   const [inquiryData, setInquiryData] = useState<{ listing: Listing; bed: Bed } | null>(null);
   const [pendingListingData, setPendingListingData] = useState<any>(null);
 
+  const [isAdModalOpen, setAdModalOpen] = useState(false);
+  const [adContent, setAdContent] = useState({ title: '', description: '', imageUrl: '' });
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -70,6 +74,18 @@ export default function Home() {
     const savedIsUnlimited = localStorage.getItem('setmystay_isUnlimited') === 'true';
     const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
     setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
+
+    const adAlreadyShown = sessionStorage.getItem('ad_shown');
+    if (!adAlreadyShown) {
+        const savedPopupSettings = localStorage.getItem('popup_settings');
+        if (savedPopupSettings) {
+            const settings = JSON.parse(savedPopupSettings);
+            if (settings.enabled) {
+                setAdContent(settings);
+                setAdModalOpen(true);
+            }
+        }
+    }
   }, []);
 
   const handleRateUsClose = (rated: boolean) => {
@@ -250,6 +266,11 @@ export default function Home() {
       toast({ title: 'AI Sort Failed', description: 'Could not sort listings. Please try again.', variant: 'destructive' });
     }
   };
+
+  const handleAdClose = () => {
+    setAdModalOpen(false);
+    sessionStorage.setItem('ad_shown', 'true');
+  };
   
   if (isLoading) {
     return (
@@ -352,6 +373,13 @@ export default function Home() {
         onClose={() => setIsBookingModalOpen(false)}
         listing={inquiryData?.listing || null}
         bed={inquiryData?.bed || null}
+      />
+       <AdvertisementModal
+        isOpen={isAdModalOpen}
+        onClose={handleAdClose}
+        title={adContent.title}
+        description={adContent.description}
+        imageUrl={adContent.imageUrl}
       />
     </div>
   );
