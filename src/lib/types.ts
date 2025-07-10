@@ -56,6 +56,10 @@ export interface Listing {
   nocUrl?: string;
   beds?: Bed[];
   lastAvailabilityCheck: Date;
+  status?: 'pending' | 'approved' | 'rejected';
+  verifiedBy?: string; // Staff ID
+  submittedAt?: Date;
+  verificationTimestamp?: Date;
 }
 
 export interface RoommateProfile {
@@ -64,7 +68,7 @@ export interface RoommateProfile {
   ownerName: string;
   age: number;
   rent: number; // Budget
-  area: number; // Preferred area
+  area?: number; // Preferred area
   city: string;
   locality: string;
   sector?: string;
@@ -83,6 +87,10 @@ export interface RoommateProfile {
   'data-ai-hint'?: string;
   aadhaarCardUrl?: string;
   hasProperty: boolean;
+  status?: 'pending' | 'approved' | 'rejected';
+  verifiedBy?: string; // Staff ID
+  submittedAt?: Date;
+  verificationTimestamp?: Date;
 }
 
 export type UnlockPlan = 1 | 5 | 10 | 'unlimited';
@@ -106,6 +114,14 @@ export interface Purchase {
     amount: number;
     date: Date;
 }
+
+export interface StaffMember {
+    id: string;
+    name: string;
+    userId: string;
+    password?: string;
+}
+
 
 // Add ToggleGroup to components/ui
 export interface ToggleGroupProps

@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -23,26 +23,26 @@ import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { Advertisement, Coupon } from '@/lib/types';
+import type { Advertisement, Coupon, StaffMember } from '@/lib/types';
 import { dummyCoupons } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, startOfWeek, addDays, getWeek, formatDistanceToNow } from 'date-fns';
+import { format, startOfWeek, addDays, getWeek, formatDistanceToNow, differenceInHours } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 
 // Mock data similar to the provided script
 const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', area: 1200, lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000) },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', area: 250, lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', area: 650, lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', area: 300, lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000) }
+    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', area: 1200, lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 26 * 60 * 60 * 1000) },
+    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', area: 250, lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000), verifiedBy: 'S001', submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 40 * 60 * 60 * 1000) },
+    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', area: 650, lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), verifiedBy: 'S002', submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 68 * 60 * 60 * 1000) },
+    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', area: 300, lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 8 * 60 * 60 * 1000) }
 ];
 const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait' },
-    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait' }
+    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait', submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000) },
+    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait', verifiedBy: 'S001', submittedAt: new Date(Date.now() - 30 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 25 * 60 * 60 * 1000) }
 ];
 const initialAdvertisements: Advertisement[] = [
     { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true, 'data-ai-hint': 'sale promotion' },
@@ -67,6 +67,12 @@ const initialAvailabilityInquiries = [
     { id: 'INQ01', propertyId: 'P002', propertyTitle: 'Cozy PG near College', userName: 'Amit Singh', time: new Date(Date.now() - 15 * 60 * 1000) },
     { id: 'INQ02', propertyId: 'P004', propertyTitle: 'Luxury PG with all amenities', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
 ]
+
+const initialStaff: StaffMember[] = [
+    { id: 'S001', name: 'Ravi Kumar', userId: 'StaffRavi', password: 'password1' },
+    { id: 'S002', name: 'Sunita Sharma', userId: 'StaffSunita', password: 'password2' }
+];
+
 
 // Chart data generation functions
 const generateHourlyData = (date: Date) => {
@@ -478,6 +484,57 @@ const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
     );
 };
 
+const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
+    const [name, setName] = useState('');
+    const [userId, setUserId] = useState('');
+    const [password, setPassword] = useState('');
+
+    useEffect(() => {
+        if (staffMember) {
+            setName(staffMember.name);
+            setUserId(staffMember.userId);
+            setPassword(staffMember.password);
+        } else {
+            setName('');
+            setUserId('');
+            setPassword('');
+        }
+    }, [staffMember, isOpen]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ name, userId, password });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{staffMember ? 'Edit' : 'Add'} Staff Member</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="staff-name">Name</Label>
+                        <Input id="staff-name" value={name} onChange={(e) => setName(e.target.value)} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="staff-userid">User ID</Label>
+                        <Input id="staff-userid" value={userId} onChange={(e) => setUserId(e.target.value)} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="staff-password">{staffMember ? 'Reset Password' : 'Password'}</Label>
+                        <Input id="staff-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Enter new password" />
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit">{staffMember ? 'Update Staff' : 'Add Staff'}</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -491,6 +548,7 @@ export default function AdminDashboard() {
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
     const [coupons, setCoupons] = useState<Coupon[]>([]);
     const [availabilityInquiries, setAvailabilityInquiries] = useState([]);
+    const [staff, setStaff] = useState<StaffMember[]>([]);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
@@ -501,6 +559,9 @@ export default function AdminDashboard() {
 
     const [isCouponFormModalOpen, setCouponFormModalOpen] = useState(false);
     const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+
+    const [isStaffFormModalOpen, setStaffFormModalOpen] = useState(false);
+    const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
 
     const [isMounted, setIsMounted] = useState(false);
     
@@ -543,6 +604,7 @@ export default function AdminDashboard() {
             setAdvertisements(initialAdvertisements);
             setCoupons(dummyCoupons);
             setAvailabilityInquiries(initialAvailabilityInquiries);
+            setStaff(initialStaff);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
@@ -550,6 +612,29 @@ export default function AdminDashboard() {
             });
         }
     }, [router]);
+
+    const staffStats = useMemo(() => {
+        const allListings = [...properties, ...roommates];
+        return staff.map(s => {
+            const verifiedListings = allListings.filter(l => l.verifiedBy === s.id);
+            const approved = verifiedListings.filter(l => l.status === 'approved').length;
+            const rejected = verifiedListings.filter(l => l.status === 'rejected').length;
+
+            const processingTimes = verifiedListings
+                .map(l => differenceInHours(new Date(l.verificationTimestamp), new Date(l.submittedAt)))
+                .filter(t => t >= 0);
+
+            const avgProcessingTime = processingTimes.length > 0
+                ? (processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length).toFixed(1)
+                : 'N/A';
+
+            return {
+                ...s,
+                stats: { approved, rejected, avgProcessingTime }
+            };
+        });
+    }, [staff, properties, roommates]);
+
 
     const handleLogout = () => {
         localStorage.removeItem('admin_authenticated');
@@ -666,6 +751,29 @@ export default function AdminDashboard() {
         toast({ title: "Coupon Deleted", variant: 'destructive' });
     };
 
+    const handleOpenStaffForm = (staffMember: StaffMember | null) => {
+        setEditingStaff(staffMember);
+        setStaffFormModalOpen(true);
+    };
+
+    const handleSaveStaff = (staffData: Omit<StaffMember, 'id'>) => {
+        if (editingStaff) {
+            setStaff(s => s.map(sm => sm.id === editingStaff.id ? { ...editingStaff, ...staffData } : sm));
+            toast({ title: "Staff Member Updated" });
+        } else {
+            const newStaff: StaffMember = { id: `S${Date.now()}`, ...staffData };
+            setStaff(s => [...s, newStaff]);
+            toast({ title: "Staff Member Added" });
+        }
+        setStaffFormModalOpen(false);
+        setEditingStaff(null);
+    };
+
+    const handleDeleteStaff = (staffId: string) => {
+        setStaff(s => s.filter(sm => sm.id !== staffId));
+        toast({ title: "Staff Member Deleted", variant: "destructive" });
+    };
+
     const StatusBadge = ({ status }) => {
         const isBoolean = typeof status === 'boolean';
         const currentStatus = isBoolean ? (status ? 'active' : 'inactive') : status;
@@ -726,348 +834,389 @@ export default function AdminDashboard() {
             </header>
 
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Analytics Section */}
-                <Card className="mb-8">
-                    <CardHeader>
-                        <CardTitle className="text-2xl">Analytics Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                            <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
-                                <div><p className="text-sm font-medium text-blue-700">Total Page Views</p><p className="text-2xl font-bold text-blue-900">{analytics.totalPageViews.toLocaleString()}</p></div>
-                                <Eye className="text-3xl text-blue-400 w-8 h-8"/>
-                            </div>
-                            <div className="bg-green-50 p-4 rounded-lg flex items-center justify-between">
-                                <div><p className="text-sm font-medium text-green-700">Total Properties</p><p className="text-2xl font-bold text-green-900">{properties.length}</p></div>
-                                <Building className="text-3xl text-green-400 w-8 h-8"/>
-                            </div>
-                            <div className="bg-purple-50 p-4 rounded-lg flex items-center justify-between">
-                                <div><p className="text-sm font-medium text-purple-700">Total Roommates</p><p className="text-2xl font-bold text-purple-900">{roommates.length}</p></div>
-                                <Users className="text-3xl text-purple-400 w-8 h-8"/>
-                            </div>
-                            <div className="bg-yellow-50 p-4 rounded-lg flex items-center justify-between">
-                                <div><p className="text-sm font-medium text-yellow-700">Total Unlocks</p><p className="text-2xl font-bold text-yellow-900">{analytics.totalUnlocks.toLocaleString()}</p></div>
-                                <LockOpen className="text-3xl text-yellow-400 w-8 h-8"/>
-                            </div>
-                        </div>
-                        <div className="mt-6">
-                             <Tabs value={chartView} onValueChange={setChartView} className="w-full">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-xl font-semibold text-slate-800">Property Views</h3>
-                                    <div className="flex items-center gap-4">
-                                        {(chartView === 'daily' || chartView === 'hourly') && (
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}
-                                                    >
-                                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
-                                                </PopoverContent>
-                                            </Popover>
-                                        )}
-                                        {(chartView === 'monthly' || chartView === 'weekly') && (
-                                            <Select value={selectedYear.toString()} onValueChange={(val) => setSelectedYear(parseInt(val))}>
-                                                <SelectTrigger className="w-[120px]">
-                                                    <SelectValue placeholder="Select year" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {years.map(year => <SelectItem key={year} value={year.toString()}>{year}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                        <TabsList>
-                                            <TabsTrigger value="hourly">Hourly</TabsTrigger>
-                                            <TabsTrigger value="daily">Daily</TabsTrigger>
-                                            <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                                            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                                            <TabsTrigger value="yearly">Yearly</TabsTrigger>
-                                        </TabsList>
-                                    </div>
-                                </div>
-                                <div className="h-80">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={chartData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="name" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Bar dataKey="views" fill="#4582EF" />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </Tabs>
-                        </div>
-                        <p className="text-sm text-slate-500 mt-4 text-right">Last Updated: {analytics.lastUpdated}</p>
-                    </CardContent>
-                </Card>
+            <Tabs defaultValue="dashboard">
+                <TabsList className="mb-8">
+                    <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                    <TabsTrigger value="listings">Listings</TabsTrigger>
+                    <TabsTrigger value="management">Management</TabsTrigger>
+                    <TabsTrigger value="staff">Staff Management</TabsTrigger>
+                </TabsList>
                 
-                 {/* Pricing Management */}
-                <Card className="mb-8">
-                    <CardHeader>
-                        <CardTitle className="text-2xl">Pricing Management</CardTitle>
-                        <CardDescription>Update the pricing for unlocks and listings.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h4 className="font-semibold mb-4 text-lg">Unlock Plans</h4>
-                                <div className="space-y-4">
-                                    {Object.entries(pricing.unlocks).map(([plan, price]) => (
-                                        <div key={plan} className="flex items-center gap-4">
-                                            <strong className="w-28 capitalize">{plan} Unlock{plan !== '1' && plan !== 'unlimited' ? 's' : ''}</strong>
-                                            <Input id={`price-unlock-${plan}`} type="number" value={price} onChange={(e) => handlePriceChange('unlocks', plan, parseInt(e.target.value))} className="max-w-xs" />
-                                        </div>
-                                    ))}
+                <TabsContent value="dashboard">
+                    <Card className="mb-8">
+                        <CardHeader>
+                            <CardTitle className="text-2xl">Analytics Overview</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
+                                    <div><p className="text-sm font-medium text-blue-700">Total Page Views</p><p className="text-2xl font-bold text-blue-900">{analytics.totalPageViews.toLocaleString()}</p></div>
+                                    <Eye className="text-3xl text-blue-400 w-8 h-8"/>
+                                </div>
+                                <div className="bg-green-50 p-4 rounded-lg flex items-center justify-between">
+                                    <div><p className="text-sm font-medium text-green-700">Total Properties</p><p className="text-2xl font-bold text-green-900">{properties.length}</p></div>
+                                    <Building className="text-3xl text-green-400 w-8 h-8"/>
+                                </div>
+                                <div className="bg-purple-50 p-4 rounded-lg flex items-center justify-between">
+                                    <div><p className="text-sm font-medium text-purple-700">Total Roommates</p><p className="text-2xl font-bold text-purple-900">{roommates.length}</p></div>
+                                    <Users className="text-3xl text-purple-400 w-8 h-8"/>
+                                </div>
+                                <div className="bg-yellow-50 p-4 rounded-lg flex items-center justify-between">
+                                    <div><p className="text-sm font-medium text-yellow-700">Total Unlocks</p><p className="text-2xl font-bold text-yellow-900">{analytics.totalUnlocks.toLocaleString()}</p></div>
+                                    <LockOpen className="text-3xl text-yellow-400 w-8 h-8"/>
                                 </div>
                             </div>
-                             <div>
-                                <h4 className="font-semibold mb-4 text-lg">Listing Plans</h4>
-                                <div className="space-y-4">
-                                     {Object.entries(pricing.listings).map(([plan, price]) => (
-                                        <div key={plan} className="flex items-center gap-4">
-                                            <strong className="w-28 capitalize">{plan} Listing</strong>
-                                            <Input id={`price-listing-${plan}`} type="number" value={price} onChange={(e) => handlePriceChange('listings', plan, parseInt(e.target.value))} className="max-w-xs" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="mt-6 flex justify-end">
-                            <Button onClick={handleSavePricing}>Save Prices</Button>
-                        </div>
-                    </CardContent>
-                </Card>
-                
-                {/* Availability Inquiries */}
-                <Card className="mb-8">
-                    <CardHeader>
-                        <CardTitle className="text-2xl">Availability Inquiries</CardTitle>
-                        <CardDescription>Recent inquiries from users about property availability.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {availabilityInquiries.length > 0 ? (
-                            <div className="space-y-4">
-                                {availabilityInquiries.map(inquiry => (
-                                    <div key={inquiry.id} className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                            <div className="mt-6">
+                                <Tabs value={chartView} onValueChange={setChartView} className="w-full">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-xl font-semibold text-slate-800">Property Views</h3>
                                         <div className="flex items-center gap-4">
-                                            <Bell className="w-6 h-6 text-blue-500" />
-                                            <div>
-                                                <p><strong className="font-semibold">{inquiry.userName}</strong> inquired about <strong className="font-semibold">{inquiry.propertyTitle}</strong></p>
-                                                <p className="text-sm text-muted-foreground">{formatDistanceToNow(inquiry.time, { addSuffix: true })}</p>
-                                            </div>
+                                            {(chartView === 'daily' || chartView === 'hourly') && (
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant={"outline"}
+                                                            className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}
+                                                        >
+                                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                                            {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0" align="start">
+                                                        <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
+                                                    </PopoverContent>
+                                                </Popover>
+                                            )}
+                                            {(chartView === 'monthly' || chartView === 'weekly') && (
+                                                <Select value={selectedYear.toString()} onValueChange={(val) => setSelectedYear(parseInt(val))}>
+                                                    <SelectTrigger className="w-[120px]">
+                                                        <SelectValue placeholder="Select year" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {years.map(year => <SelectItem key={year} value={year.toString()}>{year}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                            <TabsList>
+                                                <TabsTrigger value="hourly">Hourly</TabsTrigger>
+                                                <TabsTrigger value="daily">Daily</TabsTrigger>
+                                                <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                                                <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                                                <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                                            </TabsList>
                                         </div>
-                                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(inquiry.propertyId, 'rental')}>View Property</Button>
                                     </div>
-                                ))}
+                                    <div className="h-80">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartData}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="name" />
+                                                <YAxis />
+                                                <Tooltip />
+                                                <Bar dataKey="views" fill="#4582EF" />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </Tabs>
                             </div>
-                        ) : (
-                            <p className="text-slate-500 text-center py-4">No new availability inquiries.</p>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* Coupon Management */}
-                <Card className="mb-8">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="text-2xl">Coupon Code Management</CardTitle>
-                            <CardDescription>Create and manage discount coupons.</CardDescription>
-                        </div>
-                        <Button onClick={() => handleOpenCouponForm(null)}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add New Coupon
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Code</TableHead>
-                                    <TableHead>Discount</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {coupons.map(coupon => (
-                                    <TableRow key={coupon.id}>
-                                        <TableCell className="font-medium">{coupon.code}</TableCell>
-                                        <TableCell>{coupon.discountPercentage}%</TableCell>
-                                        <TableCell><StatusBadge status={coupon.isActive} /></TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => handleOpenCouponForm(coupon)}><Edit className="h-4 w-4" /></Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader><AlertDialogTitle>Delete Coupon?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the coupon.</AlertDialogDescription></AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteCoupon(coupon.id)}>Confirm</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                {/* Advertisement Management */}
-                <Card className="mb-8">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="text-2xl">Pop-up Advertisement Management</CardTitle>
-                            <CardDescription>Manage the pop-up shown to users.</CardDescription>
-                        </div>
-                        <Button onClick={() => handleOpenAdForm(null)}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Add New
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {advertisements.map(ad => (
-                                    <TableRow key={ad.id}>
-                                        <TableCell className="font-medium">{ad.title}</TableCell>
-                                        <TableCell><StatusBadge status={ad.isActive} /></TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => handleOpenAdForm(ad)}><Edit className="h-4 w-4" /></Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader><AlertDialogTitle>Delete Advertisement?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. Are you sure you want to delete this ad?</AlertDialogDescription></AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteAd(ad.id)}>Confirm</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                {/* Pending Listings Section */}
-                <Card className="mb-8">
-                    <CardHeader><CardTitle className="text-2xl">Pending Listings</CardTitle></CardHeader>
-                    <CardContent>
-                        {pendingListings.length > 0 ? (
-                            pendingListings.map(item => (
-                                <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <div className="w-full">
-                                        <p className="font-semibold">{item.title || item.name} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
-                                        <p className="text-sm text-slate-600">{item.locality}</p>
-                                    </div>
-                                    <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">View Details</Button>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-slate-500">No pending listings.</p>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* All Listings Table */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                            <p className="text-sm text-slate-500 mt-4 text-right">Last Updated: {analytics.lastUpdated}</p>
+                        </CardContent>
+                    </Card>
                     <Card>
                         <CardHeader>
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                <div>
-                                    <CardTitle className="text-2xl">All Properties</CardTitle>
-                                    <CardDescription>Search and filter all properties.</CardDescription>
+                            <CardTitle className="text-2xl">Availability Inquiries</CardTitle>
+                            <CardDescription>Recent inquiries from users about property availability.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {availabilityInquiries.length > 0 ? (
+                                <div className="space-y-4">
+                                    {availabilityInquiries.map(inquiry => (
+                                        <div key={inquiry.id} className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                                            <div className="flex items-center gap-4">
+                                                <Bell className="w-6 h-6 text-blue-500" />
+                                                <div>
+                                                    <p><strong className="font-semibold">{inquiry.userName}</strong> inquired about <strong className="font-semibold">{inquiry.propertyTitle}</strong></p>
+                                                    <p className="text-sm text-muted-foreground">{formatDistanceToNow(inquiry.time, { addSuffix: true })}</p>
+                                                </div>
+                                            </div>
+                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(inquiry.propertyId, 'rental')}>View Property</Button>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
-                                     <div className="relative w-full sm:w-auto">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input 
-                                            placeholder="Search by title..." 
-                                            value={propertySearchTerm}
-                                            onChange={(e) => setPropertySearchTerm(e.target.value)}
-                                            className="pl-10 w-full sm:w-48"
-                                        />
+                            ) : (
+                                <p className="text-slate-500 text-center py-4">No new availability inquiries.</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="listings">
+                    <Card className="mb-8">
+                        <CardHeader><CardTitle className="text-2xl">Pending Listings</CardTitle></CardHeader>
+                        <CardContent>
+                            {pendingListings.length > 0 ? (
+                                pendingListings.map(item => (
+                                    <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                        <div className="w-full">
+                                            <p className="font-semibold">{item.title || item.name} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
+                                            <p className="text-sm text-slate-600">{item.locality}</p>
+                                        </div>
+                                        <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">View Details</Button>
                                     </div>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="icon">
-                                                <Filter className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem onSelect={() => setPropertyTypeFilter('all')}>All</DropdownMenuItem>
-                                            <DropdownMenuItem onSelect={() => setPropertyTypeFilter('pg')}>PG</DropdownMenuItem>
-                                            <DropdownMenuItem onSelect={() => setPropertyTypeFilter('rental')}>Rental</DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                ))
+                            ) : (
+                                <p className="text-slate-500">No pending listings.</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <CardTitle className="text-2xl">All Properties</CardTitle>
+                                        <CardDescription>Search and filter all properties.</CardDescription>
+                                    </div>
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <div className="relative w-full sm:w-auto">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input 
+                                                placeholder="Search by title..." 
+                                                value={propertySearchTerm}
+                                                onChange={(e) => setPropertySearchTerm(e.target.value)}
+                                                className="pl-10 w-full sm:w-48"
+                                            />
+                                        </div>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="icon">
+                                                    <Filter className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onSelect={() => setPropertyTypeFilter('all')}>All</DropdownMenuItem>
+                                                <DropdownMenuItem onSelect={() => setPropertyTypeFilter('pg')}>PG</DropdownMenuItem>
+                                                <DropdownMenuItem onSelect={() => setPropertyTypeFilter('rental')}>Rental</DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
                                 </div>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Title</TableHead><TableHead>Type</TableHead><TableHead>Rent</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredProperties.map(p => (
+                                            <TableRow key={p.id}>
+                                                <TableCell className="font-medium">{p.title}</TableCell>
+                                                <TableCell>{p.type}</TableCell>
+                                                <TableCell>₹{p.rent.toLocaleString()}</TableCell>
+                                                <TableCell><StatusBadge status={p.status} /></TableCell>
+                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.type)}>View</Button></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader><CardTitle className="text-2xl">All Roommates</CardTitle></CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Name</TableHead><TableHead>Budget</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {roommates.map(r => (
+                                            <TableRow key={r.id}>
+                                                <TableCell className="font-medium">{r.name}</TableCell>
+                                                <TableCell>₹{r.budget.toLocaleString()}</TableCell>
+                                                <TableCell><StatusBadge status={r.status} /></TableCell>
+                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(r.id, 'roommate')}>View</Button></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+                
+                <TabsContent value="management">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-2xl">Pricing Management</CardTitle>
+                                <CardDescription>Update the pricing for unlocks and listings.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-6">
+                                    <div>
+                                        <h4 className="font-semibold mb-4 text-lg">Unlock Plans</h4>
+                                        <div className="space-y-4">
+                                            {Object.entries(pricing.unlocks).map(([plan, price]) => (
+                                                <div key={plan} className="flex items-center gap-4">
+                                                    <strong className="w-28 capitalize">{plan} Unlock{plan !== '1' && plan !== 'unlimited' ? 's' : ''}</strong>
+                                                    <Input id={`price-unlock-${plan}`} type="number" value={price} onChange={(e) => handlePriceChange('unlocks', plan, parseInt(e.target.value))} className="max-w-xs" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold mb-4 text-lg">Listing Plans</h4>
+                                        <div className="space-y-4">
+                                            {Object.entries(pricing.listings).map(([plan, price]) => (
+                                                <div key={plan} className="flex items-center gap-4">
+                                                    <strong className="w-28 capitalize">{plan} Listing</strong>
+                                                    <Input id={`price-listing-${plan}`} type="number" value={price} onChange={(e) => handlePriceChange('listings', plan, parseInt(e.target.value))} className="max-w-xs" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-6 flex justify-end">
+                                    <Button onClick={handleSavePricing}>Save Prices</Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <div className="space-y-8">
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                    <div>
+                                        <CardTitle className="text-2xl">Coupon Code Management</CardTitle>
+                                        <CardDescription>Create and manage discount coupons.</CardDescription>
+                                    </div>
+                                    <Button onClick={() => handleOpenCouponForm(null)}>
+                                        <PlusCircle className="mr-2 h-4 w-4" /> Add
+                                    </Button>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Code</TableHead><TableHead>Discount</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {coupons.map(coupon => (
+                                                <TableRow key={coupon.id}>
+                                                    <TableCell className="font-medium">{coupon.code}</TableCell>
+                                                    <TableCell>{coupon.discountPercentage}%</TableCell>
+                                                    <TableCell><StatusBadge status={coupon.isActive} /></TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button variant="ghost" size="icon" onClick={() => handleOpenCouponForm(coupon)}><Edit className="h-4 w-4" /></Button>
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
+                                                            <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Coupon?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the coupon.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteCoupon(coupon.id)}>Confirm</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                    <div>
+                                        <CardTitle className="text-2xl">Pop-up Ads</CardTitle>
+                                        <CardDescription>Manage pop-up advertisements.</CardDescription>
+                                    </div>
+                                    <Button onClick={() => handleOpenAdForm(null)}>
+                                        <PlusCircle className="mr-2 h-4 w-4" /> Add New
+                                    </Button>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Title</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {advertisements.map(ad => (
+                                                <TableRow key={ad.id}>
+                                                    <TableCell className="font-medium">{ad.title}</TableCell>
+                                                    <TableCell><StatusBadge status={ad.isActive} /></TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button variant="ghost" size="icon" onClick={() => handleOpenAdForm(ad)}><Edit className="h-4 w-4" /></Button>
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
+                                                            <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Ad?</AlertDialogTitle><AlertDialogDescription>This will permanently delete this advertisement.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteAd(ad.id)}>Confirm</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="staff">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle className="text-2xl">Staff Management</CardTitle>
+                                <CardDescription>Add, edit, and monitor staff performance.</CardDescription>
                             </div>
+                            <Button onClick={() => handleOpenStaffForm(null)}>
+                                <UserPlus className="mr-2 h-4 w-4" /> Add New Staff
+                            </Button>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Title</TableHead><TableHead>Type</TableHead><TableHead>Rent</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>User ID</TableHead>
+                                        <TableHead>Approved</TableHead>
+                                        <TableHead>Rejected</TableHead>
+                                        <TableHead>Avg. Processing Time</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {filteredProperties.map(p => (
-                                        <TableRow key={p.id}>
-                                            <TableCell className="font-medium">{p.title}</TableCell>
-                                            <TableCell>{p.type}</TableCell>
-                                            <TableCell>₹{p.rent.toLocaleString()}</TableCell>
-                                            <TableCell><StatusBadge status={p.status} /></TableCell>
-                                            <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.type)}>View</Button></TableCell>
+                                    {staffStats.map(s => (
+                                        <TableRow key={s.id}>
+                                            <TableCell className="font-medium">{s.name}</TableCell>
+                                            <TableCell>{s.userId}</TableCell>
+                                            <TableCell className="text-green-600 font-semibold">{s.stats.approved}</TableCell>
+                                            <TableCell className="text-red-600 font-semibold">{s.stats.rejected}</TableCell>
+                                            <TableCell>{s.stats.avgProcessingTime} hours</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenStaffForm(s)}><Edit className="h-4 w-4" /></Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader><AlertDialogTitle>Delete Staff Member?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the staff member's account.</AlertDialogDescription></AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDeleteStaff(s.id)}>Confirm</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader><CardTitle className="text-2xl">All Roommates</CardTitle></CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Name</TableHead><TableHead>Budget</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {roommates.map(r => (
-                                        <TableRow key={r.id}>
-                                            <TableCell className="font-medium">{r.name}</TableCell>
-                                            <TableCell>₹{r.budget.toLocaleString()}</TableCell>
-                                            <TableCell><StatusBadge status={r.status} /></TableCell>
-                                            <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(r.id, 'roommate')}>View</Button></TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </div>
+                </TabsContent>
+            </Tabs>
             </main>
 
             {/* Ad Form Modal */}
@@ -1084,6 +1233,14 @@ export default function AdminDashboard() {
                 onClose={() => setCouponFormModalOpen(false)}
                 onSave={handleSaveCoupon}
                 coupon={editingCoupon}
+            />
+            
+            {/* Staff Form Modal */}
+            <StaffFormDialog
+                isOpen={isStaffFormModalOpen}
+                onClose={() => setStaffFormModalOpen(false)}
+                onSave={handleSaveStaff}
+                staffMember={editingStaff}
             />
 
             {/* Details Modal */}
