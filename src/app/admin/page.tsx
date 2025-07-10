@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,11 @@ import { Textarea } from '@/components/ui/textarea';
 import type { Advertisement, Coupon } from '@/lib/types';
 import { dummyCoupons } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, startOfWeek, addDays, getWeek } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 
 // Mock data similar to the provided script
@@ -57,23 +62,42 @@ const initialPricing = {
     }
 }
 
-const dailyChartData = [
-    { name: 'Mon', views: 210 }, { name: 'Tue', views: 250 }, { name: 'Wed', views: 230 },
-    { name: 'Thu', views: 280 }, { name: 'Fri', views: 350 }, { name: 'Sat', views: 420 }, { name: 'Sun', views: 390 },
-];
-const weeklyChartData = [
-    { name: 'Week 1 (Aug)', views: 850 }, { name: 'Week 2 (Aug)', views: 1100 }, { name: 'Week 3 (Aug)', views: 950 },
-    { name: 'Week 4 (Aug)', views: 1300 },
-];
-const monthlyChartData = [
-    { name: 'Jan', views: 1200 }, { name: 'Feb', views: 1900 }, { name: 'Mar', views: 3000 },
-    { name: 'Apr', views: 5000 }, { name: 'May', views: 2000 }, { name: 'Jun', views: 3500 },
-    { name: 'Jul', views: 4200 }, { name: 'Aug', views: 3800 }, { name: 'Sep', views: 2500 },
-    { name: 'Oct', views: 4800 }, { name: 'Nov', views: 5200 }, { name: 'Dec', views: 6000 },
-];
-const yearlyChartData = [
-    { name: '2022', views: 28000 }, { name: '2023', views: 42000 }, { name: '2024', views: 65000 },
-];
+// Chart data generation functions
+const generateDailyData = (date: Date) => {
+    const start = startOfWeek(date);
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return days.map((day, i) => ({
+        name: `${day} (${format(addDays(start, i), 'd')})`,
+        views: Math.floor(Math.random() * 200) + 100,
+    }));
+};
+const generateWeeklyData = (year: number) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let weeklyData = [];
+    months.forEach((month) => {
+        for (let week = 1; week <= 4; week++) {
+            weeklyData.push({
+                name: `W${week} (${month})`,
+                views: Math.floor(Math.random() * 500) + 800,
+            });
+        }
+    });
+    return weeklyData.slice(0, 52); // Cap at 52 weeks
+};
+const generateMonthlyData = (year: number) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months.map(month => ({
+        name: month,
+        views: Math.floor(Math.random() * 4000) + 1000 + (year - 2022) * 500
+    }));
+};
+const generateYearlyData = () => {
+    const years = [2022, 2023, 2024];
+    return years.map(year => ({
+        name: year.toString(),
+        views: Math.floor(Math.random() * 30000) + 20000 + (year-2022)*15000
+    }));
+};
 
 const ADMIN_PASSWORD = 'Bluechip@123';
 const ADMIN_OTP = '16082007';
@@ -473,19 +497,24 @@ export default function AdminDashboard() {
     const [propertyTypeFilter, setPropertyTypeFilter] = useState('all');
 
     const [chartView, setChartView] = useState('monthly');
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedDate, setSelectedDate] = useState(new Date());
+
     const chartData = useMemo(() => {
         switch (chartView) {
             case 'daily':
-                return dailyChartData;
+                return generateDailyData(selectedDate);
             case 'weekly':
-                return weeklyChartData;
+                return generateWeeklyData(selectedYear);
             case 'yearly':
-                return yearlyChartData;
+                return generateYearlyData();
             case 'monthly':
             default:
-                return monthlyChartData;
+                return generateMonthlyData(selectedYear);
         }
-    }, [chartView]);
+    }, [chartView, selectedYear, selectedDate]);
+    
+    const years = [new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() - 2];
 
     useEffect(() => {
         const authStatus = localStorage.getItem('admin_authenticated');
@@ -709,12 +738,40 @@ export default function AdminDashboard() {
                              <Tabs value={chartView} onValueChange={setChartView} className="w-full">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-xl font-semibold text-slate-800">Property Views</h3>
-                                    <TabsList>
-                                        <TabsTrigger value="daily">Daily</TabsTrigger>
-                                        <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                                        <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                                        <TabsTrigger value="yearly">Yearly</TabsTrigger>
-                                    </TabsList>
+                                    <div className="flex items-center gap-4">
+                                        {chartView === 'daily' && (
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}
+                                                    >
+                                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                                        {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
+                                                </PopoverContent>
+                                            </Popover>
+                                        )}
+                                        {(chartView === 'monthly' || chartView === 'weekly') && (
+                                            <Select value={selectedYear.toString()} onValueChange={(val) => setSelectedYear(parseInt(val))}>
+                                                <SelectTrigger className="w-[120px]">
+                                                    <SelectValue placeholder="Select year" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {years.map(year => <SelectItem key={year} value={year.toString()}>{year}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                        <TabsList>
+                                            <TabsTrigger value="daily">Daily</TabsTrigger>
+                                            <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                                            <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                                            <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                                        </TabsList>
+                                    </div>
                                 </div>
                                 <div className="h-80">
                                     <ResponsiveContainer width="100%" height="100%">
