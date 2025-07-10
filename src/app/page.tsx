@@ -271,7 +271,7 @@ export default function Home() {
       title: "Inquiry Sent!",
       description: "The owner has been notified of your availability request.",
     });
-    // Here you would typically make an API call to notify the owner
+    // In a real app, this would trigger an API call to the owner.
   };
 
   const handleLoginSuccess = () => {
