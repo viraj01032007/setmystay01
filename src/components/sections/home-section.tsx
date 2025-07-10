@@ -56,7 +56,7 @@ export function HomeSection({
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
       {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center p-6">
+      <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center">
         <Image
           src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2071&auto=format&fit=crop"
           alt="Modern living room"
@@ -65,7 +65,7 @@ export function HomeSection({
           priority
           data-ai-hint="modern interior"
         />
-        <div className="relative text-white max-w-4xl space-y-6 w-full bg-gradient-to-br from-blue-900/70 to-blue-700/60 p-4 sm:p-8 rounded-xl shadow-2xl backdrop-blur-sm">
+        <div className="relative text-white max-w-4xl space-y-6 w-full bg-gradient-to-br from-blue-900/70 to-blue-700/60 p-6 sm:p-8 m-4 rounded-xl shadow-2xl backdrop-blur-sm">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
             Find Your Perfect Living Space
           </h1>
@@ -120,6 +120,7 @@ export function HomeSection({
                     onViewDetails={(item) => onViewDetails(item, 'listing')}
                     isLiked={likedItemIds.has(listing.id)}
                     onToggleLike={() => onToggleLike(listing.id)}
+                    isHorizontal={true}
                   />
                 </div>
               </CarouselItem>
@@ -146,6 +147,7 @@ export function HomeSection({
                     onViewDetails={(item) => onViewDetails(item, 'roommate')}
                     isLiked={likedItemIds.has(profile.id)}
                     onToggleLike={() => onToggleLike(profile.id)}
+                    isHorizontal={true}
                   />
                 </div>
               </CarouselItem>
