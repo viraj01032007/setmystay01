@@ -63,6 +63,12 @@ const initialPricing = {
 }
 
 // Chart data generation functions
+const generateHourlyData = (date: Date) => {
+    return Array.from({ length: 24 }, (_, i) => ({
+        name: `${i.toString().padStart(2, '0')}:00`,
+        views: Math.floor(Math.random() * 50) + (i > 8 && i < 22 ? 20 : 5),
+    }));
+};
 const generateDailyData = (date: Date) => {
     const start = startOfWeek(date);
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -502,6 +508,8 @@ export default function AdminDashboard() {
 
     const chartData = useMemo(() => {
         switch (chartView) {
+            case 'hourly':
+                return generateHourlyData(selectedDate);
             case 'daily':
                 return generateDailyData(selectedDate);
             case 'weekly':
@@ -739,7 +747,7 @@ export default function AdminDashboard() {
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-xl font-semibold text-slate-800">Property Views</h3>
                                     <div className="flex items-center gap-4">
-                                        {chartView === 'daily' && (
+                                        {(chartView === 'daily' || chartView === 'hourly') && (
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <Button
@@ -766,6 +774,7 @@ export default function AdminDashboard() {
                                             </Select>
                                         )}
                                         <TabsList>
+                                            <TabsTrigger value="hourly">Hourly</TabsTrigger>
                                             <TabsTrigger value="daily">Daily</TabsTrigger>
                                             <TabsTrigger value="weekly">Weekly</TabsTrigger>
                                             <TabsTrigger value="monthly">Monthly</TabsTrigger>
