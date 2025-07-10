@@ -73,7 +73,7 @@ export default function StaffLoginPage() {
                     type="text"
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
-                    placeholder="e.g., staff1"
+                    placeholder="Username"
                     required
                     className="pl-10"
                   />
