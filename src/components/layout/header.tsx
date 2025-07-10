@@ -107,7 +107,7 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
                  <DropdownMenuTrigger asChild>
                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                      <Avatar className="h-10 w-10">
-                       <AvatarImage src="https://placehold.co/100x100" alt="User" />
+                       <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="unisex avatar" />
                        <AvatarFallback>U</AvatarFallback>
                      </Avatar>
                    </Button>

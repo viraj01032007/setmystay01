@@ -21,6 +21,7 @@ import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 
 const amenitiesList = [
@@ -87,7 +88,7 @@ const formSchema = z.object({
   brokerStatus: z.enum(['With Broker', 'Without Broker']).optional(),
   aadhaarCard: fileSchema,
   electricityBill: fileSchema.optional(),
-  noc: fileSchema.optional(),
+  noc: z.any().optional(),
   videoFile: z.any().optional(),
   gender: z.string().optional(),
 }).superRefine((data, ctx) => {
@@ -479,7 +480,14 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     <>
                         <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
                         <div className="md:col-span-2">
-                            <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
+                           <FileUploadField name="noc" label="NOC" control={form.control} />
+                             <Alert className="mt-2">
+                               <ShieldCheck className="h-4 w-4" />
+                               <AlertTitle>Boost Your Listing!</AlertTitle>
+                               <AlertDescription>
+                                 Uploading a No Objection Certificate (NOC) is optional, but it significantly increases trust and can help boost your property's visibility.
+                               </AlertDescription>
+                             </Alert>
                         </div>
                     </>
                  )}
