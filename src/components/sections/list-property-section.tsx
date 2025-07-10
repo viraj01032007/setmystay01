@@ -27,7 +27,6 @@ const amenityIcons: { [key: string]: string } = {
 };
 
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
 
 const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
@@ -51,7 +50,6 @@ const formSchema = z.object({
   videoFile: z
     .any()
     .refine((file) => file instanceof File, "Video is required.")
-    .refine((file) => file?.size <= MAX_VIDEO_SIZE, `Max video size is 50MB.`)
     .refine(
       (file) => file?.type ? ACCEPTED_VIDEO_TYPES.includes(file.type) : false,
       ".mp4, .webm and .ogg formats are supported."
@@ -341,7 +339,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
              <Card>
               <CardHeader>
                 <CardTitle>Video Tour (Required)</CardTitle>
-                <CardDescription>Upload a short video tour. (Max 50MB)</CardDescription>
+                <CardDescription>Upload a short video tour.</CardDescription>
               </CardHeader>
               <CardContent>
                 <FormField
@@ -469,5 +467,3 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     </div>
   );
 }
-
-    
