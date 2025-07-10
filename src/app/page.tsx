@@ -68,6 +68,15 @@ export default function Home() {
     // Initial data loading
     setAllListings(dummyProperties);
     setAllRoommates(dummyRoommates);
+    
+    // Shuffling logic for initial render
+    const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
+    const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
+    const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
+  
+    setFeaturedProperties(shuffledListings.slice(0, 3));
+    setFeaturedRoommates(shuffledRoommates.slice(0, 3));
+    
     setIsLoading(false);
   }, []);
 
@@ -96,14 +105,6 @@ export default function Home() {
 
           return () => clearTimeout(timer);
       }
-
-      // Shuffling logic moved here to avoid hydration errors
-      const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
-      const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
-      const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
-    
-      setFeaturedProperties(shuffledListings.slice(0, 3));
-      setFeaturedRoommates(shuffledRoommates.slice(0, 3));
     }
   }, [isClient]);
 
@@ -445,5 +446,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

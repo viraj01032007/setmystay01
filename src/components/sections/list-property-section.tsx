@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
@@ -27,6 +27,13 @@ const amenityIcons: { [key: string]: string } = {
 };
 
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+
+const fileSchema = z
+  .any()
+  .refine((files) => files?.length === 1, "File is required.")
+  .refine((files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type), ".jpg, .jpeg, .png and .pdf files are accepted.");
+
 
 const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
@@ -46,7 +53,9 @@ const formSchema = z.object({
   description: z.string().optional(),
   amenities: z.array(z.string()).optional(),
   brokerStatus: z.enum(['With Broker', 'Without Broker']),
-  verificationDocument: z.any().optional(),
+  aadhaarCard: fileSchema,
+  electricityBill: fileSchema,
+  noc: fileSchema.optional(),
   videoFile: z
     .any()
     .refine((file) => file?.[0], "Video is required.")
@@ -68,13 +77,55 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface ListPropertySectionProps {
-  onSubmit: (data: FormValues & { images: File[], videoFile: File | null }) => void;
+  onSubmit: (data: FormValues & { images: File[] }) => void;
 }
+
+const FileUploadField = ({ name, label, control }: { name: "aadhaarCard" | "electricityBill" | "noc", label: string, control: any }) => {
+    const [fileName, setFileName] = useState<string | null>(null);
+
+    return (
+        <FormField
+            control={control}
+            name={name}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                        <div
+                            className="border-2 border-dashed border-muted rounded-lg p-4 text-center cursor-pointer hover:border-primary"
+                            onClick={() => document.getElementById(`upload-${name}`)?.click()}
+                        >
+                            <FileUp className="mx-auto h-8 w-8 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                {fileName || `Click to upload ${label}`}
+                            </p>
+                            <Input
+                                id={`upload-${name}`}
+                                type="file"
+                                accept="image/*,application/pdf"
+                                className="hidden"
+                                onBlur={field.onBlur}
+                                name={field.name}
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        field.onChange(e.target.files);
+                                        setFileName(file.name);
+                                    }
+                                }}
+                                ref={field.ref}
+                            />
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    );
+};
 
 export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-  const [verificationFile, setVerificationFile] = useState<File | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [customAmenity, setCustomAmenity] = useState('');
   
   const form = useForm<FormValues>({
@@ -111,20 +162,19 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
 
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
-    const finalData = { ...data, images: mediaFiles, videoFile: videoFile };
+    const finalData = { 
+        ...data, 
+        images: mediaFiles,
+        aadhaarCard: data.aadhaarCard[0],
+        electricityBill: data.electricityBill[0],
+        noc: data.noc ? data.noc[0] : undefined,
+    };
     onSubmit(finalData);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setMediaFiles(prev => [...prev, ...Array.from(event.target.files)].slice(0, 5));
-    }
-  };
-  
-  const handleVerificationFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setVerificationFile(event.target.files[0]);
-      form.setValue('verificationDocument', event.target.files[0]);
     }
   };
 
@@ -305,83 +355,75 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Photo Upload</CardTitle>
-                <CardDescription>Add photos to attract more interest. (Max 5)</CardDescription>
+                <CardTitle>Photo & Video Upload</CardTitle>
+                <CardDescription>Add photos (Max 5) and a required video tour.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('media-upload')?.click()}>
-                  <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground"/>
-                  <p className="mt-4 text-sm text-muted-foreground">Drag & drop or click to upload</p>
-                  <Input id="media-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
-                </div>
-                {mediaFiles.length > 0 && (
-                  <div className="mt-4 grid grid-cols-3 sm:grid-cols-5 gap-4">
-                    {mediaFiles.map((file, i) => (
-                      <div key={i} className="relative group">
-                        <Image src={URL.createObjectURL(file)} alt={file.name} width={100} height={100} className="w-full h-24 object-cover rounded-md"/>
-                        <button type="button" onClick={() => setMediaFiles(mediaFiles.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <X className="w-3 h-3"/>
-                        </button>
+                 <div className="mb-6">
+                    <FormLabel>Photos</FormLabel>
+                    <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('media-upload')?.click()}>
+                      <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground"/>
+                      <p className="mt-4 text-sm text-muted-foreground">Drag & drop or click to upload photos</p>
+                      <Input id="media-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                    </div>
+                    {mediaFiles.length > 0 && (
+                      <div className="mt-4 grid grid-cols-3 sm:grid-cols-5 gap-4">
+                        {mediaFiles.map((file, i) => (
+                          <div key={i} className="relative group">
+                            <Image src={URL.createObjectURL(file)} alt={file.name} width={100} height={100} className="w-full h-24 object-cover rounded-md"/>
+                            <button type="button" onClick={() => setMediaFiles(mediaFiles.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <X className="w-3 h-3"/>
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-             <Card>
-              <CardHeader>
-                <CardTitle>Video Tour (Required)</CardTitle>
-                <CardDescription>Upload a short video tour.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FormField
-                    control={form.control}
-                    name="videoFile"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormControl>
-                                <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('video-upload')?.click()}>
-                                    <Video className="mx-auto h-12 w-12 text-muted-foreground"/>
-                                    <p className="mt-4 text-sm text-muted-foreground">
-                                        {videoFile ? videoFile.name : 'Click to upload video file'}
-                                    </p>
-                                    <Input id="video-upload" type="file" accept="video/*" className="hidden" onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            setVideoFile(file);
-                                            field.onChange([file]);
-                                        }
-                                    }} />
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
                     )}
-                />
+                </div>
+
+                <div>
+                    <FormField
+                        control={form.control}
+                        name="videoFile"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Video Tour</FormLabel>
+                                <FormControl>
+                                    <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('video-upload')?.click()}>
+                                        <Video className="mx-auto h-12 w-12 text-muted-foreground"/>
+                                        <p className="mt-4 text-sm text-muted-foreground">
+                                            {field.value?.[0]?.name || 'Click to upload video file'}
+                                        </p>
+                                        <Input
+                                            id="video-upload"
+                                            type="file"
+                                            accept="video/*"
+                                            className="hidden"
+                                            onBlur={field.onBlur}
+                                            name={field.name}
+                                            onChange={(e) => field.onChange(e.target.files)}
+                                            ref={field.ref}
+                                        />
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
               </CardContent>
             </Card>
 
              <Card>
               <CardHeader>
-                <CardTitle>Verification Document</CardTitle>
-                <CardDescription>Upload a document for verification (e.g., Aadhar card, Agreement). This will only be visible to our admin team.</CardDescription>
+                <CardTitle>Verification Documents</CardTitle>
+                <CardDescription>Upload these documents for verification. This will only be visible to our admin team.</CardDescription>
               </CardHeader>
-              <CardContent>
-                 <FormField control={form.control} name="verificationDocument" render={({ field }) => (
-                    <FormItem>
-                        <FormControl>
-                            <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('verification-upload')?.click()}>
-                                <ShieldCheck className="mx-auto h-12 w-12 text-muted-foreground"/>
-                                <p className="mt-4 text-sm text-muted-foreground">
-                                    {verificationFile ? verificationFile.name : 'Click to upload your verification document'}
-                                </p>
-                                <Input id="verification-upload" type="file" accept="image/*,application/pdf" className="hidden" onChange={handleVerificationFileChange} />
-                            </div>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                 )} />
+              <CardContent className="grid md:grid-cols-2 gap-6">
+                 <FileUploadField name="aadhaarCard" label="Aadhaar Card (Required)" control={form.control} />
+                 <FileUploadField name="electricityBill" label="Electricity Bill (Required)" control={form.control} />
+                 <div className="md:col-span-2">
+                    <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
+                 </div>
               </CardContent>
             </Card>
 
@@ -466,5 +508,3 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     </div>
   );
 }
-
-    
