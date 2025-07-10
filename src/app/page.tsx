@@ -217,7 +217,8 @@ export default function Home() {
           videoUrl: pendingListingData.videoFile ? URL.createObjectURL(pendingListingData.videoFile) : undefined,
           views: 0,
           ownerId: 'newUser',
-          brokerStatus: pendingListingData.brokerStatus
+          brokerStatus: pendingListingData.brokerStatus,
+          lastAvailabilityCheck: new Date(),
       }
       setAllListings(prev => [mappedListing, ...prev]);
     } else {
@@ -262,6 +263,15 @@ export default function Home() {
     setInquiryData({ listing, bed });
     setIsBookingModalOpen(true);
     setSelectedItem(null); 
+  };
+  
+  const handleCheckAvailability = () => {
+    setSelectedItem(null);
+    toast({
+      title: "Inquiry Sent!",
+      description: "The owner has been notified of your availability request.",
+    });
+    // Here you would typically make an API call to notify the owner
   };
 
   const handleLoginSuccess = () => {
@@ -375,6 +385,7 @@ export default function Home() {
         onUnlock={handleUnlockClick}
         onChat={() => handleChat(selectedItem?.data?.ownerName || 'Owner')}
         onBookInquiry={handleBookInquiry}
+        onCheckAvailability={handleCheckAvailability}
       />
       <RoommateDetails
         profile={selectedItem?.type === 'roommate' ? selectedItem.data as RoommateProfile : null}

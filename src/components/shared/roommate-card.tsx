@@ -1,7 +1,7 @@
-
 "use client";
 
 import Image from "next/image";
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { RoommateProfile } from "@/lib/types";
@@ -14,6 +14,13 @@ interface RoommateCardProps {
 }
 
 export function RoommateCard({ profile, onViewDetails }: RoommateCardProps) {
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent card click event from firing
+      setIsLiked(!isLiked);
+  };
+
   return (
     <div 
       className="bg-card rounded-xl shadow-md overflow-hidden border border-transparent hover:border-primary/50 hover:shadow-xl transition-all duration-300 group cursor-pointer"
@@ -31,6 +38,15 @@ export function RoommateCard({ profile, onViewDetails }: RoommateCardProps) {
           <User className="w-3 h-3 mr-1.5" />
           Roommate
         </Badge>
+         <Button 
+            size="icon" 
+            variant="ghost" 
+            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/70 backdrop-blur-sm hover:bg-white"
+            onClick={handleLikeClick}
+        >
+            <Heart className={cn("w-5 h-5 text-slate-600 transition-all", isLiked && "text-red-500 fill-red-500")} />
+            <span className="sr-only">Like profile</span>
+        </Button>
       </div>
       <div className="p-4 space-y-3">
         <h3 className="text-lg font-bold text-card-foreground truncate group-hover:text-primary">{profile.ownerName}, {profile.age}</h3>

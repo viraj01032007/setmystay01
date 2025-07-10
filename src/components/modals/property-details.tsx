@@ -6,8 +6,9 @@ import type { Listing, Bed } from '@/lib/types';
 import { DetailsModalWrapper } from './details-modal-wrapper';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, IndianRupee, Home, Eye, BedDouble, ChevronLeft, ChevronRight, Lock, MessageSquare, Phone, PlayCircle } from 'lucide-react';
+import { MapPin, IndianRupee, Home, Eye, BedDouble, ChevronLeft, ChevronRight, Lock, MessageSquare, Phone, PlayCircle, Clock, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
 
 interface PropertyDetailsProps {
   listing: Listing | null;
@@ -16,6 +17,7 @@ interface PropertyDetailsProps {
   onUnlock: () => void;
   onChat: () => void;
   onBookInquiry: (listing: Listing, bed: Bed) => void;
+  onCheckAvailability: () => void;
 }
 
 const amenityIcons: { [key: string]: React.ReactNode } = {
@@ -124,7 +126,7 @@ const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isU
 };
 
 
-export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat, onBookInquiry }: PropertyDetailsProps) {
+export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat, onBookInquiry, onCheckAvailability }: PropertyDetailsProps) {
   if (!listing) return null;
 
   const handleBedClick = (bed: Bed) => {
@@ -237,18 +239,29 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button size="lg" className="flex-1" onClick={onChat} disabled={!isUnlocked}>
-            <MessageSquare className="w-5 h-5 mr-2" /> Chat with Owner
-          </Button>
-           <a href={`tel:${listing.contactPhonePrimary}`} className="flex-1">
-            <Button size="lg" variant="outline" className="w-full" disabled={!isUnlocked}>
-                <Phone className="w-5 h-5 mr-2" /> Call Owner
-            </Button>
-           </a>
-           <Button size="lg" variant="ghost" className="flex-1" onClick={onClose}>
-                Close
-           </Button>
+        <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" className="flex-1" onClick={onChat} disabled={!isUnlocked}>
+                    <MessageSquare className="w-5 h-5 mr-2" /> Chat with Owner
+                </Button>
+                <a href={`tel:${listing.contactPhonePrimary}`} className="flex-1">
+                    <Button size="lg" variant="outline" className="w-full" disabled={!isUnlocked}>
+                        <Phone className="w-5 h-5 mr-2" /> Call Owner
+                    </Button>
+                </a>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" variant="secondary" className="flex-1" onClick={onCheckAvailability}>
+                    <CheckCircle className="w-5 h-5 mr-2" /> Check Availability
+                </Button>
+                <Button size="lg" variant="ghost" className="flex-1" onClick={onClose}>
+                    Close
+                </Button>
+            </div>
+            <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+                <Clock className="w-3 h-3"/>
+                Availability last updated: {formatDistanceToNow(new Date(listing.lastAvailabilityCheck), { addSuffix: true })}
+            </p>
         </div>
       </div>
     </DetailsModalWrapper>

@@ -57,7 +57,8 @@ export const dummyProperties: Listing[] = [
             { id: 'bed2', status: 'vacant' },
             { id: 'bed3', status: 'vacant' },
             { id: 'bed4', status: 'occupied' },
-        ]
+        ],
+        lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
     },
     {
         id: 'luxury-2bhk-vashi',
@@ -87,6 +88,7 @@ export const dummyProperties: Listing[] = [
         views: 340,
         ownerId: 'dummyOwner2',
         brokerStatus: 'With Broker',
+        lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
     },
     {
         id: 'spacious-3bhk-kharghar',
@@ -113,6 +115,7 @@ export const dummyProperties: Listing[] = [
         views: 210,
         ownerId: 'dummyOwner1',
         brokerStatus: 'Without Broker',
+        lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
     },
     {
         id: 'modern-2bhk-nerul',
@@ -139,6 +142,7 @@ export const dummyProperties: Listing[] = [
         views: 95,
         ownerId: 'dummyOwner3',
         brokerStatus: 'With Broker',
+        lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
     },
     {
         id: 'affordable-1bhk-panvel',
@@ -165,6 +169,7 @@ export const dummyProperties: Listing[] = [
         views: 450,
         ownerId: 'dummyOwner4',
         brokerStatus: 'Without Broker',
+        lastAvailabilityCheck: new Date(),
     },
     {
         id: 'cozy-1bhk-andheri',
@@ -188,6 +193,7 @@ export const dummyProperties: Listing[] = [
         views: 280,
         ownerId: 'dummyOwner6',
         brokerStatus: 'Without Broker',
+        lastAvailabilityCheck: new Date(),
     },
     {
         id: 'student-pg-airoli',
@@ -220,7 +226,8 @@ export const dummyProperties: Listing[] = [
             { id: 'bed4', status: 'occupied' },
             { id: 'bed5', status: 'vacant' },
             { id: 'bed6', status: 'vacant' },
-        ]
+        ],
+        lastAvailabilityCheck: new Date(),
     }
 ];
 

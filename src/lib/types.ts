@@ -51,6 +51,7 @@ export interface Listing {
   brokerStatus: 'With Broker' | 'Without Broker';
   verificationDocumentUrl?: string;
   beds?: Bed[];
+  lastAvailabilityCheck: Date;
 }
 
 export interface RoommateProfile {

@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -29,19 +29,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, startOfWeek, addDays, getWeek } from 'date-fns';
+import { format, startOfWeek, addDays, getWeek, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 
 // Mock data similar to the provided script
 const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior' },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room' },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment' },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room' }
+    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', area: 1200, lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', area: 250, lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', area: 650, lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
+    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', area: 300, lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000) }
 ];
 const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait' },
+    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait' },
     { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait' }
 ];
 const initialAdvertisements: Advertisement[] = [
@@ -62,6 +62,11 @@ const initialPricing = {
         rental: 999
     }
 }
+
+const initialAvailabilityInquiries = [
+    { id: 'INQ01', propertyId: 'P002', propertyTitle: 'Cozy PG near College', userName: 'Amit Singh', time: new Date(Date.now() - 15 * 60 * 1000) },
+    { id: 'INQ02', propertyId: 'P004', propertyTitle: 'Luxury PG with all amenities', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+]
 
 // Chart data generation functions
 const generateHourlyData = (date: Date) => {
@@ -485,6 +490,7 @@ export default function AdminDashboard() {
     const [analytics, setAnalytics] = useState(null);
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
     const [coupons, setCoupons] = useState<Coupon[]>([]);
+    const [availabilityInquiries, setAvailabilityInquiries] = useState([]);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
@@ -536,6 +542,7 @@ export default function AdminDashboard() {
             setPricing(initialPricing);
             setAdvertisements(initialAdvertisements);
             setCoupons(dummyCoupons);
+            setAvailabilityInquiries(initialAvailabilityInquiries);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
@@ -834,6 +841,34 @@ export default function AdminDashboard() {
                         <div className="mt-6 flex justify-end">
                             <Button onClick={handleSavePricing}>Save Prices</Button>
                         </div>
+                    </CardContent>
+                </Card>
+                
+                {/* Availability Inquiries */}
+                <Card className="mb-8">
+                    <CardHeader>
+                        <CardTitle className="text-2xl">Availability Inquiries</CardTitle>
+                        <CardDescription>Recent inquiries from users about property availability.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {availabilityInquiries.length > 0 ? (
+                            <div className="space-y-4">
+                                {availabilityInquiries.map(inquiry => (
+                                    <div key={inquiry.id} className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                                        <div className="flex items-center gap-4">
+                                            <Bell className="w-6 h-6 text-blue-500" />
+                                            <div>
+                                                <p><strong className="font-semibold">{inquiry.userName}</strong> inquired about <strong className="font-semibold">{inquiry.propertyTitle}</strong></p>
+                                                <p className="text-sm text-muted-foreground">{formatDistanceToNow(inquiry.time, { addSuffix: true })}</p>
+                                            </div>
+                                        </div>
+                                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(inquiry.propertyId, 'rental')}>View Property</Button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-slate-500 text-center py-4">No new availability inquiries.</p>
+                        )}
                     </CardContent>
                 </Card>
 
