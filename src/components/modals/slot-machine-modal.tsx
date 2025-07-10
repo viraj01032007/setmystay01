@@ -31,6 +31,7 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
     const [isSpinning, setIsSpinning] = useState(false);
     const [winner, setWinner] = useState<Coupon | null>(null);
     const [hasSpun, setHasSpun] = useState(false);
+    const [leverPulled, setLeverPulled] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -51,6 +52,7 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
 
         setIsSpinning(true);
         setWinner(null);
+        setLeverPulled(true);
         sessionStorage.setItem('setmystay_has_spun_slot', 'true');
 
         // Determine winner
@@ -63,19 +65,20 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
             const winningSymbolIndex = Math.floor(Math.random() * reelSymbols.length);
             finalReels = [winningSymbolIndex, winningSymbolIndex, winningSymbolIndex];
         } else {
-            // Ensure no win
+            // Ensure no win by making sure at least two are different
             finalReels = [
                 Math.floor(Math.random() * reelSymbols.length),
-                (Math.floor(Math.random() * (reelSymbols.length -1)) + 1) % reelSymbols.length,
-                (Math.floor(Math.random() * (reelSymbols.length -2)) + 2) % reelSymbols.length,
+                Math.floor(Math.random() * reelSymbols.length),
+                Math.floor(Math.random() * reelSymbols.length),
             ];
-             // Shuffle to make it look random
-            finalReels.sort(() => Math.random() - 0.5);
+            while (finalReels[0] === finalReels[1] && finalReels[1] === finalReels[2]) {
+                 finalReels[1] = (finalReels[1] + 1) % reelSymbols.length;
+            }
         }
 
-        // Animate reels one by one
-        setTimeout(() => setReels(prev => [finalReels[0], prev[1], prev[2]]), 500);
-        setTimeout(() => setReels(prev => [prev[0], finalReels[1], prev[2]]), 1000);
+        // Animate reels one by one over 10 seconds
+        setTimeout(() => setReels(prev => [finalReels[0], prev[1], prev[2]]), 3000);
+        setTimeout(() => setReels(prev => [prev[0], finalReels[1], prev[2]]), 6000);
         setTimeout(() => {
             setReels(finalReels);
             setIsSpinning(false);
@@ -84,7 +87,10 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                 setWinner(prize);
                 onWin(prize);
             }
-        }, 1500);
+        }, 9000);
+        
+        // Reset lever animation
+        setTimeout(() => setLeverPulled(false), 500);
     };
 
     const copyToClipboard = () => {
@@ -104,25 +110,43 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                             ? "You've already played this session."
                             : winner
                             ? "Congratulations! You've won a prize!"
-                            : "Spin the reels to win a discount coupon. Good luck!"
+                            : "Pull the lever to win a discount coupon. Good luck!"
                         }
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="py-8 flex flex-col items-center justify-center gap-6">
-                    <div className="bg-slate-800 p-6 rounded-xl shadow-2xl border-4 border-slate-600 w-full">
-                        <div className="grid grid-cols-3 gap-4 bg-slate-100 rounded-lg p-4 overflow-hidden">
-                            {reels.map((symbolIndex, i) => (
-                                <div key={i} className={cn("flex items-center justify-center transition-transform duration-500 ease-in-out", isSpinning ? 'animate-pulse' : '')}>
-                                    <ReelIcon icon={reelSymbols[symbolIndex].icon} className={reelSymbols[symbolIndex].color} />
-                                </div>
-                            ))}
+                    <div className="flex items-center gap-4">
+                        <div className="bg-slate-800 p-6 rounded-xl shadow-2xl border-4 border-slate-600 w-full">
+                            <div className="grid grid-cols-3 gap-4 bg-slate-100 rounded-lg p-4 overflow-hidden">
+                                {reels.map((symbolIndex, i) => (
+                                    <div key={i} className={cn("flex items-center justify-center transition-transform duration-500 ease-in-out", isSpinning ? 'animate-pulse' : '')}>
+                                        <ReelIcon icon={reelSymbols[symbolIndex].icon} className={reelSymbols[symbolIndex].color} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Slot machine lever */}
+                        <div 
+                            className="flex-shrink-0 cursor-pointer group"
+                            onClick={handleSpin}
+                        >
+                            <div className="w-4 h-24 bg-slate-400 rounded-t-full relative">
+                                <div className={cn(
+                                    "absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-red-600 border-4 border-slate-200 shadow-inner transform transition-transform duration-300 ease-out",
+                                    leverPulled ? 'translate-y-20' : 'translate-y-0',
+                                    (isSpinning || hasSpun) && 'group-hover:translate-y-0'
+                                    )}
+                                ></div>
+                            </div>
+                            <div className="w-10 h-8 bg-slate-700 rounded-b-lg -mt-1 mx-auto"></div>
                         </div>
                     </div>
                     
                     {winner ? (
-                        <div className="text-center space-y-2">
-                             <p className="text-3xl font-bold text-primary">JACKPOT!</p>
+                        <div className="text-center space-y-2 mt-4">
+                             <p className="text-3xl font-bold text-primary animate-pulse">JACKPOT!</p>
                              <div className="flex items-center gap-2 mt-2 p-3 border-2 border-dashed rounded-lg bg-muted">
                                 <Ticket className="w-6 h-6 text-muted-foreground"/>
                                 <span className="text-xl font-bold tracking-widest">{winner.code} ({winner.discountPercentage}%)</span>
@@ -132,8 +156,8 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                             </div>
                         </div>
                     ) : (
-                         <Button size="lg" onClick={handleSpin} disabled={isSpinning || hasSpun} className="w-full">
-                            {isSpinning ? "Spinning..." : hasSpun ? "Already Played" : "Spin Now!"}
+                         <Button size="lg" onClick={handleSpin} disabled={isSpinning || hasSpun} className="w-full mt-4">
+                            {isSpinning ? "Spinning..." : hasSpun ? "Already Played" : "Pull Lever to Spin!"}
                         </Button>
                     )}
                 </div>
