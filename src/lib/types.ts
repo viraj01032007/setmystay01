@@ -63,6 +63,7 @@ export interface RoommateProfile {
   ownerName: string;
   age: number;
   rent: number; // Budget
+  area: number; // Preferred area
   city: string;
   locality: string;
   state: string;
@@ -109,4 +110,3 @@ export interface ToggleGroupProps
   extends React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<HTMLElement>> {
   Item: React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<HTMLButtonElement>>;
 }
-

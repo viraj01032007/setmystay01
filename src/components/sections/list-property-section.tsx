@@ -70,6 +70,7 @@ const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
   title: z.string().min(5, 'Title must be at least 5 characters'),
   rent: z.coerce.number().min(1000, 'Rent must be at least 1000'),
+  area: z.coerce.number().min(50, 'Area must be at least 50 sq ft'),
   state: z.string().min(1, 'State is required'),
   city: z.string().min(1, 'City is required'),
   locality: z.string().min(1, 'Locality is required'),
@@ -167,6 +168,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       propertyType: 'Rental',
       brokerStatus: 'Without Broker',
       rent: 15000,
+      area: 1200,
       amenities: [],
       phonePrimary: '',
       phoneSecondary: '',
@@ -260,6 +262,9 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 )}/>
                 <FormField control={form.control} name="rent" render={({ field }) => (
                   <FormItem><FormLabel>Monthly Rent (₹)</FormLabel><FormControl><Input type="number" placeholder="25000" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="area" render={({ field }) => (
+                  <FormItem><FormLabel>Area (sq ft)</FormLabel><FormControl><Input type="number" placeholder="1200" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 
                 {propertyType === 'Roommate' && (
