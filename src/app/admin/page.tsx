@@ -1,4 +1,5 @@
 
+
 // @ts-nocheck
 'use client';
 
@@ -7,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -34,13 +35,13 @@ import { cn } from '@/lib/utils';
 
 // Mock data similar to the provided script
 const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior' },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room' },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment' },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room' }
+    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior' },
+    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room' },
+    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment' },
+    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room' }
 ];
 const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait' },
+    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait' },
     { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait' }
 ];
 const initialAdvertisements: Advertisement[] = [
@@ -1076,18 +1077,42 @@ export default function AdminDashboard() {
                                 </div>
                             )}
 
-                            {currentItem.verificationDocumentUrl && (
+                             {(currentItem.aadhaarCardUrl || currentItem.electricityBillUrl) && (
                                 <div className="border rounded-lg p-4 bg-blue-50">
-                                    <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
+                                    <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
                                         <FileCheck className="w-5 h-5 text-blue-700" />
-                                        Verification Document
+                                        Verification Documents
                                     </h4>
-                                    <p className="text-sm text-blue-600 mb-2">This document is visible only to admins.</p>
-                                    <Button asChild variant="outline">
-                                        <a href={currentItem.verificationDocumentUrl} target="_blank" rel="noopener noreferrer">
-                                            View Document
-                                        </a>
-                                    </Button>
+                                    <p className="text-sm text-blue-600 mb-4">These documents are visible only to admins for verification.</p>
+                                    <div className="flex flex-wrap gap-4">
+                                        {currentItem.aadhaarCardUrl && (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <FileText className="w-8 h-8 text-blue-600"/>
+                                                <p className="text-sm font-medium">Aadhaar Card</p>
+                                                <Button asChild variant="outline" size="sm">
+                                                    <a href={currentItem.aadhaarCardUrl} target="_blank" rel="noopener noreferrer">View</a>
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {currentItem.electricityBillUrl && (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <FileText className="w-8 h-8 text-blue-600"/>
+                                                <p className="text-sm font-medium">Electricity Bill</p>
+                                                <Button asChild variant="outline" size="sm">
+                                                    <a href={currentItem.electricityBillUrl} target="_blank" rel="noopener noreferrer">View</a>
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {currentItem.nocUrl && (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <FileText className="w-8 h-8 text-blue-600"/>
+                                                <p className="text-sm font-medium">NOC</p>
+                                                <Button asChild variant="outline" size="sm">
+                                                    <a href={currentItem.nocUrl} target="_blank" rel="noopener noreferrer">View</a>
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
