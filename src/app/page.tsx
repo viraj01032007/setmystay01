@@ -303,7 +303,7 @@ export default function Home() {
     setPendingListingData(null);
     toast({
       title: "Listing Submitted!",
-      description: "Your property is now live.",
+      description: "Your property is now live. You will receive a call from our staff for manual verification shortly.",
     });
     setTimeout(() => setRateUsModalOpen(true), 500);
   };
