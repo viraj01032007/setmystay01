@@ -26,7 +26,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
       setIsOtpSent(true);
       toast({
         title: "OTP Sent!",
-        description: `An OTP has been sent to ${mobileNumber}. (Simulated)`,
+        description: `An OTP has been sent to +91 ${mobileNumber}. (Simulated)`,
       });
     } else {
       toast({
@@ -88,10 +88,11 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
             <div className="grid gap-2">
               <div className="relative">
                 <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <span className="absolute left-10 top-1/2 -translate-y-1/2 text-sm text-muted-foreground border-r pr-2">+91</span>
                 <Input
                   id="mobile"
                   placeholder="10-digit mobile number"
-                  className="pl-10"
+                  className="pl-20"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   maxLength={10}

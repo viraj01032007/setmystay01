@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp, Wifi, Car, Dumbbell, Utensils, Tv, Snowflake, Wind, Droplets, Zap, Users, Shield, VenetianMask } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp, Wifi, Car, Dumbbell, Utensils, Tv, Snowflake, Wind, Droplets, Zap, Users, Shield, VenetianMask, User, BedDouble, Building, Leaf, PawPrint, Sparkles } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
@@ -41,13 +41,22 @@ const amenitiesList = [
   'Two-Wheeler Parking', 'Car Parking', 'Valet Parking', 'EV Charging', 'Shuttle Service',
   'Near Metro Station', 'Near Bus Stop', 'Near Grocery Store', 'Near Mall', 'Near College', 'Near Office', 'Near Hospital', 'Near ATM', 'Peaceful Area',
   // Original Amenities for backward compatibility if needed
-  'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Meals', 'Laundry', 'Housekeeping', 'Garden', 'Mirror'
+  'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Meals', 'Laundry', 'Housekeeping', 'Garden', 'Mirror',
+  // Roommate specific preferences
+  'Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'
 ].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
 
 
 const amenityIcons: { [key: string]: React.ElementType } = {
-  'AC': Snowflake, 'WiFi': Wifi, 'Parking': Car, 'Gym': Dumbbell, 'Pool': Wind, 'Elevator': Users, 'Security': Shield, 'Balcony': VenetianMask, 'Power Backup': Zap, 'Meals': Utensils, 'Laundry': Droplets, 'Housekeeping': Droplets, 'Garden': Wind, 'TV': Tv
+  'AC': Snowflake, 'Wi-Fi': Wifi, 'Parking': Car, 'Gymnasium': Dumbbell, 'Lift/Elevator': Users, 'Security': Shield, 'Balcony': VenetianMask, 'Power Backup': Zap, 'In-house Mess': Utensils, 'Washing Machine (Private/Common)': Droplets, 'Housekeeping': Droplets, 'Garden': Wind, 'TV': Tv, 'Refrigerator': Snowflake, 'Attached Bathroom': User, 'Reserved Parking': Car, 'Lift': Users, 'Gated Security': Shield, 'Non-Smoker': User, 'Vegetarian': Leaf, 'Pet-Friendly': PawPrint, 'Clean': Sparkles
 };
+
+const topAmenitiesByPropertyType: { [key: string]: string[] } = {
+    'Rental': ['AC', 'Wi-Fi', 'Parking', 'Gymnasium', 'Lift/Elevator', 'Security', 'Balcony', 'Power Backup'],
+    'PG': ['AC', 'Wi-Fi', 'In-house Mess', 'Washing Machine (Private/Common)', 'Housekeeping', 'Security', 'Power Backup', 'Refrigerator'],
+    'Roommate': ['Non-Smoker', 'Vegetarian', 'Pet-Friendly', 'Clean', 'Wi-Fi', 'AC', 'Attached Bathroom', 'Reserved Parking']
+};
+
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
 
@@ -172,6 +181,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const stateValue = form.watch('state');
   const cityValue = form.watch('city');
   const selectedAmenities = form.watch('amenities') || [];
+  const topAmenities = topAmenitiesByPropertyType[propertyType] || [];
 
   const citySuggestions = stateValue ? indianCitiesByState[stateValue] || [] : allIndianCities;
   const areaSuggestions = cityValue ? indianAreas[cityValue] || [] : [];
@@ -186,13 +196,14 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
 
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
+    const videoFile = data.videoFile?.[0];
     const finalData = { 
         ...data, 
         images: mediaFiles,
         aadhaarCard: data.aadhaarCard[0],
         electricityBill: data.electricityBill?.[0],
         noc: data.noc ? data.noc[0] : undefined,
-        videoFile: data.videoFile ? data.videoFile[0] : undefined,
+        videoFile,
     };
     onSubmit(finalData);
   };
@@ -305,7 +316,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                         render={() => (
                             <FormItem>
                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-4">
-                                  {['AC', 'WiFi', 'Parking', 'Gym', 'Meals', 'Laundry', 'Security', 'TV'].map((amenity) => {
+                                  {topAmenities.map((amenity) => {
                                       const Icon = amenityIcons[amenity] || Shield;
                                       return (
                                         <FormField
