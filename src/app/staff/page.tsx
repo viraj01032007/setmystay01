@@ -90,7 +90,7 @@ export default function StaffDashboard() {
         if (type === 'roommate') {
             setRoommates(rms => rms.map(r => r.id === id ? { ...r, status } : r));
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status } : p));
+            setProperties(props => props.map(p => p.id === id ? { ...r, status } : p));
         }
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
