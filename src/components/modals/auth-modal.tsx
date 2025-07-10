@@ -8,6 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Smartphone, Mail, KeyRound, Lock, LogIn } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { countryCodes } from '@/lib/country-codes';
+
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -19,19 +28,21 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
+  const [countryCode, setCountryCode] = useState('+91');
   const { toast } = useToast();
 
   const handleSendOtp = () => {
-    if (mobileNumber.length === 10) {
+    // Basic validation, can be improved with a library like libphonenumber-js
+    if (mobileNumber.length >= 7) { // Loosely check for a valid number length
       setIsOtpSent(true);
       toast({
         title: "OTP Sent!",
-        description: `An OTP has been sent to +91 ${mobileNumber}. (Simulated)`,
+        description: `An OTP has been sent to ${countryCode} ${mobileNumber}. (Simulated)`,
       });
     } else {
       toast({
         title: "Invalid Number",
-        description: "Please enter a valid 10-digit mobile number.",
+        description: "Please enter a valid mobile number.",
         variant: "destructive",
       });
     }
@@ -86,18 +97,31 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
           </div>
           <form onSubmit={handleLogin}>
             <div className="grid gap-2">
-              <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <span className="absolute left-10 top-1/2 -translate-y-1/2 text-sm text-muted-foreground border-r pr-2">+91</span>
-                <Input
-                  id="mobile"
-                  placeholder="10-digit mobile number"
-                  className="pl-20"
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  maxLength={10}
-                />
+              <div className="flex gap-2">
+                <Select value={countryCode} onValueChange={setCountryCode}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue placeholder="Country Code" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countryCodes.map(country => (
+                      <SelectItem key={country.code} value={country.dial_code}>
+                        {country.dial_code} ({country.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="relative w-full">
+                  <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="mobile"
+                    placeholder="Mobile number"
+                    className="pl-10"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                  />
+                </div>
               </div>
+
               {isOtpSent && (
                 <div className="relative">
                   <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
