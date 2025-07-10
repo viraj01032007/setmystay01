@@ -261,6 +261,7 @@ export default function Home() {
           size: '2 BHK', 
           images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/600x400'],
           videoUrl: pendingListingData.videoFile ? URL.createObjectURL(pendingListingData.videoFile) : undefined,
+          nocUrl: pendingListingData.noc ? URL.createObjectURL(pendingListingData.noc) : undefined,
           views: 0,
           ownerId,
           brokerStatus: pendingListingData.brokerStatus,

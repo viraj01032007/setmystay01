@@ -74,7 +74,7 @@ const formSchema = z.object({
   area: z.coerce.number().min(50, 'Area must be at least 50 sq ft'),
   state: z.string().min(1, 'State is required'),
   city: z.string().min(1, 'City is required'),
-  locality: z.string().min(1, 'Locality is required'),
+  locality: z.string().min(1, 'Area / Locality is required'),
   address: z.string().min(10, 'Full address is required'),
   ownerName: z.string().min(2, 'Name is required'),
   phonePrimary: z.string().refine((val) => /^\d{10}$/.test(val), {
