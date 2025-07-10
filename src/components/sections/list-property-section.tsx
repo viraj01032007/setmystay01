@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp, Wifi, Car, Dumbbell, Utensils, Tv, Snowflake, Wind, Droplets, Zap, Users, Shield, VenetianMask } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
@@ -20,6 +20,8 @@ import { indianStates } from '@/lib/states';
 import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 const amenitiesList = [
   'Electricity Backup', '24x7 Water Supply', 'Lift/Elevator', 'Gated Security', 'Reserved Parking', 'Visitor Parking', 'Intercom Facility', 'Power Backup', 'Fire Safety', 'CCTV Surveillance',
@@ -43,11 +45,10 @@ const amenitiesList = [
 ].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
 
 
-const amenityIcons: { [key: string]: string } = {
-  'AC': '❄️', 'WiFi': '📶', 'Parking': '🅿️', 'Gym': '🏋️', 'Pool': '🏊', 'Elevator': '↕️', 'Security': '🛡️', 'Balcony': '🪟', 'Power Backup': '🔋', 'Meals': '🍴', 'Laundry': '🧺', 'Housekeeping': '🧹', 'Garden': '🌳'
+const amenityIcons: { [key: string]: React.ElementType } = {
+  'AC': Snowflake, 'WiFi': Wifi, 'Parking': Car, 'Gym': Dumbbell, 'Pool': Wind, 'Elevator': Users, 'Security': Shield, 'Balcony': VenetianMask, 'Power Backup': Zap, 'Meals': Utensils, 'Laundry': Droplets, 'Housekeeping': Droplets, 'Garden': Wind, 'TV': Tv
 };
 
-const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
 
 const fileSchema = z
@@ -77,13 +78,7 @@ const formSchema = z.object({
   aadhaarCard: fileSchema,
   electricityBill: fileSchema.optional(),
   noc: fileSchema.optional(),
-  videoFile: z
-    .any()
-    .refine((files) => files?.[0], "Video is required.")
-    .refine(
-      (files) => files?.[0]?.type ? ACCEPTED_VIDEO_TYPES.includes(files?.[0]?.type) : true,
-      ".mp4, .webm and .ogg formats are supported."
-    ),
+  videoFile: z.any().optional(),
   gender: z.string().optional(),
 }).refine(data => {
     if (data.propertyType === 'Rental' || data.propertyType === 'PG') {
@@ -109,7 +104,7 @@ interface ListPropertySectionProps {
   onSubmit: (data: FormValues & { images: File[] }) => void;
 }
 
-const FileUploadField = ({ name, label, control }: { name: "aadhaarCard" | "electricityBill" | "noc", label: string, control: any }) => {
+const FileUploadField = ({ name, label, control, required = false }: { name: "aadhaarCard" | "electricityBill" | "noc", label: string, control: any, required?: boolean }) => {
     const [fileName, setFileName] = useState<string | null>(null);
 
     return (
@@ -118,7 +113,7 @@ const FileUploadField = ({ name, label, control }: { name: "aadhaarCard" | "elec
             name={name}
             render={({ field }) => (
                 <FormItem>
-                    <FormLabel>{label}</FormLabel>
+                    <FormLabel>{label}{required && <span className="text-destructive">*</span>}</FormLabel>
                     <FormControl>
                         <div
                             className="border-2 border-dashed border-muted rounded-lg p-4 text-center cursor-pointer hover:border-primary"
@@ -197,7 +192,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
         aadhaarCard: data.aadhaarCard[0],
         electricityBill: data.electricityBill?.[0],
         noc: data.noc ? data.noc[0] : undefined,
-        videoFile: data.videoFile[0],
+        videoFile: data.videoFile ? data.videoFile[0] : undefined,
     };
     onSubmit(finalData);
   };
@@ -209,7 +204,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   };
 
   const handleAddCustomAmenity = () => {
-    if (customAmenity && !selectedAmenities.includes(customAmenity)) {
+    if (customAmenity && amenitiesList.includes(customAmenity) && !selectedAmenities.includes(customAmenity)) {
         form.setValue('amenities', [...selectedAmenities, customAmenity]);
         setCustomAmenity('');
     }
@@ -301,7 +296,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
             <Card>
                 <CardHeader>
                     <CardTitle>Amenities</CardTitle>
-                    <CardDescription>Select all the amenities that apply, or add your own.</CardDescription>
+                    <CardDescription>Select all the amenities that apply, or search for more options.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <FormField
@@ -309,50 +304,54 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                         name="amenities"
                         render={() => (
                             <FormItem>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'].map((amenity) => (
-                                    <FormField
-                                    key={amenity}
-                                    control={form.control}
-                                    name="amenities"
-                                    render={({ field }) => {
-                                        return (
-                                        <FormItem
+                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-4">
+                                  {['AC', 'WiFi', 'Parking', 'Gym', 'Meals', 'Laundry', 'Security', 'TV'].map((amenity) => {
+                                      const Icon = amenityIcons[amenity] || Shield;
+                                      return (
+                                        <FormField
                                             key={amenity}
-                                            className="flex flex-row items-center space-x-3 space-y-0"
-                                        >
-                                            <FormControl>
-                                            <Checkbox
-                                                checked={field.value?.includes(amenity)}
-                                                onCheckedChange={(checked) => {
-                                                return checked
-                                                    ? field.onChange([...(field.value || []), amenity])
-                                                    : field.onChange(
-                                                        field.value?.filter(
-                                                        (value) => value !== amenity
-                                                        )
-                                                    )
-                                                }}
-                                            />
-                                            </FormControl>
-                                            <FormLabel className="font-normal flex items-center gap-2">
-                                              <span className="text-lg w-6 text-center">{amenityIcons[amenity]}</span>
-                                              <span>{amenity}</span>
-                                            </FormLabel>
-                                        </FormItem>
-                                        )
-                                    }}
-                                    />
-                                ))}
+                                            control={form.control}
+                                            name="amenities"
+                                            render={({ field }) => (
+                                                <FormItem
+                                                    key={amenity}
+                                                    className="flex-1"
+                                                >
+                                                    <FormControl>
+                                                        <Checkbox
+                                                            checked={field.value?.includes(amenity)}
+                                                            onCheckedChange={(checked) => {
+                                                                const updatedAmenities = checked
+                                                                    ? [...(field.value || []), amenity]
+                                                                    : field.value?.filter((value) => value !== amenity);
+                                                                field.onChange(updatedAmenities);
+                                                            }}
+                                                            className="sr-only"
+                                                            id={`amenity-${amenity}`}
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel 
+                                                        htmlFor={`amenity-${amenity}`}
+                                                        className="flex flex-col items-center justify-center gap-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors data-[state=checked]:border-primary data-[state=checked]:bg-primary/10"
+                                                        data-state={field.value?.includes(amenity) ? 'checked' : 'unchecked'}
+                                                    >
+                                                      <Icon className="w-6 h-6" />
+                                                      <span className="text-sm font-medium text-center">{amenity}</span>
+                                                    </FormLabel>
+                                                </FormItem>
+                                            )}
+                                        />
+                                      )
+                                  })}
                                 </div>
                                 <div className="mt-6">
-                                  <FormLabel>Add a custom amenity</FormLabel>
+                                  <FormLabel>Search for more amenities</FormLabel>
                                   <div className="flex gap-2 mt-2">
                                       <AutocompleteInput
                                         placeholder="e.g., Piped Gas"
                                         value={customAmenity}
                                         onChange={setCustomAmenity}
-                                        suggestions={amenitiesList}
+                                        suggestions={amenitiesList.filter(a => !selectedAmenities.includes(a))}
                                       />
                                       <Button type="button" onClick={handleAddCustomAmenity}>
                                           <Plus className="w-4 h-4 mr-2" /> Add
@@ -363,16 +362,18 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                 {selectedAmenities.length > 0 && (
                                     <div className="mt-4 pt-4 border-t">
                                         <h4 className="text-sm font-medium mb-2">Selected Amenities:</h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {selectedAmenities.map((amenity) => (
-                                                <Badge key={amenity} variant="secondary" className="pl-2">
-                                                    {amenity}
-                                                    <button type="button" onClick={() => handleRemoveAmenity(amenity)} className="ml-2 p-0.5 rounded-full hover:bg-destructive/20 text-destructive">
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-                                                </Badge>
-                                            ))}
-                                        </div>
+                                        <ScrollArea className="h-40">
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedAmenities.map((amenity) => (
+                                                    <Badge key={amenity} variant="secondary" className="pl-2">
+                                                        {amenity}
+                                                        <button type="button" onClick={() => handleRemoveAmenity(amenity)} className="ml-2 p-0.5 rounded-full hover:bg-destructive/20 text-destructive">
+                                                            <X className="w-3 h-3" />
+                                                        </button>
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        </ScrollArea>
                                     </div>
                                 )}
 
@@ -386,7 +387,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Photo & Video Upload</CardTitle>
-                <CardDescription>Add photos (Max 5) and a required video tour.</CardDescription>
+                <CardDescription>Add photos (Max 5) and a video tour.</CardDescription>
               </CardHeader>
               <CardContent>
                  <div className="mb-6">
@@ -416,7 +417,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                         name="videoFile"
                         render={({ field: { onChange, onBlur, name, ref } }) => (
                             <FormItem>
-                                <FormLabel>Video Tour</FormLabel>
+                                <FormLabel>Video Tour (Optional)</FormLabel>
                                 <FormControl>
                                     <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('video-upload')?.click()}>
                                         <Video className="mx-auto h-12 w-12 text-muted-foreground"/>
@@ -449,10 +450,10 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 <CardDescription>Upload these documents for verification. This will only be visible to our admin team.</CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-6">
-                 <FileUploadField name="aadhaarCard" label="Aadhaar Card (Required)" control={form.control} />
+                 <FileUploadField name="aadhaarCard" label="Aadhaar Card" control={form.control} required />
                  {propertyType !== 'Roommate' && (
                     <>
-                        <FileUploadField name="electricityBill" label="Electricity Bill (Required)" control={form.control} />
+                        <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
                         <div className="md:col-span-2">
                             <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
                         </div>
