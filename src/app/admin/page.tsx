@@ -57,9 +57,13 @@ const initialPricing = {
     }
 }
 
+const dailyChartData = [
+    { name: 'Mon', views: 210 }, { name: 'Tue', views: 250 }, { name: 'Wed', views: 230 },
+    { name: 'Thu', views: 280 }, { name: 'Fri', views: 350 }, { name: 'Sat', views: 420 }, { name: 'Sun', views: 390 },
+];
 const weeklyChartData = [
-    { name: 'Week 1', views: 850 }, { name: 'Week 2', views: 1100 }, { name: 'Week 3', views: 950 },
-    { name: 'Week 4', views: 1300 },
+    { name: 'Week 1 (Aug)', views: 850 }, { name: 'Week 2 (Aug)', views: 1100 }, { name: 'Week 3 (Aug)', views: 950 },
+    { name: 'Week 4 (Aug)', views: 1300 },
 ];
 const monthlyChartData = [
     { name: 'Jan', views: 1200 }, { name: 'Feb', views: 1900 }, { name: 'Mar', views: 3000 },
@@ -471,6 +475,8 @@ export default function AdminDashboard() {
     const [chartView, setChartView] = useState('monthly');
     const chartData = useMemo(() => {
         switch (chartView) {
+            case 'daily':
+                return dailyChartData;
             case 'weekly':
                 return weeklyChartData;
             case 'yearly':
@@ -704,6 +710,7 @@ export default function AdminDashboard() {
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-xl font-semibold text-slate-800">Property Views</h3>
                                     <TabsList>
+                                        <TabsTrigger value="daily">Daily</TabsTrigger>
                                         <TabsTrigger value="weekly">Weekly</TabsTrigger>
                                         <TabsTrigger value="monthly">Monthly</TabsTrigger>
                                         <TabsTrigger value="yearly">Yearly</TabsTrigger>
