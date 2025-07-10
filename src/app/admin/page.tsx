@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,7 @@ import { dummyCoupons } from '@/lib/data';
 const initialProperties = [
     { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior' },
     { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room' },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], 'data-ai-hint': 'small apartment' },
+    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment' },
     { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room' }
 ];
 const initialRoommates = [
@@ -453,6 +453,9 @@ export default function AdminDashboard() {
     const [isMounted, setIsMounted] = useState(false);
     
     const [activeSettingsDialog, setActiveSettingsDialog] = useState<null | 'password' | 'pin' | 'security' | 'contact'>(null);
+    
+    const [propertySearchTerm, setPropertySearchTerm] = useState('');
+    const [propertyTypeFilter, setPropertyTypeFilter] = useState('all');
 
     useEffect(() => {
         const authStatus = localStorage.getItem('admin_authenticated');
@@ -485,6 +488,14 @@ export default function AdminDashboard() {
             ...roommates.filter(r => r.status === 'pending').map(r => ({ ...r, itemType: 'roommate' }))
         ];
     }, [properties, roommates]);
+
+    const filteredProperties = useMemo(() => {
+        return properties.filter(p => {
+            const matchesSearch = propertySearchTerm === '' || p.title.toLowerCase().includes(propertySearchTerm.toLowerCase());
+            const matchesType = propertyTypeFilter === 'all' || p.type === propertyTypeFilter;
+            return matchesSearch && matchesType;
+        });
+    }, [properties, propertySearchTerm, propertyTypeFilter]);
     
     const handleViewDetails = (id, type) => {
         const item = type === 'roommate'
@@ -838,7 +849,39 @@ export default function AdminDashboard() {
                 {/* All Listings Table */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     <Card>
-                        <CardHeader><CardTitle className="text-2xl">All Properties</CardTitle></CardHeader>
+                        <CardHeader>
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <CardTitle className="text-2xl">All Properties</CardTitle>
+                                    <CardDescription>Search and filter all properties.</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                     <div className="relative w-full sm:w-auto">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input 
+                                            placeholder="Search by title..." 
+                                            value={propertySearchTerm}
+                                            onChange={(e) => setPropertySearchTerm(e.target.value)}
+                                            className="pl-10 w-full sm:w-48"
+                                        />
+                                    </div>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="icon">
+                                                <Filter className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem onSelect={() => setPropertyTypeFilter('all')}>All</DropdownMenuItem>
+                                            <DropdownMenuItem onSelect={() => setPropertyTypeFilter('pg')}>PG</DropdownMenuItem>
+                                            <DropdownMenuItem onSelect={() => setPropertyTypeFilter('rental')}>Rental</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
+                        </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
@@ -847,7 +890,7 @@ export default function AdminDashboard() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {properties.map(p => (
+                                    {filteredProperties.map(p => (
                                         <TableRow key={p.id}>
                                             <TableCell className="font-medium">{p.title}</TableCell>
                                             <TableCell>{p.type}</TableCell>
