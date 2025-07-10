@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -225,7 +226,7 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
                 <p><strong>Primary Phone:</strong> **********</p>
                 <p><strong>Secondary Phone:</strong> **********</p>
                 <p><strong>Email:</strong> *****@*****.com</p>
-                <p><strong>Address:</strong> *******************************</p>
+                <p><strong>Address:</strong> {listing.partialAddress}</p>
               </div>
             )}
             {!isUnlocked && (

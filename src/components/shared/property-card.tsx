@@ -55,7 +55,7 @@ export function PropertyCard({ listing, onViewDetails, isLiked, onToggleLike }: 
         
         <div className="flex items-center text-muted-foreground text-sm">
           <MapPin className="w-4 h-4 mr-2" />
-          <span>{listing.locality}, {listing.city}</span>
+          <span>{listing.partialAddress}</span>
         </div>
         
         <div className="flex items-center text-lg font-bold text-primary">
