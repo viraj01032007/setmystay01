@@ -5,10 +5,6 @@ import { cn } from "@/lib/utils";
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <defs>
-        {/* This path creates an arc at the bottom of the circle for the text */}
-        <path id="circlePath" d="M 30 85 A 40 40 0 0 1 90 85" />
-      </defs>
       <rect width="120" height="120" rx="20" fill="hsl(var(--primary))"/>
       <circle cx="60" cy="60" r="45" stroke="white" strokeWidth="1.5" fill="none"/>
       
@@ -21,15 +17,16 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       </g>
       
       <text 
+        x="60" 
+        y="98" 
+        textAnchor="middle" 
         fontFamily="Inter, sans-serif" 
-        fontSize="16" 
+        fontSize="14" 
         fontWeight="600" 
         fill="white" 
-        letterSpacing="1"
+        letterSpacing="0.5"
       >
-        <textPath href="#circlePath" startOffset="50%" textAnchor="middle">
-          SetMyStay
-        </textPath>
+        SetMyStay
       </text>
     </svg>
   );
