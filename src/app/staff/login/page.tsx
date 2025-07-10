@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { User, Lock, LogIn } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
@@ -22,6 +23,7 @@ export default function StaffLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -85,7 +87,7 @@ export default function StaffLoginPage() {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
@@ -93,6 +95,10 @@ export default function StaffLoginPage() {
                     className="pl-10"
                   />
                 </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                  <Checkbox id="show-password" onCheckedChange={() => setShowPassword(!showPassword)} />
+                  <Label htmlFor="show-password" className="text-sm font-normal">Show Password</Label>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <LoadingSpinner className="w-4 h-4" /> : <LogIn className="w-4 h-4 mr-2" />}

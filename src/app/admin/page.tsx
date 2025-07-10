@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
@@ -488,6 +489,7 @@ const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
     const [name, setName] = useState('');
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (staffMember) {
@@ -499,6 +501,7 @@ const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
             setUserId('');
             setPassword('');
         }
+        setShowPassword(false);
     }, [staffMember, isOpen]);
 
     const handleSubmit = (e) => {
@@ -523,7 +526,18 @@ const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
                     </div>
                     <div>
                         <Label htmlFor="staff-password">{staffMember ? 'Reset Password' : 'Password'}</Label>
-                        <Input id="staff-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Enter new password" />
+                        <Input 
+                            id="staff-password" 
+                            type={showPassword ? 'text' : 'password'}
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            required 
+                            placeholder="Enter new password" 
+                        />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="show-staff-password" onCheckedChange={() => setShowPassword(!showPassword)} />
+                        <Label htmlFor="show-staff-password">Show Password</Label>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
