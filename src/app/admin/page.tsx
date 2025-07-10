@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -59,6 +59,7 @@ const chartData = [
     { name: 'Apr', views: 5000 }, { name: 'May', views: 2000 }, { name: 'Jun', views: 3500 },
 ];
 
+const ADMIN_PASSWORD = 'Bluechip@123';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -428,6 +429,17 @@ export default function AdminDashboard() {
                         </Table>
                     </CardContent>
                 </Card>
+                
+                 {/* Admin Settings */}
+                <Card className="mb-8">
+                    <CardHeader>
+                        <CardTitle className="text-2xl">Admin Settings</CardTitle>
+                        <CardDescription>Manage your administrator account.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <PasswordChangeForm currentPassword={ADMIN_PASSWORD} />
+                    </CardContent>
+                </Card>
 
                 {/* Pending Listings Section */}
                 <Card className="mb-8">
@@ -742,5 +754,58 @@ const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
                 </form>
             </DialogContent>
         </Dialog>
+    );
+};
+
+const PasswordChangeForm = ({ currentPassword }) => {
+    const { toast } = useToast();
+    const [passwords, setPasswords] = useState({
+        current: '',
+        newPass: '',
+        confirmPass: ''
+    });
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPasswords(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitPasswordChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (passwords.current !== currentPassword) {
+            toast({ title: 'Error', description: 'Current password is not correct.', variant: 'destructive' });
+            return;
+        }
+        if (passwords.newPass !== passwords.confirmPass) {
+            toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
+            return;
+        }
+        if (passwords.newPass.length < 6) {
+             toast({ title: 'Error', description: 'New password must be at least 6 characters.', variant: 'destructive' });
+            return;
+        }
+        // In a real app, you would now make an API call to change the password.
+        // Since this is a simulation, we just show a success message.
+        toast({ title: 'Success!', description: 'Your password has been changed.' });
+        setPasswords({ current: '', newPass: '', confirmPass: '' });
+    };
+
+    return (
+        <form onSubmit={handleSubmitPasswordChange} className="space-y-4 max-w-md">
+            <h4 className="font-semibold text-lg">Change Password</h4>
+            <div className="space-y-2">
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input id="current-password" name="current" type="password" value={passwords.current} onChange={handlePasswordChange} required />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input id="new-password" name="newPass" type="password" value={passwords.newPass} onChange={handlePasswordChange} required />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input id="confirm-password" name="confirmPass" type="password" value={passwords.confirmPass} onChange={handlePasswordChange} required />
+            </div>
+            <Button type="submit">Update Password</Button>
+        </form>
     );
 };
