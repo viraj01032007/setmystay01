@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from "react";
@@ -15,6 +16,8 @@ interface HomeSectionProps {
   featuredRoommates: RoommateProfile[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
   onNavigate: (page: Page) => void;
+  likedItemIds: Set<string>;
+  onToggleLike: (itemId: string) => void;
 }
 
 const features = [
@@ -40,6 +43,8 @@ export function HomeSection({
   featuredRoommates, 
   onViewDetails, 
   onNavigate,
+  likedItemIds,
+  onToggleLike
 }: HomeSectionProps) {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
@@ -99,6 +104,8 @@ export function HomeSection({
                   key={listing.id} 
                   listing={listing} 
                   onViewDetails={(item) => onViewDetails(item, 'listing')}
+                  isLiked={likedItemIds.has(listing.id)}
+                  onToggleLike={() => onToggleLike(listing.id)}
                 />
             ))}
         </div>
@@ -113,6 +120,8 @@ export function HomeSection({
                   key={profile.id} 
                   profile={profile} 
                   onViewDetails={(item) => onViewDetails(item, 'roommate')} 
+                  isLiked={likedItemIds.has(profile.id)}
+                  onToggleLike={() => onToggleLike(profile.id)}
                 />
            ))}
         </div>

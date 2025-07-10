@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Listing } from "@/lib/types";
@@ -11,14 +10,15 @@ import { cn } from "@/lib/utils";
 interface PropertyCardProps {
   listing: Listing;
   onViewDetails: (listing: Listing) => void;
+  isLiked: boolean;
+  onToggleLike: () => void;
 }
 
-export function PropertyCard({ listing, onViewDetails }: PropertyCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
+export function PropertyCard({ listing, onViewDetails, isLiked, onToggleLike }: PropertyCardProps) {
 
   const handleLikeClick = (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card click event from firing
-      setIsLiked(!isLiked);
+      onToggleLike();
   };
 
   return (

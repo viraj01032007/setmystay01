@@ -1,11 +1,14 @@
 
+
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { Menu, X, Crown, User, Home, Users, Building, BedDouble, PlusCircle, Heart, LogOut } from "lucide-react";
+import { Menu, X, Crown, User, Home, Users, Building, BedDouble, PlusCircle, Heart, LogOut, History, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Logo } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Page } from "@/lib/types";
@@ -60,9 +63,10 @@ interface HeaderProps {
   onSubscriptionClick: () => void;
   isLoggedIn: boolean;
   onLogout: () => void;
+  onHistoryClick: () => void;
 }
 
-export function Header({ activePage, setActivePage, onSignInClick, onSubscriptionClick, isLoggedIn, onLogout }: HeaderProps) {
+export function Header({ activePage, setActivePage, onSignInClick, onSubscriptionClick, isLoggedIn, onLogout, onHistoryClick }: HeaderProps) {
   const navItems = [
     { page: 'home' as Page, label: 'Home', icon: <Home className="w-5 h-5" /> },
     { page: 'pg' as Page, label: 'PG Listings', icon: <BedDouble className="w-5 h-5" /> },
@@ -70,6 +74,10 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
     { page: 'roommates' as Page, label: 'Roommates', icon: <Users className="w-5 h-5" /> },
     { page: 'list' as Page, label: 'List Property', icon: <PlusCircle className="w-5 h-5" /> },
   ];
+  
+  const handleProfileNav = (page: Page) => {
+    setActivePage(page);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
@@ -95,10 +103,44 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
               Pricing
             </Button>
             {isLoggedIn ? (
-              <Button variant="outline" size="sm" onClick={onLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+               <DropdownMenu>
+                 <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                     <Avatar className="h-10 w-10">
+                       <AvatarImage src="https://placehold.co/100x100" alt="User" />
+                       <AvatarFallback>U</AvatarFallback>
+                     </Avatar>
+                   </Button>
+                 </DropdownMenuTrigger>
+                 <DropdownMenuContent className="w-56" align="end" forceMount>
+                   <DropdownMenuLabel className="font-normal">
+                     <div className="flex flex-col space-y-1">
+                       <p className="text-sm font-medium leading-none">My Account</p>
+                       <p className="text-xs leading-none text-muted-foreground">
+                         Welcome Back!
+                       </p>
+                     </div>
+                   </DropdownMenuLabel>
+                   <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => handleProfileNav('my-properties')}>
+                       <Briefcase className="mr-2 h-4 w-4" />
+                       <span>My Properties</span>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem onSelect={onHistoryClick}>
+                       <History className="mr-2 h-4 w-4" />
+                       <span>Purchase History</span>
+                     </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleProfileNav('liked-properties')}>
+                       <Heart className="mr-2 h-4 w-4" />
+                       <span>Liked Properties</span>
+                     </DropdownMenuItem>
+                   <DropdownMenuSeparator />
+                   <DropdownMenuItem onSelect={onLogout}>
+                     <LogOut className="mr-2 h-4 w-4" />
+                     <span>Log out</span>
+                   </DropdownMenuItem>
+                 </DropdownMenuContent>
+               </DropdownMenu>
             ) : (
               <Button variant="default" size="sm" onClick={onSignInClick}>
                 <User className="w-4 h-4 mr-2" />
@@ -138,6 +180,24 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
                     <span className="font-medium">{item.label}</span>
                   </NavLink>
                 ))}
+                
+                {isLoggedIn && (
+                  <>
+                    <div className="my-2 border-t -mx-6"></div>
+                    <NavLink page="my-properties" activePage={activePage} onClick={setActivePage} isMobile>
+                        <Briefcase className="w-5 h-5"/>
+                        <span className="font-medium">My Properties</span>
+                    </NavLink>
+                    <button onClick={onHistoryClick} className="flex items-center w-full p-3 rounded-lg gap-3 transition-colors text-foreground/70 hover:bg-muted">
+                        <History className="w-5 h-5"/>
+                        <span className="font-medium">Purchase History</span>
+                    </button>
+                    <NavLink page="liked-properties" activePage={activePage} onClick={setActivePage} isMobile>
+                        <Heart className="w-5 h-5"/>
+                        <span className="font-medium">Liked Properties</span>
+                    </NavLink>
+                  </>
+                )}
               </nav>
               
               <div className="flex flex-col gap-2 border-t pt-4 mt-4">

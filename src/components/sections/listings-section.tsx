@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -25,6 +26,9 @@ interface ListingsSectionProps {
   listings: (Listing | RoommateProfile)[];
   onViewDetails: (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => void;
   initialSearchFilters: Partial<FilterState> | null;
+  likedItemIds: Set<string>;
+  onToggleLike: (itemId: string) => void;
+  pageTitle?: string;
 }
 
 const initialFilters: FilterState = {
@@ -170,6 +174,9 @@ export function ListingsSection({
   listings, 
   onViewDetails, 
   initialSearchFilters,
+  likedItemIds,
+  onToggleLike,
+  pageTitle: customPageTitle
 }: ListingsSectionProps) {
   const [filters, setFilters] = useState<FilterState>({ ...initialFilters, ...initialSearchFilters });
   const [pageTitle, setPageTitle] = useState('');
@@ -187,10 +194,10 @@ export function ListingsSection({
     };
     
     const config = pageConfig[type] || { title: 'Our Listings', description: 'Browse our collection of properties and roommate profiles to find your perfect match.' };
-    setPageTitle(config.title);
+    setPageTitle(customPageTitle || config.title);
     setPageDescription(config.description);
 
-  }, [initialSearchFilters, type]);
+  }, [initialSearchFilters, type, customPageTitle]);
 
   
   const handleFilterChange = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
@@ -298,8 +305,8 @@ export function ListingsSection({
             {filteredListings.map(item => {
               const itemType = item.propertyType === 'Roommate' ? 'roommate' : 'listing';
               return itemType === 'roommate' 
-                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} />
-                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} />
+                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
+                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
             })}
           </div>
           {filteredListings.length === 0 && (

@@ -1,8 +1,9 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement, Coupon } from "@/lib/types";
+import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement, Coupon, Purchase } from "@/lib/types";
 import { dummyProperties, dummyRoommates, dummyAdvertisements, dummyCoupons } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,6 +27,8 @@ import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 import { PaymentConfirmationModal } from "@/components/modals/payment-confirmation-modal";
 import { SlotMachineModal } from "@/components/modals/slot-machine-modal";
 import { ContactFab } from "@/components/shared/contact-fab";
+import { HistoryModal } from "@/components/modals/history-modal";
+
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
@@ -42,6 +45,7 @@ export default function Home() {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [isChatModalOpen, setChatModalOpen] = useState(false);
   const [isRateUsModalOpen, setRateUsModalOpen] = useState(false);
+  const [isHistoryModalOpen, setHistoryModalOpen] = useState(false);
   const [chattingWith, setChattingWith] = useState<string | null>(null);
 
   const [unlocks, setUnlocks] = useState({ count: 0, isUnlimited: false, unlockedIds: new Set<string>() });
@@ -59,6 +63,9 @@ export default function Home() {
   const [paymentDetails, setPaymentDetails] = useState<{ planName: string; amount: number; onConfirm: () => void; } | null>(null);
 
   const [isSlotMachineModalOpen, setIsSlotMachineModalOpen] = useState(false);
+  
+  const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
+  const [likedItemIds, setLikedItemIds] = useState<Set<string>>(new Set());
 
 
   const { toast } = useToast();
@@ -82,17 +89,21 @@ export default function Home() {
 
   useEffect(() => {
     if (isClient) {
-      // Client-side only logic for unlocks
+      // Client-side only logic
       const savedCount = parseInt(localStorage.getItem('setmystay_unlocks') || '0');
       const savedIsUnlimited = localStorage.getItem('setmystay_isUnlimited') === 'true';
       const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
       setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
 
-      // Client-side only logic for login status
       const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
       setIsLoggedIn(loggedInStatus);
       
-      // Client-side only logic for advertisement pop-up
+      const savedHistory = JSON.parse(localStorage.getItem('setmystay_purchaseHistory') || '[]');
+      setPurchaseHistory(savedHistory.map((p: any) => ({ ...p, date: new Date(p.date) })));
+      
+      const savedLikedItems = new Set<string>(JSON.parse(localStorage.getItem('setmystay_likedItems') || '[]'));
+      setLikedItemIds(savedLikedItems);
+
       const activeAd = dummyAdvertisements.find(ad => ad.isActive);
       const adShown = sessionStorage.getItem('setmystay_ad_shown');
 
@@ -112,7 +123,7 @@ export default function Home() {
     setRateUsModalOpen(false);
   }
 
-  const handleUnlockPurchase = useCallback((plan: UnlockPlan) => {
+  const handleUnlockPurchase = useCallback((plan: UnlockPlan, planName: string, amount: number) => {
     setUnlocks(prev => {
       let newCount = prev.count;
       let newIsUnlimited = prev.isUnlimited;
@@ -128,6 +139,13 @@ export default function Home() {
       localStorage.setItem('setmystay_isUnlimited', newUnlocks.isUnlimited.toString());
       
       return newUnlocks;
+    });
+    
+    const newPurchase: Purchase = { id: `purchase_${Date.now()}`, planName, amount, date: new Date() };
+    setPurchaseHistory(prev => {
+        const updatedHistory = [...prev, newPurchase];
+        localStorage.setItem('setmystay_purchaseHistory', JSON.stringify(updatedHistory));
+        return updatedHistory;
     });
     
     toast({
@@ -174,6 +192,32 @@ export default function Home() {
        }
     }
   }
+  
+  const handleToggleLike = (itemId: string) => {
+    setLikedItemIds(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(itemId)) {
+            newSet.delete(itemId);
+        } else {
+            newSet.add(itemId);
+        }
+        localStorage.setItem('setmystay_likedItems', JSON.stringify(Array.from(newSet)));
+        return newSet;
+    });
+  };
+  
+  const likedItems = useMemo(() => {
+    const allItems = [...allListings, ...allRoommates];
+    return allItems.filter(item => likedItemIds.has(item.id));
+  }, [likedItemIds, allListings, allRoommates]);
+  
+  const myProperties = useMemo(() => {
+      // In a real app, this would be based on a user ID from the login session.
+      // Here, we simulate it by assigning some listings to a "logged in" user.
+      const userId = 'newUser';
+      return allListings.filter(l => l.ownerId === userId);
+  }, [allListings]);
+
 
   const handleInitiateListing = (data: any) => {
     if (!isLoggedIn) {
@@ -194,6 +238,8 @@ export default function Home() {
     
     setListPaymentModalOpen(false);
     const newId = `new-${Date.now()}`;
+    const ownerId = 'newUser'; // Simulate current user
+    
     if ('propertyType' in pendingListingData && pendingListingData.propertyType !== 'Roommate') {
         const mappedListing: Listing = {
           id: newId,
@@ -216,7 +262,7 @@ export default function Home() {
           images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/600x400'],
           videoUrl: pendingListingData.videoFile ? URL.createObjectURL(pendingListingData.videoFile) : undefined,
           views: 0,
-          ownerId: 'newUser',
+          ownerId,
           brokerStatus: pendingListingData.brokerStatus,
           lastAvailabilityCheck: new Date(),
       }
@@ -239,7 +285,7 @@ export default function Home() {
         preferences: [], 
         gender: pendingListingData.gender || 'Any',
         views: 0,
-        ownerId: 'newUser',
+        ownerId,
         hasProperty: true, 
         images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/400x400'],
     }
@@ -266,7 +312,6 @@ export default function Home() {
   };
   
   const handleCheckAvailability = () => {
-    setSelectedItem(null);
     toast({
       title: "Inquiry Sent!",
       description: "The owner has been notified of your availability request.",
@@ -310,7 +355,7 @@ export default function Home() {
   const handlePlanSelect = (plan: { plan: UnlockPlan, title: string, price: number }) => {
     if (isLoggedIn) {
       setUnlockModalOpen(false);
-      handleOpenConfirmationModal(plan.title, plan.price, () => handleUnlockPurchase(plan.plan));
+      handleOpenConfirmationModal(plan.title, plan.price, () => handleUnlockPurchase(plan.plan, plan.title, plan.price));
     } else {
       setUnlockModalOpen(false);
       setAuthModalOpen(true);
@@ -330,6 +375,30 @@ export default function Home() {
       </div>
     );
   }
+  
+  const getListingsForPage = () => {
+    switch (activePage) {
+        case 'pg':
+            return allListings.filter(l => l.propertyType === 'PG');
+        case 'rentals':
+            return allListings.filter(l => l.propertyType === 'Rental');
+        case 'roommates':
+            return allRoommates;
+        case 'my-properties':
+            return myProperties;
+        case 'liked-properties':
+            return likedItems;
+        default:
+            return [];
+    }
+  }
+  
+  const getPageType = (): ListingType => {
+      if (['pg', 'rentals'].includes(activePage)) return activePage as ListingType;
+      if (activePage === 'roommates') return 'roommate';
+      if (activePage === 'my-properties' || activePage === 'liked-properties') return 'rental'; // Default for mixed content
+      return 'rental';
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-body text-foreground">
@@ -340,6 +409,7 @@ export default function Home() {
         onSubscriptionClick={() => setUnlockModalOpen(true)}
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
+        onHistoryClick={() => setHistoryModalOpen(true)}
       />
       
       <main className="flex-grow">
@@ -349,23 +419,24 @@ export default function Home() {
             featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
             onNavigate={setActivePage}
+            likedItemIds={likedItemIds}
+            onToggleLike={handleToggleLike}
           />
         )}
-        {(activePage === 'pg' || activePage === 'rentals' || activePage === 'roommates') && (
+        {(['pg', 'rentals', 'roommates', 'my-properties', 'liked-properties'].includes(activePage)) && (
             <ListingsSection
               key={activePage} // Re-mount component on page change
-              type={activePage as ListingType}
-              listings={
-                activePage === 'roommates'
-                  ? allRoommates
-                  : allListings.filter(l => {
-                      if (activePage === 'pg') return l.propertyType === 'PG';
-                      if (activePage === 'rentals') return l.propertyType === 'Rental';
-                      return false;
-                    })
-              }
+              type={getPageType()}
+              listings={getListingsForPage()}
               onViewDetails={handleViewDetails}
               initialSearchFilters={null}
+              likedItemIds={likedItemIds}
+              onToggleLike={handleToggleLike}
+              pageTitle={
+                activePage === 'my-properties' ? 'My Properties' :
+                activePage === 'liked-properties' ? 'My Liked Properties' :
+                undefined
+              }
             />
         )}
         {activePage === 'list' && (
@@ -373,7 +444,7 @@ export default function Home() {
         )}
       </main>
 
-      <Footer onYourPropertiesClick={() => setAuthModalOpen(true)} onNavigate={setActivePage}/>
+      <Footer onNavigate={setActivePage} />
       <FloatingCta onGameClick={() => setIsSlotMachineModalOpen(true)} />
       <ContactFab />
       
@@ -420,6 +491,11 @@ export default function Home() {
         isOpen={isChatModalOpen}
         onClose={() => setChatModalOpen(false)}
         contactName={chattingWith}
+      />
+       <HistoryModal 
+        isOpen={isHistoryModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
+        purchases={purchaseHistory}
       />
       <RateUsModal 
         isOpen={isRateUsModalOpen}

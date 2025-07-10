@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -10,11 +11,10 @@ import { useState, useEffect } from "react";
 import type { Page } from "@/lib/types";
 
 interface FooterProps {
-  onYourPropertiesClick: () => void;
   onNavigate: (page: Page) => void;
 }
 
-export function Footer({ onYourPropertiesClick, onNavigate }: FooterProps) {
+export function Footer({ onNavigate }: FooterProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -54,8 +54,8 @@ export function Footer({ onYourPropertiesClick, onNavigate }: FooterProps) {
           <div>
             <h3 className="font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-white">Home</Link></li>
-              <li><button onClick={onYourPropertiesClick} className="hover:text-white text-left w-full">Your Properties</button></li>
+              <li><button onClick={() => onNavigate('home')} className="hover:text-white text-left w-full">Home</button></li>
+              <li><button onClick={() => onNavigate('my-properties')} className="hover:text-white text-left w-full">Your Properties</button></li>
               <li><a href="https://g.co/kgs/Mmk6x3N" target="_blank" rel="noopener noreferrer" className="hover:text-white">Visit Our Office</a></li>
               <li><Link href="/admin" className="hover:text-white">Admin Dashboard</Link></li>
               <li><button onClick={() => onNavigate('list')} className="hover:text-white text-left w-full">Post Your Property</button></li>

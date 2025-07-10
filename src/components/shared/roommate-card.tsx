@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { RoommateProfile } from "@/lib/types";
@@ -11,14 +10,15 @@ import { cn } from "@/lib/utils";
 interface RoommateCardProps {
   profile: RoommateProfile;
   onViewDetails: (profile: RoommateProfile) => void;
+  isLiked: boolean;
+  onToggleLike: () => void;
 }
 
-export function RoommateCard({ profile, onViewDetails }: RoommateCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
-
+export function RoommateCard({ profile, onViewDetails, isLiked, onToggleLike }: RoommateCardProps) {
+  
   const handleLikeClick = (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card click event from firing
-      setIsLiked(!isLiked);
+      onToggleLike();
   };
 
   return (

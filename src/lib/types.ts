@@ -1,5 +1,6 @@
 
-export type Page = 'home' | 'pg' | 'rentals' | 'roommates' | 'list' | 'your-properties';
+
+export type Page = 'home' | 'pg' | 'rentals' | 'roommates' | 'list' | 'my-properties' | 'liked-properties';
 
 export type ListingType = 'pg' | 'rental' | 'roommate';
 
@@ -9,7 +10,7 @@ export interface Bed {
 }
 
 export interface Advertisement {
-  id: string;
+  id:string;
   title: string;
   description: string;
   imageUrl: string;
@@ -49,7 +50,9 @@ export interface Listing {
   ownerId: string;
   'data-ai-hint'?: string;
   brokerStatus: 'With Broker' | 'Without Broker';
-  verificationDocumentUrl?: string;
+  aadhaarCardUrl?: string;
+  electricityBillUrl?: string;
+  nocUrl?: string;
   beds?: Bed[];
   lastAvailabilityCheck: Date;
 }
@@ -75,7 +78,7 @@ export interface RoommateProfile {
   views: number;
   ownerId: string;
   'data-ai-hint'?: string;
-  verificationDocumentUrl?: string;
+  aadhaarCardUrl?: string;
   hasProperty: boolean;
 }
 
@@ -93,3 +96,10 @@ export type FilterState = {
   gender: string;
   brokerStatus: string;
 };
+
+export interface Purchase {
+    id: string;
+    planName: string;
+    amount: number;
+    date: Date;
+}
