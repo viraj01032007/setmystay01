@@ -12,8 +12,8 @@ import { User, Lock, LogIn } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
 
 // Hardcoded credentials for staff simulation
-const STAFF_USERID = 'StaffUser';
-const STAFF_PASSWORD = 'Staff@123';
+const STAFF_USERID = 'staff1';
+const STAFF_PASSWORD = 'Bluechip@1';
 
 export default function StaffLoginPage() {
   const router = useRouter();
@@ -73,7 +73,7 @@ export default function StaffLoginPage() {
                     type="text"
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
-                    placeholder="e.g., StaffUser"
+                    placeholder="e.g., staff1"
                     required
                     className="pl-10"
                   />
