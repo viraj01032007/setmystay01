@@ -53,7 +53,7 @@ export function HomeSection({
           priority
           data-ai-hint="modern interior"
         />
-        <div className="relative text-white max-w-4xl space-y-6 w-full bg-blue-900/60 p-4 sm:p-8 rounded-xl shadow-2xl backdrop-blur-sm">
+        <div className="relative text-white max-w-4xl space-y-6 w-full bg-gradient-to-br from-blue-900/70 to-blue-700/60 p-4 sm:p-8 rounded-xl shadow-2xl backdrop-blur-sm">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
             Find Your Perfect Living Space
           </h1>
