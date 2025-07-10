@@ -21,7 +21,28 @@ import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
 import { Badge } from '@/components/ui/badge';
 
-const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
+const amenitiesList = [
+  'Electricity Backup', '24x7 Water Supply', 'Lift/Elevator', 'Gated Security', 'Reserved Parking', 'Visitor Parking', 'Intercom Facility', 'Power Backup', 'Fire Safety', 'CCTV Surveillance',
+  'Wi-Fi', 'Broadband Internet', 'Smart Home Features', 'DTH/Cable TV', 'Mobile Charging Points', 'LAN Port',
+  'Gymnasium', 'Swimming Pool', 'Yoga Area', 'Jogging Track', 'Spa/Sauna', 'Health Club',
+  'Club House', 'Party Hall', 'Community Hall', 'Amphitheatre', 'Library', 'Indoor Games (TT, Carrom)', 'Outdoor Games (Tennis, Basketball)', 'Lounge/Common Room',
+  "Kids' Play Area", 'Daycare Center', 'Senior Citizen Sitting Area', 'Family Area',
+  'Landscaped Garden', 'Balcony', 'Terrace Garden', 'Sit-out Area', 'Park View', 'Lake View', 'Open Green Space', 'Eco-friendly (Solar Panels, Rainwater Harvesting)',
+  'Western Toilet', 'Indian Toilet', 'Attached Bathroom', 'Shared Bathroom', 'Geyser', 'Shower', 'Bathtub', 'Wash Basin', 'Towel Rack', 'Exhaust Fan', 'Toilet Paper Holder', 'Hot & Cold Water',
+  'Private Kitchen', 'Shared Kitchen', 'Modular Kitchen', 'Refrigerator', 'Microwave', 'Gas Connection', 'Induction', 'Chimney', 'Water Purifier (RO/UV)', 'Sink', 'Kitchen Utensils', 'Dining Table',
+  'Single Bed', 'Double Bed', 'Mattress', 'Pillow', 'Blanket', 'Wardrobe', 'Study Table', 'Chair', 'Dressing Table', 'Fan', 'Lights', 'Curtains', 'AC', 'Cooler', 'TV', 'Shoe Rack', 'Side Table',
+  'Washing Machine (Private/Common)', 'Laundry Service', 'Drying Area', 'Iron & Ironing Board', 'Dustbin', 'Broom/Mop', 'Bucket & Mug', 'Cleaning Tools',
+  'Room Cleaning', 'Bathroom Cleaning', 'Linen Change', 'Daily/Weekly Cleaning',
+  'In-house Mess', 'Tiffin Service', 'Veg/Non-Veg Available', 'Breakfast/Lunch/Dinner', 'Self Cooking Allowed', 'Common Dining Area',
+  '24x7 Security Guard', 'CCTV Cameras', 'Biometric Access', 'Keycard Entry', 'Fire Alarm', 'Fire Exit', 'First Aid Kit', 'Emergency Alarm',
+  'Lift', 'Reception Area', 'Front Desk', 'Terrace Access', 'Common Hall', 'Lounge Area', 'Generator Backup', 'Pantry', 'RO Water', 'EV Charging Point',
+  'Two-Wheeler Parking', 'Car Parking', 'Valet Parking', 'EV Charging', 'Shuttle Service',
+  'Near Metro Station', 'Near Bus Stop', 'Near Grocery Store', 'Near Mall', 'Near College', 'Near Office', 'Near Hospital', 'Near ATM', 'Peaceful Area',
+  // Original Amenities for backward compatibility if needed
+  'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Meals', 'Laundry', 'Housekeeping', 'Garden', 'Mirror'
+].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
+
+
 const amenityIcons: { [key: string]: string } = {
   'AC': '❄️', 'WiFi': '📶', 'Parking': '🅿️', 'Gym': '🏋️', 'Pool': '🏊', 'Elevator': '↕️', 'Security': '🛡️', 'Balcony': '🪟', 'Power Backup': '🔋', 'Meals': '🍴', 'Laundry': '🧺', 'Housekeeping': '🧹', 'Garden': '🌳'
 };
@@ -58,9 +79,9 @@ const formSchema = z.object({
   noc: fileSchema.optional(),
   videoFile: z
     .any()
-    .refine((file) => file?.[0], "Video is required.")
+    .refine((files) => files?.[0], "Video is required.")
     .refine(
-      (file) => file?.[0]?.type ? ACCEPTED_VIDEO_TYPES.includes(file?.[0]?.type) : true,
+      (files) => files?.[0]?.type ? ACCEPTED_VIDEO_TYPES.includes(files?.[0]?.type) : true,
       ".mp4, .webm and .ogg formats are supported."
     ),
   gender: z.string().optional(),
@@ -289,7 +310,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                         render={() => (
                             <FormItem>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {amenitiesList.map((amenity) => (
+                                {['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'].map((amenity) => (
                                     <FormField
                                     key={amenity}
                                     control={form.control}
@@ -393,24 +414,24 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     <FormField
                         control={form.control}
                         name="videoFile"
-                        render={({ field }) => (
+                        render={({ field: { onChange, onBlur, name, ref } }) => (
                             <FormItem>
                                 <FormLabel>Video Tour</FormLabel>
                                 <FormControl>
                                     <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('video-upload')?.click()}>
                                         <Video className="mx-auto h-12 w-12 text-muted-foreground"/>
                                         <p className="mt-4 text-sm text-muted-foreground">
-                                            {field.value?.[0]?.name || 'Click to upload video file'}
+                                            {form.getValues('videoFile')?.[0]?.name || 'Click to upload video file'}
                                         </p>
                                         <Input
                                             id="video-upload"
                                             type="file"
                                             accept="video/*"
                                             className="hidden"
-                                            onBlur={field.onBlur}
-                                            name={field.name}
-                                            onChange={(e) => field.onChange(e.target.files)}
-                                            ref={field.ref}
+                                            onBlur={onBlur}
+                                            name={name}
+                                            onChange={(e) => onChange(e.target.files)}
+                                            ref={ref}
                                         />
                                     </div>
                                 </FormControl>
