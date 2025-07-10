@@ -24,7 +24,7 @@ import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 import { FloatingCta } from "@/components/shared/floating-cta";
 import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 import { PaymentConfirmationModal } from "@/components/modals/payment-confirmation-modal";
-import { SpinWheelModal } from "@/components/modals/spin-wheel-modal";
+import { SlotMachineModal } from "@/components/modals/slot-machine-modal";
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
@@ -57,7 +57,7 @@ export default function Home() {
   const [isPaymentConfirmationOpen, setIsPaymentConfirmationOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState<{ planName: string; amount: number; onConfirm: () => void; } | null>(null);
 
-  const [isSpinWheelModalOpen, setIsSpinWheelModalOpen] = useState(false);
+  const [isSlotMachineModalOpen, setIsSlotMachineModalOpen] = useState(false);
 
 
   const { toast } = useToast();
@@ -336,7 +336,7 @@ export default function Home() {
       </main>
 
       <Footer onYourPropertiesClick={() => setAuthModalOpen(true)} onNavigate={setActivePage}/>
-      <FloatingCta onSpinWheelClick={() => setIsSpinWheelModalOpen(true)} />
+      <FloatingCta onGameClick={() => setIsSlotMachineModalOpen(true)} />
       
       {/* Modals */}
       <PropertyDetails 
@@ -410,9 +410,9 @@ export default function Home() {
         availableCoupons={dummyCoupons}
       />
       {isClient && (
-        <SpinWheelModal
-            isOpen={isSpinWheelModalOpen}
-            onClose={() => setIsSpinWheelModalOpen(false)}
+        <SlotMachineModal
+            isOpen={isSlotMachineModalOpen}
+            onClose={() => setIsSlotMachineModalOpen(false)}
             prizes={dummyCoupons.filter(c => c.isActive)}
             onWin={handleCouponWin}
         />
