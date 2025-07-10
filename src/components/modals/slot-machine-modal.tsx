@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, Gift, Ticket, Cherry, Gem, Star } from "lucide-react";
@@ -26,21 +26,60 @@ const reelSymbols = [
     { id: 'gem', icon: (props: any) => <Gem {...props} />, color: "text-blue-500" },
 ];
 
+const TWENTY_FOUR_HOURS_IN_MS = 24 * 60 * 60 * 1000;
+
 export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachineModalProps) {
     const [reels, setReels] = useState([0, 0, 0]);
     const [isSpinning, setIsSpinning] = useState(false);
     const [winner, setWinner] = useState<Coupon | null>(null);
-    const [hasSpun, setHasSpun] = useState(false);
     const [leverPulled, setLeverPulled] = useState(false);
     const [resultMessage, setResultMessage] = useState<string | null>(null);
     const { toast } = useToast();
 
+    // Cooldown and Bonus state
+    const [canPlay, setCanPlay] = useState(false);
+    const [isLuckySpin, setIsLuckySpin] = useState(false);
+    const [cooldownTime, setCooldownTime] = useState('');
+
+    const checkCanPlay = useCallback(() => {
+        const lastSpunTimestamp = localStorage.getItem('setmystay_last_spun_timestamp');
+        if (!lastSpunTimestamp) {
+            setCanPlay(true);
+            return;
+        }
+
+        const timeSinceLastSpin = Date.now() - parseInt(lastSpunTimestamp, 10);
+
+        if (timeSinceLastSpin >= TWENTY_FOUR_HOURS_IN_MS) {
+            setCanPlay(true);
+            localStorage.removeItem('setmystay_slot_lucky_spin'); // Reset lucky spin on new day
+        } else {
+            setCanPlay(false);
+            const remainingTime = TWENTY_FOUR_HOURS_IN_MS - timeSinceLastSpin;
+            updateCooldownTime(remainingTime);
+        }
+    }, []);
+
+    const updateCooldownTime = (ms: number) => {
+        const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((ms / (1000 * 60)) % 60);
+        const seconds = Math.floor((ms / 1000) % 60);
+        setCooldownTime(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
     useEffect(() => {
         if (isOpen) {
-            const alreadySpun = sessionStorage.getItem('setmystay_has_spun_slot');
-            if (alreadySpun) {
-                setHasSpun(true);
+            checkCanPlay();
+            const luckySpinStatus = localStorage.getItem('setmystay_slot_lucky_spin') === 'true';
+            setIsLuckySpin(luckySpinStatus);
+
+            let interval: NodeJS.Timeout;
+            if (!canPlay) {
+                interval = setInterval(() => {
+                    checkCanPlay();
+                }, 1000);
             }
+            return () => clearInterval(interval);
         } else {
             // Reset on close if not spinning
             if (!isSpinning) {
@@ -48,26 +87,30 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                 setResultMessage(null);
             }
         }
-    }, [isOpen, isSpinning]);
+    }, [isOpen, isSpinning, canPlay, checkCanPlay]);
+
 
     const handleSpin = () => {
-        if (isSpinning || hasSpun || prizes.length === 0) return;
+        if (isSpinning || !canPlay || prizes.length === 0) return;
 
         setIsSpinning(true);
         setWinner(null);
         setResultMessage(null);
         setLeverPulled(true);
-        sessionStorage.setItem('setmystay_has_spun_slot', 'true');
+        
+        localStorage.setItem('setmystay_last_spun_timestamp', Date.now().toString());
 
         // Determine winner
         const winProbability = 0.3; // 30% chance to win
-        const didWin = Math.random() < winProbability;
+        let didWin = isLuckySpin || Math.random() < winProbability;
         
         let finalReels: number[];
-
+        
         if (didWin) {
             const winningSymbolIndex = Math.floor(Math.random() * reelSymbols.length);
             finalReels = [winningSymbolIndex, winningSymbolIndex, winningSymbolIndex];
+            localStorage.removeItem('setmystay_slot_lucky_spin');
+            setIsLuckySpin(false);
         } else {
             // Ensure no win by making sure at least two are different
             finalReels = [
@@ -78,9 +121,20 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
             while (finalReels[0] === finalReels[1] && finalReels[1] === finalReels[2]) {
                  finalReels[1] = (finalReels[1] + 1) % reelSymbols.length;
             }
+
+            // Check for a near miss (bonus round trigger)
+            const counts = finalReels.reduce((acc, val) => {
+                acc[val] = (acc[val] || 0) + 1;
+                return acc;
+            }, {} as Record<number, number>);
+
+            if (Object.values(counts).includes(2)) {
+                localStorage.setItem('setmystay_slot_lucky_spin', 'true');
+                setResultMessage("So close! You've earned a Lucky Spin for next time!");
+            }
         }
 
-        // Animate reels one by one, faster now
+        // Animate reels one by one
         setTimeout(() => setReels(prev => [finalReels[0], prev[1], prev[2]]), 500);
         setTimeout(() => setReels(prev => [prev[0], finalReels[1], prev[2]]), 1000);
         setTimeout(() => {
@@ -90,9 +144,10 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                 const prize = prizes[Math.floor(Math.random() * prizes.length)];
                 setWinner(prize);
                 onWin(prize);
-            } else {
+            } else if (!resultMessage) { // Only set this if no bonus message was set
                 setResultMessage("Better luck next time!");
             }
+            checkCanPlay(); // Re-check play status to start cooldown
         }, 1500);
         
         // Reset lever animation
@@ -111,15 +166,12 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-2xl text-center">Slot Machine Fun!</DialogTitle>
-                    <DialogDescription className="text-center">
-                        {hasSpun 
-                            ? "You've already played this session."
-                            : winner
-                            ? "Congratulations! You've won a prize!"
-                            : resultMessage
-                            ? resultMessage
-                            : "Pull the lever to win a discount coupon. Good luck!"
-                        }
+                     <DialogDescription className="text-center">
+                        {isLuckySpin && canPlay && "You have a Lucky Spin! Good luck!"}
+                        {!canPlay && `You can play again in: ${cooldownTime}`}
+                        {canPlay && !isLuckySpin && !winner && !resultMessage && "Pull the lever to win a discount coupon!"}
+                        {winner && "Congratulations! You've won a prize!"}
+                        {resultMessage && resultMessage}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -144,7 +196,7 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                                 <div className={cn(
                                     "absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-red-600 border-4 border-slate-200 shadow-inner transform transition-transform duration-300 ease-out",
                                     leverPulled ? 'translate-y-20' : 'translate-y-0',
-                                    (isSpinning || hasSpun) && 'group-hover:translate-y-0'
+                                    (isSpinning || !canPlay) && 'group-hover:translate-y-0'
                                     )}
                                 ></div>
                             </div>
@@ -163,13 +215,9 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                                 </Button>
                             </div>
                         </div>
-                    ) : resultMessage && !isSpinning ? (
-                        <div className="text-center mt-4">
-                            <p className="text-xl font-semibold text-muted-foreground">{resultMessage}</p>
-                        </div>
                     ) : (
-                         <Button size="lg" onClick={handleSpin} disabled={isSpinning || hasSpun} className="w-full mt-4">
-                            {isSpinning ? "Spinning..." : hasSpun ? "Already Played" : "Pull Lever to Spin!"}
+                         <Button size="lg" onClick={handleSpin} disabled={isSpinning || !canPlay} className="w-full mt-4">
+                            {isSpinning ? "Spinning..." : !canPlay ? "On Cooldown" : isLuckySpin ? "Use Lucky Spin!" : "Pull Lever to Spin!"}
                         </Button>
                     )}
                 </div>
