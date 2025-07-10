@@ -33,6 +33,7 @@ export interface Listing {
   area: number;
   city: string;
   locality: string;
+  sector?: string;
   state: string;
   completeAddress: string;
   partialAddress: string;
@@ -66,6 +67,7 @@ export interface RoommateProfile {
   area: number; // Preferred area
   city: string;
   locality: string;
+  sector?: string;
   state: string;
   completeAddress: string;
   partialAddress: string;

@@ -240,6 +240,11 @@ export default function Home() {
     const newId = `new-${Date.now()}`;
     const ownerId = 'newUser'; // Simulate current user
     
+    let partialAddress = `${pendingListingData.locality}, ${pendingListingData.city}`;
+    if (pendingListingData.sector) {
+      partialAddress = `${pendingListingData.sector}, ${pendingListingData.locality}, ${pendingListingData.city}`;
+    }
+
     if ('propertyType' in pendingListingData && pendingListingData.propertyType !== 'Roommate') {
         const mappedListing: Listing = {
           id: newId,
@@ -250,8 +255,9 @@ export default function Home() {
           state: pendingListingData.state,
           city: pendingListingData.city,
           locality: pendingListingData.locality,
+          sector: pendingListingData.sector,
           completeAddress: pendingListingData.address,
-          partialAddress: `${pendingListingData.locality}, ${pendingListingData.city}`,
+          partialAddress: partialAddress,
           ownerName: pendingListingData.ownerName,
           contactPhonePrimary: pendingListingData.phonePrimary,
           contactPhoneSecondary: pendingListingData.phoneSecondary,
@@ -279,8 +285,9 @@ export default function Home() {
         state: pendingListingData.state,
         city: pendingListingData.city,
         locality: pendingListingData.locality,
+        sector: pendingListingData.sector,
         completeAddress: pendingListingData.address,
-        partialAddress: `${pendingListingData.locality}, ${pendingListingData.city}`,
+        partialAddress: partialAddress,
         contactPhonePrimary: pendingListingData.phonePrimary,
         contactPhoneSecondary: pendingListingData.phoneSecondary,
         description: pendingListingData.description,

@@ -75,6 +75,7 @@ const formSchema = z.object({
   state: z.string().min(1, 'State is required'),
   city: z.string().min(1, 'City is required'),
   locality: z.string().min(1, 'Area / Locality is required'),
+  sector: z.string().optional(),
   address: z.string().min(10, 'Full address is required'),
   ownerName: z.string().min(2, 'Name is required'),
   phonePrimary: z.string().refine((val) => /^\d{10}$/.test(val), {
@@ -183,6 +184,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       state: '',
       city: '',
       locality: '',
+      sector: '',
     },
   });
   
@@ -536,6 +538,18 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                 value={field.value}
                                 onChange={field.onChange}
                                 suggestions={areaSuggestions}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                  )}/>
+                  <FormField control={form.control} name="sector" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Sector</FormLabel>
+                        <FormControl>
+                           <Input 
+                                placeholder="e.g., Sector 15"
+                                {...field}
                             />
                         </FormControl>
                         <FormMessage />
