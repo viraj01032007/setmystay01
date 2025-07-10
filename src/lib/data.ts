@@ -6,7 +6,7 @@ export const dummyAdvertisements: Advertisement[] = [
         id: 'ad001',
         title: 'Grand Opening Offer!',
         description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50',
-        imageUrl: 'https://placehold.co/600x400',
+        imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto=format&fit=crop',
         isActive: true,
         'data-ai-hint': 'sale promotion',
     },
@@ -14,7 +14,7 @@ export const dummyAdvertisements: Advertisement[] = [
         id: 'ad002',
         title: 'Unlock Unlimited Connections',
         description: 'Subscribe to our unlimited plan and find your perfect roommate today.',
-        imageUrl: 'https://placehold.co/600x400',
+        imageUrl: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2070&auto=format&fit=crop',
         isActive: false,
         'data-ai-hint': 'people connecting',
     }
@@ -46,7 +46,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['AC', 'WiFi', 'Meals', 'Laundry', 'Housekeeping', 'Security'],
         size: 'Single Room',
         images: [
-            'https://placehold.co/600x400',
+            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop',
         ],
         'data-ai-hint': 'modern apartment',
         views: 125,
@@ -80,8 +80,8 @@ export const dummyProperties: Listing[] = [
         amenities: ['AC', 'WiFi', 'Parking', 'Gym', 'Elevator', 'Security'],
         size: '2 BHK',
         images: [
-            'https://placehold.co/600x400',
-            'https://placehold.co/600x400',
+            'https://images.unsplash.com/photo-1493809842344-ab6181ba96a2?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1980&auto=format&fit=crop',
         ],
         'data-ai-hint': 'luxury apartment',
         videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
@@ -109,7 +109,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['Parking', 'Balcony', 'Garden', 'Power Backup'],
         size: '3 BHK',
         images: [
-            'https://placehold.co/600x400',
+            'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=2070&auto=format&fit=crop',
         ],
         'data-ai-hint': 'house garden',
         views: 210,
@@ -136,7 +136,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['AC', 'WiFi', 'Gym', 'Elevator'],
         size: '2 BHK',
         images: [
-            'https://placehold.co/600x400',
+            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop',
         ],
         'data-ai-hint': 'bright apartment',
         views: 95,
@@ -163,7 +163,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['Parking', 'Elevator'],
         size: '1 BHK',
         images: [
-            'https://placehold.co/600x400',
+            'https://images.unsplash.com/photo-1600585152225-358bfe9ddb0b?q=80&w=2070&auto=format&fit=crop',
         ],
         'data-ai-hint': 'simple apartment',
         views: 450,
@@ -188,7 +188,7 @@ export const dummyProperties: Listing[] = [
         furnishedStatus: 'Semi-Furnished',
         amenities: ['Elevator', 'Security', 'Piped Gas'],
         size: '1 BHK',
-        images: ['https://placehold.co/600x400'],
+        images: ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2070&auto=format&fit=crop'],
         'data-ai-hint': 'small apartment interior',
         views: 280,
         ownerId: 'dummyOwner6',
@@ -213,7 +213,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['WiFi', 'Housekeeping', 'Security'],
         size: 'Double Sharing',
         images: [
-            'https://placehold.co/600x400',
+            'https://images.unsplash.com/photo-1591825729269-caeb483e0222?q=80&w=1974&auto=format&fit=crop',
         ],
         'data-ai-hint': 'student room',
         views: 190,
@@ -249,7 +249,7 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Non-Smoker', 'Clean', 'Drinker', 'Vegetarian'],
         gender: 'Male',
         images: [
-            'https://placehold.co/400x400',
+            'https://images.unsplash.com/photo-1557862921-37829c790f19?q=80&w=2071&auto=format&fit=crop',
         ],
         'data-ai-hint': 'male portrait',
         views: 75,
@@ -273,7 +273,7 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Non-Smoker', 'Clean', 'Drinker', 'Non-Vegetarian'],
         gender: 'Female',
         images: [
-            'https://placehold.co/400x400',
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop',
         ],
         'data-ai-hint': 'female portrait',
         views: 180,
@@ -296,7 +296,7 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Pet-Friendly', 'Clean', 'Drinker'],
         gender: 'Male',
         images: [
-            'https://placehold.co/400x400',
+            'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop',
         ],
         'data-ai-hint': 'male professional',
         views: 220,
@@ -319,7 +319,7 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Pet-Friendly', 'Non-Smoker', 'Clean'],
         gender: 'Female',
         images: [
-            'https://placehold.co/400x400',
+            'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop',
         ],
         'data-ai-hint': 'female creative',
         views: 155,
@@ -341,7 +341,7 @@ export const dummyRoommates: RoommateProfile[] = [
         description: "Art student looking for a fun and friendly female roommate for a shared PG. I'm tidy, love to paint, and explore cafes. Let's find a great place together!",
         preferences: ['Non-Smoker', 'Clean', 'Vegetarian'],
         gender: 'Female',
-        images: ['https://placehold.co/400x400'],
+        images: ['https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop'],
         'data-ai-hint': 'female student',
         views: 95,
         ownerId: 'dummyRoommateOwner5',
