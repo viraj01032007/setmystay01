@@ -6,22 +6,23 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>
-        <path id="circlePath" d="M 30 70 A 30 30 0 1 1 90 70" />
+        {/* This path creates an arc at the bottom of the circle for the text */}
+        <path id="circlePath" d="M 30 85 A 40 40 0 0 1 90 85" />
       </defs>
       <rect width="120" height="120" rx="20" fill="hsl(var(--primary))"/>
       <circle cx="60" cy="60" r="45" stroke="white" strokeWidth="1.5" fill="none"/>
       
       <g transform="translate(0, -5)">
         <path d="M60 32C49.507 32 41 40.507 41 51C41 65.5 60 78 60 78C60 78 79 65.5 79 51C79 40.507 70.493 32 60 32Z" fill="hsl(var(--primary))" stroke="white" strokeWidth="2.5"/>
-        <g strokeWidth="1.5" stroke="white" fill="hsl(var(--primary))">
-            <path d="M60 43.5L53 49.5V58.5H67V49.5L60 43.5Z"/>
-            <rect x="58" y="54.5" width="4" height="4" rx="0.5"/>
+        <g strokeWidth="1.5" stroke="hsl(var(--primary))" fill="white">
+            <path d="M60 43.5L53 49.5V58.5H67V49.5L60 43.5Z" stroke="white" fill="hsl(var(--primary))"/>
+            <rect x="58" y="54.5" width="4" height="4" rx="0.5" stroke="white" fill="hsl(var(--primary))"/>
         </g>
       </g>
       
       <text 
         fontFamily="Inter, sans-serif" 
-        fontSize="17" 
+        fontSize="16" 
         fontWeight="600" 
         fill="white" 
         letterSpacing="1"
