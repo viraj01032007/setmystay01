@@ -32,6 +32,7 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
     const [winner, setWinner] = useState<Coupon | null>(null);
     const [hasSpun, setHasSpun] = useState(false);
     const [leverPulled, setLeverPulled] = useState(false);
+    const [resultMessage, setResultMessage] = useState<string | null>(null);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -41,8 +42,10 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                 setHasSpun(true);
             }
         } else {
+            // Reset on close if not spinning
             if (!isSpinning) {
                 setWinner(null);
+                setResultMessage(null);
             }
         }
     }, [isOpen, isSpinning]);
@@ -52,6 +55,7 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
 
         setIsSpinning(true);
         setWinner(null);
+        setResultMessage(null);
         setLeverPulled(true);
         sessionStorage.setItem('setmystay_has_spun_slot', 'true');
 
@@ -76,9 +80,9 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
             }
         }
 
-        // Animate reels one by one over 10 seconds
-        setTimeout(() => setReels(prev => [finalReels[0], prev[1], prev[2]]), 3000);
-        setTimeout(() => setReels(prev => [prev[0], finalReels[1], prev[2]]), 6000);
+        // Animate reels one by one, faster now
+        setTimeout(() => setReels(prev => [finalReels[0], prev[1], prev[2]]), 500);
+        setTimeout(() => setReels(prev => [prev[0], finalReels[1], prev[2]]), 1000);
         setTimeout(() => {
             setReels(finalReels);
             setIsSpinning(false);
@@ -86,8 +90,10 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                 const prize = prizes[Math.floor(Math.random() * prizes.length)];
                 setWinner(prize);
                 onWin(prize);
+            } else {
+                setResultMessage("Better luck next time!");
             }
-        }, 9000);
+        }, 1500);
         
         // Reset lever animation
         setTimeout(() => setLeverPulled(false), 500);
@@ -110,6 +116,8 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                             ? "You've already played this session."
                             : winner
                             ? "Congratulations! You've won a prize!"
+                            : resultMessage
+                            ? resultMessage
                             : "Pull the lever to win a discount coupon. Good luck!"
                         }
                     </DialogDescription>
@@ -154,6 +162,10 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                                     <Copy className="w-5 h-5"/>
                                 </Button>
                             </div>
+                        </div>
+                    ) : resultMessage && !isSpinning ? (
+                        <div className="text-center mt-4">
+                            <p className="text-xl font-semibold text-muted-foreground">{resultMessage}</p>
                         </div>
                     ) : (
                          <Button size="lg" onClick={handleSpin} disabled={isSpinning || hasSpun} className="w-full mt-4">
