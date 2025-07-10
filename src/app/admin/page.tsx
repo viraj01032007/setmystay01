@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -60,6 +60,8 @@ const chartData = [
 ];
 
 const ADMIN_PASSWORD = 'Bluechip@123';
+const ADMIN_OTP = '16082007';
+const ADMIN_ANSWER = 'rohan kholi';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -434,10 +436,12 @@ export default function AdminDashboard() {
                 <Card className="mb-8">
                     <CardHeader>
                         <CardTitle className="text-2xl">Admin Settings</CardTitle>
-                        <CardDescription>Manage your administrator account.</CardDescription>
+                        <CardDescription>Manage your administrator account and authentication factors.</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-8">
                         <PasswordChangeForm currentPassword={ADMIN_PASSWORD} />
+                        <PinChangeForm currentPin={ADMIN_OTP} />
+                        <SecurityQuestionChangeForm currentAnswer={ADMIN_ANSWER} />
                     </CardContent>
                 </Card>
 
@@ -806,6 +810,95 @@ const PasswordChangeForm = ({ currentPassword }) => {
                 <Input id="confirm-password" name="confirmPass" type="password" value={passwords.confirmPass} onChange={handlePasswordChange} required />
             </div>
             <Button type="submit">Update Password</Button>
+        </form>
+    );
+};
+
+const PinChangeForm = ({ currentPin }) => {
+    const { toast } = useToast();
+    const [pins, setPins] = useState({
+        current: '',
+        newPin: '',
+    });
+
+    const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPins(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitPinChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (pins.current !== currentPin) {
+            toast({ title: 'Error', description: 'Current PIN is not correct.', variant: 'destructive' });
+            return;
+        }
+        if (pins.newPin.length !== 8) {
+             toast({ title: 'Error', description: 'New PIN must be 8 digits.', variant: 'destructive' });
+            return;
+        }
+        toast({ title: 'Success!', description: 'Your PIN has been changed.' });
+        setPins({ current: '', newPin: '' });
+    };
+
+    return (
+        <form onSubmit={handleSubmitPinChange} className="space-y-4 max-w-md pt-8 border-t">
+            <h4 className="font-semibold text-lg">Change PIN</h4>
+            <div className="space-y-2">
+                <Label htmlFor="current-pin">Current PIN</Label>
+                <Input id="current-pin" name="current" type="password" value={pins.current} onChange={handlePinChange} required maxLength={8} />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="new-pin">New PIN</Label>
+                <Input id="new-pin" name="newPin" type="password" value={pins.newPin} onChange={handlePinChange} required maxLength={8} />
+            </div>
+            <Button type="submit">Update PIN</Button>
+        </form>
+    );
+};
+
+const SecurityQuestionChangeForm = ({ currentAnswer }) => {
+    const { toast } = useToast();
+    const [security, setSecurity] = useState({
+        current: '',
+        newQuestion: '',
+        newAnswer: ''
+    });
+
+    const handleSecurityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSecurity(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitSecurityChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (security.current.toLowerCase() !== currentAnswer) {
+            toast({ title: 'Error', description: 'Your current security answer is not correct.', variant: 'destructive' });
+            return;
+        }
+        if (!security.newQuestion || !security.newAnswer) {
+             toast({ title: 'Error', description: 'New question and answer cannot be empty.', variant: 'destructive' });
+            return;
+        }
+        toast({ title: 'Success!', description: 'Your security question and answer have been updated.' });
+        setSecurity({ current: '', newQuestion: '', newAnswer: '' });
+    };
+
+    return (
+        <form onSubmit={handleSubmitSecurityChange} className="space-y-4 max-w-md pt-8 border-t">
+            <h4 className="font-semibold text-lg">Change Security Question</h4>
+            <div className="space-y-2">
+                <Label htmlFor="current-answer">Current Security Answer (Who are you?)</Label>
+                <Input id="current-answer" name="current" type="text" value={security.current} onChange={handleSecurityChange} required />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="new-question">New Security Question</Label>
+                <Input id="new-question" name="newQuestion" type="text" value={security.newQuestion} onChange={handleSecurityChange} required />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="new-answer">New Security Answer</Label>
+                <Input id="new-answer" name="newAnswer" type="text" value={security.newAnswer} onChange={handleSecurityChange} required />
+            </div>
+            <Button type="submit">Update Security Question</Button>
         </form>
     );
 };
