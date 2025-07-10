@@ -56,7 +56,7 @@ export function HomeSection({
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
       {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center">
+      <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center -mx-4 sm:-mx-6 lg:-mx-8">
         <Image
           src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2071&auto=format&fit=crop"
           alt="Modern living room"
@@ -114,18 +114,19 @@ export function HomeSection({
           <CarouselContent>
             {featuredProperties.map((listing) => (
               <CarouselItem key={listing.id} className="md:basis-1/2 lg:basis-1/3">
-                <div className="p-1">
+                <div className="p-1 h-full">
                   <PropertyCard
                     listing={listing}
                     onViewDetails={(item) => onViewDetails(item, 'listing')}
                     isLiked={likedItemIds.has(listing.id)}
                     onToggleLike={() => onToggleLike(listing.id)}
-                    isHorizontal={true}
                   />
                 </div>
               </CarouselItem>
             ))}
           </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
         </Carousel>
       </div>
 
@@ -141,18 +142,19 @@ export function HomeSection({
           <CarouselContent>
             {featuredRoommates.map((profile) => (
               <CarouselItem key={profile.id} className="md:basis-1/2 lg:basis-1/3">
-                 <div className="p-1">
+                 <div className="p-1 h-full">
                   <RoommateCard
                     profile={profile}
                     onViewDetails={(item) => onViewDetails(item, 'roommate')}
                     isLiked={likedItemIds.has(profile.id)}
                     onToggleLike={() => onToggleLike(profile.id)}
-                    isHorizontal={true}
                   />
                 </div>
               </CarouselItem>
             ))}
           </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
         </Carousel>
       </div>
     </div>

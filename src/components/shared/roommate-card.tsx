@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -13,79 +14,15 @@ interface RoommateCardProps {
   onViewDetails: (profile: RoommateProfile) => void;
   isLiked: boolean;
   onToggleLike: () => void;
-  isHorizontal?: boolean;
 }
 
-export function RoommateCard({ profile, onViewDetails, isLiked, onToggleLike, isHorizontal = false }: RoommateCardProps) {
+export function RoommateCard({ profile, onViewDetails, isLiked, onToggleLike }: RoommateCardProps) {
   
   const handleLikeClick = (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card click event from firing
       onToggleLike();
   };
-
-  if (isHorizontal) {
-    return (
-      <div 
-        className="bg-card rounded-xl shadow-md overflow-hidden border border-transparent hover:border-primary/50 hover:shadow-xl transition-all duration-300 group cursor-pointer flex flex-col md:flex-row"
-        onClick={() => onViewDetails(profile)}
-      >
-        <div className="relative h-48 md:h-auto md:w-1/3 lg:w-2/5 flex-shrink-0">
-          <Image
-            src={profile.images[0]}
-            alt={profile.ownerName}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            data-ai-hint={profile['data-ai-hint'] as string | undefined}
-          />
-          <Badge variant="secondary" className="absolute top-3 left-3">
-            <User className="w-3 h-3 mr-1.5" />
-            Roommate
-          </Badge>
-          <Button 
-              size="icon" 
-              variant="ghost" 
-              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/70 backdrop-blur-sm hover:bg-white"
-              onClick={handleLikeClick}
-          >
-              <Heart className={cn("w-5 h-5 text-slate-600 transition-all", isLiked && "text-red-500 fill-red-500")} />
-              <span className="sr-only">Like profile</span>
-          </Button>
-        </div>
-        <div className="p-4 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold text-card-foreground truncate group-hover:text-primary">{profile.ownerName}, {profile.age}</h3>
-          
-          <div className="flex items-center text-muted-foreground text-sm mt-1">
-            <MapPin className="w-4 h-4 mr-2" />
-            <span>Seeking in {profile.locality}, {profile.city}</span>
-          </div>
-          
-          <div className="flex items-center text-lg font-bold text-primary my-3">
-            <IndianRupee className="w-5 h-5 mr-1" />
-            <span>Budget: {profile.rent.toLocaleString()}</span>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 text-xs">
-            <Badge variant="outline">{profile.gender}</Badge>
-            {profile.preferences.slice(0, 2).map(pref => (
-              <Badge key={pref} variant="outline">{pref}</Badge>
-            ))}
-          </div>
-
-          <div className="flex justify-between items-center mt-auto pt-4">
-              <Button variant="default" size="sm" className="w-full">
-                  View Profile
-              </Button>
-              <div className="flex items-center text-xs text-muted-foreground ml-4 shrink-0">
-                  <Eye className="w-3 h-3 mr-1" />
-                  {profile.views || 0}
-              </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
   
-  // Default vertical card
   return (
     <div 
       className="bg-card rounded-xl shadow-md overflow-hidden border border-transparent hover:border-primary/50 hover:shadow-xl transition-all duration-300 group cursor-pointer h-full flex flex-col"

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -318,8 +319,8 @@ export function ListingsSection({
             {filteredListings.map(item => {
               const itemType = item.propertyType === 'Roommate' ? 'roommate' : 'listing';
               return itemType === 'roommate' 
-                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} isHorizontal={layout === 'list'} />
-                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} isHorizontal={layout === 'list'} />
+                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
+                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
             })}
           </div>
           {filteredListings.length === 0 && (
