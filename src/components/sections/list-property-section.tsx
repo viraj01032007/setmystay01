@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp, Wifi, Car, Dumbbell, Utensils, Tv, Snowflake, Wind, Droplets, Zap, Users, Shield, VenetianMask, User, BedDouble, Building, Leaf, PawPrint, Sparkles } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp, Wifi, Car, Dumbbell, Utensils, Tv, Snowflake, Wind, Droplets, Zap, Users, Shield, VenetianMask, User, BedDouble, Building, Leaf, PawPrint, Sparkles, ArrowBigUpDash } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
@@ -30,7 +30,7 @@ const amenitiesList = [
   'Club House', 'Party Hall', 'Community Hall', 'Amphitheatre', 'Library', 'Indoor Games (TT, Carrom)', 'Outdoor Games (Tennis, Basketball)', 'Lounge/Common Room',
   "Kids' Play Area", 'Daycare Center', 'Senior Citizen Sitting Area', 'Family Area',
   'Landscaped Garden', 'Balcony', 'Terrace Garden', 'Sit-out Area', 'Park View', 'Lake View', 'Open Green Space', 'Eco-friendly (Solar Panels, Rainwater Harvesting)',
-  'Western Toilet', 'Indian Toilet', 'Attached Bathroom', 'Shared Bathroom', 'Geyser', 'Shower', 'Bathtub', 'Wash Basin', 'Towel Rack', 'Exhaust Fan', 'Toilet Paper Holder', 'Hot & Cold Water',
+  'Western Toilet', 'Indian Toilet', 'Attached Bathroom', 'Shared Bathroom', 'Geyser', 'Shower', 'Bathtub', 'Wash Basin', 'Towel Rack', 'Exhaust Fan', 'Toilet Paper Holder', 'Hot & Cold Water', 'Mirror',
   'Private Kitchen', 'Shared Kitchen', 'Modular Kitchen', 'Refrigerator', 'Microwave', 'Gas Connection', 'Induction', 'Chimney', 'Water Purifier (RO/UV)', 'Sink', 'Kitchen Utensils', 'Dining Table',
   'Single Bed', 'Double Bed', 'Mattress', 'Pillow', 'Blanket', 'Wardrobe', 'Study Table', 'Chair', 'Dressing Table', 'Fan', 'Lights', 'Curtains', 'AC', 'Cooler', 'TV', 'Shoe Rack', 'Side Table',
   'Washing Machine (Private/Common)', 'Laundry Service', 'Drying Area', 'Iron & Ironing Board', 'Dustbin', 'Broom/Mop', 'Bucket & Mug', 'Cleaning Tools',
@@ -41,20 +41,20 @@ const amenitiesList = [
   'Two-Wheeler Parking', 'Car Parking', 'Valet Parking', 'EV Charging', 'Shuttle Service',
   'Near Metro Station', 'Near Bus Stop', 'Near Grocery Store', 'Near Mall', 'Near College', 'Near Office', 'Near Hospital', 'Near ATM', 'Peaceful Area',
   // Original Amenities for backward compatibility if needed
-  'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Meals', 'Laundry', 'Housekeeping', 'Garden', 'Mirror',
+  'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Meals', 'Laundry', 'Housekeeping', 'Garden',
   // Roommate specific preferences
   'Non-Smoker', 'Vegetarian', 'Non-Vegetarian', 'Clean', 'Drinker', 'Pet-Friendly'
 ].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
 
 
 const amenityIcons: { [key: string]: React.ElementType } = {
-  'AC': Snowflake, 'Wi-Fi': Wifi, 'Parking': Car, 'Gymnasium': Dumbbell, 'Lift/Elevator': Users, 'Security': Shield, 'Balcony': VenetianMask, 'Power Backup': Zap, 'In-house Mess': Utensils, 'Washing Machine (Private/Common)': Droplets, 'Housekeeping': Droplets, 'Garden': Wind, 'TV': Tv, 'Refrigerator': Snowflake, 'Attached Bathroom': User, 'Reserved Parking': Car, 'Lift': Users, 'Gated Security': Shield, 'Non-Smoker': User, 'Vegetarian': Leaf, 'Pet-Friendly': PawPrint, 'Clean': Sparkles
+  'AC': Snowflake, 'Wi-Fi': Wifi, 'Parking': Car, 'Gymnasium': Dumbbell, 'Lift/Elevator': ArrowBigUpDash, 'Security': Shield, 'Balcony': VenetianMask, 'Power Backup': Zap, 'In-house Mess': Utensils, 'Washing Machine (Private/Common)': Droplets, 'Housekeeping': Droplets, 'Garden': Wind, 'TV': Tv, 'Refrigerator': Snowflake, 'Attached Bathroom': User, 'Reserved Parking': Car, 'Lift': ArrowBigUpDash, 'Gated Security': Shield, 'Non-Smoker': User, 'Vegetarian': Leaf, 'Pet-Friendly': PawPrint, 'Clean': Sparkles
 };
 
 const topAmenitiesByPropertyType: { [key: string]: string[] } = {
     'Rental': ['AC', 'Wi-Fi', 'Parking', 'Gymnasium', 'Lift/Elevator', 'Security', 'Balcony', 'Power Backup'],
-    'PG': ['AC', 'Wi-Fi', 'In-house Mess', 'Washing Machine (Private/Common)', 'Housekeeping', 'Security', 'Power Backup', 'Refrigerator'],
-    'Roommate': ['Non-Smoker', 'Vegetarian', 'Pet-Friendly', 'Clean', 'Wi-Fi', 'AC', 'Attached Bathroom', 'Reserved Parking']
+    'PG': ['AC', 'Wi-Fi', 'In-house Mess', 'Washing Machine (Private/Common)', 'Lift/Elevator', 'Security', 'Power Backup', 'Refrigerator'],
+    'Roommate': ['Non-Smoker', 'Vegetarian', 'Pet-Friendly', 'Lift/Elevator', 'Wi-Fi', 'AC', 'Attached Bathroom', 'Reserved Parking']
 };
 
 
