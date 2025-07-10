@@ -160,6 +160,22 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
             toast({ title: "Copied!", description: "Coupon code copied to clipboard." });
         }
     };
+    
+    const getDescription = () => {
+        if (winner) return "Congratulations! You've won a prize!";
+        if (resultMessage) {
+            return (
+                <>
+                    {resultMessage}
+                    {!canPlay && <div className="mt-1">You can play again in: {cooldownTime}</div>}
+                </>
+            );
+        }
+        if (!canPlay) return `You can play again in: ${cooldownTime}`;
+        if (isLuckySpin) return "You have a Lucky Spin! Good luck!";
+        return "Pull the lever to win a discount coupon!";
+    };
+
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -167,11 +183,7 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                 <DialogHeader>
                     <DialogTitle className="text-2xl text-center">Slot Machine Fun!</DialogTitle>
                      <DialogDescription className="text-center">
-                        {isLuckySpin && canPlay && "You have a Lucky Spin! Good luck!"}
-                        {!canPlay && `You can play again in: ${cooldownTime}`}
-                        {canPlay && !isLuckySpin && !winner && !resultMessage && "Pull the lever to win a discount coupon!"}
-                        {winner && "Congratulations! You've won a prize!"}
-                        {resultMessage && resultMessage}
+                        {getDescription()}
                     </DialogDescription>
                 </DialogHeader>
 
