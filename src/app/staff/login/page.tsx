@@ -8,19 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Lock, LogIn } from 'lucide-react';
+import { User, Lock, LogIn } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
 
 // Hardcoded credentials for staff simulation
+const STAFF_USERID = 'StaffUser';
 const STAFF_PASSWORD = 'Staff@123';
-const STAFF_OTP = '123456';
 
 export default function StaffLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [step, setStep] = useState<'password' | 'otp'>('password');
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -32,26 +31,16 @@ export default function StaffLoginPage() {
     }
   }, [router]);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === STAFF_PASSWORD) {
-      toast({ title: 'Step 1 Complete', description: 'Password correct. Please enter your OTP.' });
-      setStep('otp');
-    } else {
-      toast({ title: 'Authentication Error', description: 'Incorrect password.', variant: 'destructive' });
-    }
-  };
-
-  const handleOtpSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    if (otp === STAFF_OTP) {
+    if (userId === STAFF_USERID && password === STAFF_PASSWORD) {
       toast({ title: 'Authentication Successful!', description: 'Redirecting to staff dashboard...' });
       // In a real app, you'd get a session token from the server
       localStorage.setItem('staff_authenticated', 'true');
       router.push('/staff');
     } else {
-      toast({ title: 'Authentication Error', description: 'Incorrect OTP.', variant: 'destructive' });
+      toast({ title: 'Authentication Error', description: 'Incorrect User ID or Password.', variant: 'destructive' });
       setIsLoading(false);
     }
   };
@@ -70,13 +59,26 @@ export default function StaffLoginPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Staff Panel Access</CardTitle>
           <CardDescription>
-            {step === 'password' && 'Enter your staff password.'}
-            {step === 'otp' && 'Enter your OTP. (Hint: 123456)'}
+            Enter your User ID and Password to sign in.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {step === 'password' && (
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="userid">User ID</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="userid"
+                    type="text"
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    placeholder="e.g., StaffUser"
+                    required
+                    className="pl-10"
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -93,35 +95,10 @@ export default function StaffLoginPage() {
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                Continue
-              </Button>
-            </form>
-          )}
-
-          {step === 'otp' && (
-            <form onSubmit={handleOtpSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="otp">One-Time Password (OTP)</Label>
-                <div className="relative">
-                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        id="otp"
-                        type="text"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        placeholder="6-digit code"
-                        maxLength={6}
-                        required
-                        className="pl-10"
-                    />
-                </div>
-              </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <LoadingSpinner className="w-4 h-4" /> : <LogIn className="w-4 h-4 mr-2" />}
                 {isLoading ? 'Verifying...' : 'Login'}
               </Button>
             </form>
-          )}
         </CardContent>
       </Card>
     </div>
