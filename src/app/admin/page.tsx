@@ -24,6 +24,8 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { Advertisement, Coupon } from '@/lib/types';
 import { dummyCoupons } from '@/lib/data';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 // Mock data similar to the provided script
 const initialProperties = [
@@ -55,9 +57,18 @@ const initialPricing = {
     }
 }
 
-const chartData = [
+const weeklyChartData = [
+    { name: 'Week 1', views: 850 }, { name: 'Week 2', views: 1100 }, { name: 'Week 3', views: 950 },
+    { name: 'Week 4', views: 1300 },
+];
+const monthlyChartData = [
     { name: 'Jan', views: 1200 }, { name: 'Feb', views: 1900 }, { name: 'Mar', views: 3000 },
     { name: 'Apr', views: 5000 }, { name: 'May', views: 2000 }, { name: 'Jun', views: 3500 },
+    { name: 'Jul', views: 4200 }, { name: 'Aug', views: 3800 }, { name: 'Sep', views: 2500 },
+    { name: 'Oct', views: 4800 }, { name: 'Nov', views: 5200 }, { name: 'Dec', views: 6000 },
+];
+const yearlyChartData = [
+    { name: '2022', views: 28000 }, { name: '2023', views: 42000 }, { name: '2024', views: 65000 },
 ];
 
 const ADMIN_PASSWORD = 'Bluechip@123';
@@ -457,6 +468,19 @@ export default function AdminDashboard() {
     const [propertySearchTerm, setPropertySearchTerm] = useState('');
     const [propertyTypeFilter, setPropertyTypeFilter] = useState('all');
 
+    const [chartView, setChartView] = useState('monthly');
+    const chartData = useMemo(() => {
+        switch (chartView) {
+            case 'weekly':
+                return weeklyChartData;
+            case 'yearly':
+                return yearlyChartData;
+            case 'monthly':
+            default:
+                return monthlyChartData;
+        }
+    }, [chartView]);
+
     useEffect(() => {
         const authStatus = localStorage.getItem('admin_authenticated');
         if (authStatus !== 'true') {
@@ -676,18 +700,27 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <div className="mt-6">
-                            <h3 className="text-xl font-semibold text-slate-800 mb-4">Property Views by Month</h3>
-                            <div className="h-80">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={chartData}>
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="name" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <Bar dataKey="views" fill="#4582EF" />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
+                             <Tabs value={chartView} onValueChange={setChartView} className="w-full">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-semibold text-slate-800">Property Views</h3>
+                                    <TabsList>
+                                        <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                                        <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                                        <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                                    </TabsList>
+                                </div>
+                                <div className="h-80">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={chartData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="name" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Bar dataKey="views" fill="#4582EF" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </Tabs>
                         </div>
                         <p className="text-sm text-slate-500 mt-4 text-right">Last Updated: {analytics.lastUpdated}</p>
                     </CardContent>
