@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -86,6 +87,8 @@ export default function AdminDashboard() {
     const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
 
     const [isMounted, setIsMounted] = useState(false);
+    
+    const [activeSettingsDialog, setActiveSettingsDialog] = useState<null | 'password' | 'pin' | 'security'>(null);
 
     useEffect(() => {
         const authStatus = localStorage.getItem('admin_authenticated');
@@ -241,13 +244,28 @@ export default function AdminDashboard() {
             <header className="bg-white shadow-sm">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 h-auto sm:h-20 py-4 sm:py-0">
                      <h1 className="text-2xl font-bold text-slate-800">StayFinder Admin</h1>
-                     <div className="flex items-center gap-4">
+                     <div className="flex items-center gap-2">
                         <Button asChild>
                             <Link href="/">
                                 <Home className="w-4 h-4 mr-2" />
                                 Go to Main Site
                             </Link>
                         </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    Settings
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onSelect={() => setActiveSettingsDialog('password')}>Change Password</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => setActiveSettingsDialog('pin')}>Change PIN</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => setActiveSettingsDialog('security')}>Change Security Question</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <Button variant="outline" onClick={handleLogout}>
                             <LogOut className="w-4 h-4 mr-2" />
                             Logout
@@ -431,19 +449,6 @@ export default function AdminDashboard() {
                         </Table>
                     </CardContent>
                 </Card>
-                
-                 {/* Admin Settings */}
-                <Card className="mb-8">
-                    <CardHeader>
-                        <CardTitle className="text-2xl">Admin Settings</CardTitle>
-                        <CardDescription>Manage your administrator account and authentication factors.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-8">
-                        <PasswordChangeForm currentPassword={ADMIN_PASSWORD} />
-                        <PinChangeForm currentPin={ADMIN_OTP} />
-                        <SecurityQuestionChangeForm currentAnswer={ADMIN_ANSWER} />
-                    </CardContent>
-                </Card>
 
                 {/* Pending Listings Section */}
                 <Card className="mb-8">
@@ -599,6 +604,26 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                     )}
+                </DialogContent>
+            </Dialog>
+
+             {/* Settings Modals */}
+            <Dialog open={activeSettingsDialog === 'password'} onOpenChange={() => setActiveSettingsDialog(null)}>
+                <DialogContent>
+                    <DialogHeader><DialogTitle>Change Password</DialogTitle></DialogHeader>
+                    <PasswordChangeForm currentPassword={ADMIN_PASSWORD} onClose={() => setActiveSettingsDialog(null)} />
+                </DialogContent>
+            </Dialog>
+            <Dialog open={activeSettingsDialog === 'pin'} onOpenChange={() => setActiveSettingsDialog(null)}>
+                <DialogContent>
+                    <DialogHeader><DialogTitle>Change PIN</DialogTitle></DialogHeader>
+                    <PinChangeForm currentPin={ADMIN_OTP} onClose={() => setActiveSettingsDialog(null)} />
+                </DialogContent>
+            </Dialog>
+            <Dialog open={activeSettingsDialog === 'security'} onOpenChange={() => setActiveSettingsDialog(null)}>
+                <DialogContent>
+                    <DialogHeader><DialogTitle>Change Security Question</DialogTitle></DialogHeader>
+                    <SecurityQuestionChangeForm currentAnswer={ADMIN_ANSWER} onClose={() => setActiveSettingsDialog(null)} />
                 </DialogContent>
             </Dialog>
         </div>
@@ -761,7 +786,7 @@ const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
     );
 };
 
-const PasswordChangeForm = ({ currentPassword }) => {
+const PasswordChangeForm = ({ currentPassword, onClose }) => {
     const { toast } = useToast();
     const [passwords, setPasswords] = useState({
         current: '',
@@ -788,15 +813,13 @@ const PasswordChangeForm = ({ currentPassword }) => {
              toast({ title: 'Error', description: 'New password must be at least 6 characters.', variant: 'destructive' });
             return;
         }
-        // In a real app, you would now make an API call to change the password.
-        // Since this is a simulation, we just show a success message.
         toast({ title: 'Success!', description: 'Your password has been changed.' });
         setPasswords({ current: '', newPass: '', confirmPass: '' });
+        onClose();
     };
 
     return (
-        <form onSubmit={handleSubmitPasswordChange} className="space-y-4 max-w-md">
-            <h4 className="font-semibold text-lg">Change Password</h4>
+        <form onSubmit={handleSubmitPasswordChange} className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="current-password">Current Password</Label>
                 <Input id="current-password" name="current" type="password" value={passwords.current} onChange={handlePasswordChange} required />
@@ -809,12 +832,15 @@ const PasswordChangeForm = ({ currentPassword }) => {
                 <Label htmlFor="confirm-password">Confirm New Password</Label>
                 <Input id="confirm-password" name="confirmPass" type="password" value={passwords.confirmPass} onChange={handlePasswordChange} required />
             </div>
-            <Button type="submit">Update Password</Button>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update Password</Button>
+            </DialogFooter>
         </form>
     );
 };
 
-const PinChangeForm = ({ currentPin }) => {
+const PinChangeForm = ({ currentPin, onClose }) => {
     const { toast } = useToast();
     const [pins, setPins] = useState({
         current: '',
@@ -838,11 +864,11 @@ const PinChangeForm = ({ currentPin }) => {
         }
         toast({ title: 'Success!', description: 'Your PIN has been changed.' });
         setPins({ current: '', newPin: '' });
+        onClose();
     };
 
     return (
-        <form onSubmit={handleSubmitPinChange} className="space-y-4 max-w-md pt-8 border-t">
-            <h4 className="font-semibold text-lg">Change PIN</h4>
+        <form onSubmit={handleSubmitPinChange} className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="current-pin">Current PIN</Label>
                 <Input id="current-pin" name="current" type="password" value={pins.current} onChange={handlePinChange} required maxLength={8} />
@@ -851,12 +877,15 @@ const PinChangeForm = ({ currentPin }) => {
                 <Label htmlFor="new-pin">New PIN</Label>
                 <Input id="new-pin" name="newPin" type="password" value={pins.newPin} onChange={handlePinChange} required maxLength={8} />
             </div>
-            <Button type="submit">Update PIN</Button>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update PIN</Button>
+            </DialogFooter>
         </form>
     );
 };
 
-const SecurityQuestionChangeForm = ({ currentAnswer }) => {
+const SecurityQuestionChangeForm = ({ currentAnswer, onClose }) => {
     const { toast } = useToast();
     const [security, setSecurity] = useState({
         current: '',
@@ -881,11 +910,11 @@ const SecurityQuestionChangeForm = ({ currentAnswer }) => {
         }
         toast({ title: 'Success!', description: 'Your security question and answer have been updated.' });
         setSecurity({ current: '', newQuestion: '', newAnswer: '' });
+        onClose();
     };
 
     return (
-        <form onSubmit={handleSubmitSecurityChange} className="space-y-4 max-w-md pt-8 border-t">
-            <h4 className="font-semibold text-lg">Change Security Question</h4>
+        <form onSubmit={handleSubmitSecurityChange} className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="current-answer">Current Security Answer (Who are you?)</Label>
                 <Input id="current-answer" name="current" type="text" value={security.current} onChange={handleSecurityChange} required />
@@ -898,7 +927,10 @@ const SecurityQuestionChangeForm = ({ currentAnswer }) => {
                 <Label htmlFor="new-answer">New Security Answer</Label>
                 <Input id="new-answer" name="newAnswer" type="text" value={security.newAnswer} onChange={handleSecurityChange} required />
             </div>
-            <Button type="submit">Update Security Question</Button>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update Security Question</Button>
+            </DialogFooter>
         </form>
     );
 };
