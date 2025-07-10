@@ -219,7 +219,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      setMediaFiles(prev => [...prev, ...Array.from(event.target.files)].slice(0, 5));
+      setMediaFiles(prev => [...prev, ...Array.from(event.target.files)]);
     }
   };
 
@@ -412,7 +412,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Photo & Video Upload</CardTitle>
-                <CardDescription>Add photos (Max 5) and a video tour.</CardDescription>
+                <CardDescription>Add photos and an optional video tour.</CardDescription>
               </CardHeader>
               <CardContent>
                  <div className="mb-6">
@@ -480,7 +480,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     <>
                         <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
                         <div className="md:col-span-2">
-                           <FileUploadField name="noc" label="NOC" control={form.control} />
+                           <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
                              <Alert className="mt-2">
                                <ShieldCheck className="h-4 w-4" />
                                <AlertTitle>Boost Your Listing!</AlertTitle>

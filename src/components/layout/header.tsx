@@ -4,7 +4,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Menu, X, Crown, User, Home, Users, Building, BedDouble, PlusCircle, Heart, LogOut, History, Briefcase } from "lucide-react";
+import { Menu, X, Crown, User, Home, Users, Building, BedDouble, PlusCircle, Heart, LogOut, History, Briefcase, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -66,7 +66,16 @@ interface HeaderProps {
   onHistoryClick: () => void;
 }
 
-export function Header({ activePage, setActivePage, onSignInClick, onSubscriptionClick, isLoggedIn, onLogout, onHistoryClick }: HeaderProps) {
+export function Header({ 
+  activePage, 
+  setActivePage, 
+  onSignInClick, 
+  onSubscriptionClick, 
+  isLoggedIn, 
+  onLogout, 
+  onHistoryClick,
+}: HeaderProps) {
+
   const navItems = [
     { page: 'home' as Page, label: 'Home', icon: <Home className="w-5 h-5" /> },
     { page: 'pg' as Page, label: 'PG Listings', icon: <BedDouble className="w-5 h-5" /> },
@@ -80,6 +89,7 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
   };
 
   return (
+    <>
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2" onClick={() => setActivePage('home')}>
@@ -107,7 +117,7 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
                  <DropdownMenuTrigger asChild>
                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                      <Avatar className="h-10 w-10">
-                       <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="unisex avatar" />
+                       <AvatarImage src="https://placehold.co/100x100/4582EF/FFFFFF.png" alt="User" data-ai-hint="unisex avatar" />
                        <AvatarFallback>U</AvatarFallback>
                      </Avatar>
                    </Button>
@@ -188,10 +198,12 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
                         <Briefcase className="w-5 h-5"/>
                         <span className="font-medium">My Properties</span>
                     </NavLink>
-                    <button onClick={onHistoryClick} className="flex items-center w-full p-3 rounded-lg gap-3 transition-colors text-foreground/70 hover:bg-muted">
-                        <History className="w-5 h-5"/>
-                        <span className="font-medium">Purchase History</span>
-                    </button>
+                    <SheetClose asChild>
+                      <button onClick={onHistoryClick} className="flex items-center w-full p-3 rounded-lg gap-3 transition-colors text-foreground/70 hover:bg-muted">
+                          <History className="w-5 h-5"/>
+                          <span className="font-medium">Purchase History</span>
+                      </button>
+                    </SheetClose>
                     <NavLink page="liked-properties" activePage={activePage} onClick={setActivePage} isMobile>
                         <Heart className="w-5 h-5"/>
                         <span className="font-medium">Liked Properties</span>
@@ -228,5 +240,6 @@ export function Header({ activePage, setActivePage, onSignInClick, onSubscriptio
         </div>
       </div>
     </header>
+    </>
   );
 }
