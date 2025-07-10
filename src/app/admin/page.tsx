@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -27,13 +27,13 @@ import { dummyCoupons } from '@/lib/data';
 
 // Mock data similar to the provided script
 const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], 'data-ai-hint': 'apartment interior' },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], 'data-ai-hint': 'student room' },
+    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior' },
+    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room' },
     { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], 'data-ai-hint': 'small apartment' },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], 'data-ai-hint': 'luxury room' }
+    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room' }
 ];
 const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], 'data-ai-hint': 'male portrait' },
+    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], verificationDocumentUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait' },
     { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait' }
 ];
 const initialAdvertisements: Advertisement[] = [
@@ -66,6 +66,366 @@ const ADMIN_ANSWER = 'rohan kholi';
 const ADMIN_EMAIL = 'setmystay02@gmail.com';
 const ADMIN_PHONE = '+918210552902';
 const ADMIN_ADDRESS = 'Office no. 01, Neelsidhi Splendour, Sector 15, CBD Belapur, Navi Mumbai, Maharashtra 400614';
+
+
+const PasswordChangeForm = ({ currentPassword, onClose }) => {
+    const { toast } = useToast();
+    const [passwords, setPasswords] = useState({
+        current: '',
+        newPass: '',
+        confirmPass: ''
+    });
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPasswords(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitPasswordChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (passwords.current !== currentPassword) {
+            toast({ title: 'Error', description: 'Current password is not correct.', variant: 'destructive' });
+            return;
+        }
+        if (passwords.newPass !== passwords.confirmPass) {
+            toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
+            return;
+        }
+        if (passwords.newPass.length < 6) {
+             toast({ title: 'Error', description: 'New password must be at least 6 characters.', variant: 'destructive' });
+            return;
+        }
+        toast({ title: 'Success!', description: 'Your password has been changed.' });
+        setPasswords({ current: '', newPass: '', confirmPass: '' });
+        onClose();
+    };
+
+    return (
+        <form onSubmit={handleSubmitPasswordChange} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input id="current-password" name="current" type="password" value={passwords.current} onChange={handlePasswordChange} required />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input id="new-password" name="newPass" type="password" value={passwords.newPass} onChange={handlePasswordChange} required />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input id="confirm-password" name="confirmPass" type="password" value={passwords.confirmPass} onChange={handlePasswordChange} required />
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update Password</Button>
+            </DialogFooter>
+        </form>
+    );
+};
+
+const PinChangeForm = ({ currentPin, onClose }) => {
+    const { toast } = useToast();
+    const [pins, setPins] = useState({
+        current: '',
+        newPin: '',
+    });
+
+    const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPins(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitPinChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (pins.current !== currentPin) {
+            toast({ title: 'Error', description: 'Current PIN is not correct.', variant: 'destructive' });
+            return;
+        }
+        if (pins.newPin.length !== 8) {
+             toast({ title: 'Error', description: 'New PIN must be 8 digits.', variant: 'destructive' });
+            return;
+        }
+        toast({ title: 'Success!', description: 'Your PIN has been changed.' });
+        setPins({ current: '', newPin: '' });
+        onClose();
+    };
+
+    return (
+        <form onSubmit={handleSubmitPinChange} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="current-pin">Current PIN</Label>
+                <Input id="current-pin" name="current" type="password" value={pins.current} onChange={handlePinChange} required maxLength={8} />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="new-pin">New PIN</Label>
+                <Input id="new-pin" name="newPin" type="password" value={pins.newPin} onChange={handlePinChange} required maxLength={8} />
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update PIN</Button>
+            </DialogFooter>
+        </form>
+    );
+};
+
+const SecurityQuestionChangeForm = ({ currentAnswer, onClose }) => {
+    const { toast } = useToast();
+    const [security, setSecurity] = useState({
+        current: '',
+        newQuestion: '',
+        newAnswer: ''
+    });
+
+    const handleSecurityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSecurity(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmitSecurityChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (security.current.toLowerCase() !== currentAnswer) {
+            toast({ title: 'Error', description: 'Your current security answer is not correct.', variant: 'destructive' });
+            return;
+        }
+        if (!security.newQuestion || !security.newAnswer) {
+             toast({ title: 'Error', description: 'New question and answer cannot be empty.', variant: 'destructive' });
+            return;
+        }
+        toast({ title: 'Success!', description: 'Your security question and answer have been updated.' });
+        setSecurity({ current: '', newQuestion: '', newAnswer: '' });
+        onClose();
+    };
+
+    return (
+        <form onSubmit={handleSubmitSecurityChange} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="current-answer">Current Security Answer (Who are you?)</Label>
+                <Input id="current-answer" name="current" type="text" value={security.current} onChange={handleSecurityChange} required />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="new-question">New Security Question</Label>
+                <Input id="new-question" name="newQuestion" type="text" value={security.newQuestion} onChange={handleSecurityChange} required />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="new-answer">New Security Answer</Label>
+                <Input id="new-answer" name="newAnswer" type="text" value={security.newAnswer} onChange={handleSecurityChange} required />
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update Security Question</Button>
+            </DialogFooter>
+        </form>
+    );
+};
+
+const ContactInfoChangeForm = ({ currentEmail, currentPhone, currentAddress, onClose }) => {
+    const { toast } = useToast();
+    const [info, setInfo] = useState({
+        email: currentEmail,
+        phone: currentPhone,
+        address: currentAddress
+    });
+
+    const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setInfo(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!info.email || !info.phone || !info.address) {
+            toast({ title: 'Error', description: 'All fields are required.', variant: 'destructive' });
+            return;
+        }
+        toast({ title: 'Success!', description: 'Your contact information has been updated.' });
+        onClose();
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="email" name="email" type="email" value={info.email} onChange={handleInfoChange} required className="pl-10"/>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                 <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="phone" name="phone" type="tel" value={info.phone} onChange={handleInfoChange} required className="pl-10"/>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="address">Office Address</Label>
+                 <div className="relative">
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Textarea id="address" name="address" value={info.address} onChange={handleInfoChange} required className="pl-10"/>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update Information</Button>
+            </DialogFooter>
+        </form>
+    );
+};
+
+const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
+    const { toast } = useToast();
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        if (ad) {
+            setTitle(ad.title);
+            setDescription(ad.description);
+            setImagePreview(ad.imageUrl);
+            setImageFile(null);
+            setIsActive(ad.isActive);
+        } else {
+            setTitle('');
+            setDescription('');
+            setImageFile(null);
+            setImagePreview(null);
+            setIsActive(false);
+        }
+    }, [ad, isOpen]);
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!imagePreview) {
+            toast({
+                title: "Image required",
+                description: "Please upload an image for the advertisement.",
+                variant: "destructive",
+            });
+            return;
+        }
+        onSave({ title, description, imageUrl: imagePreview, isActive });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{ad ? 'Edit' : 'Add'} Advertisement</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="ad-title">Title</Label>
+                        <Input id="ad-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="ad-description">Description</Label>
+                        <Textarea id="ad-description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="ad-image-upload">Image</Label>
+                        <div 
+                            className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md cursor-pointer hover:border-primary"
+                            onClick={() => document.getElementById('ad-image-upload')?.click()}
+                        >
+                            <div className="space-y-1 text-center">
+                                {imagePreview ? (
+                                    <Image src={imagePreview} alt="Preview" width={200} height={100} className="mx-auto h-24 object-contain rounded-md" />
+                                ) : (
+                                    <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                                )}
+                                <div className="flex text-sm text-muted-foreground justify-center">
+                                    <p className="pl-1">{imageFile ? 'Click to change' : 'Click to upload'}</p>
+                                </div>
+                                <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB</p>
+                            </div>
+                        </div>
+                        <Input 
+                            id="ad-image-upload" 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={handleImageChange}
+                        />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="ad-is-active" checked={isActive} onCheckedChange={setIsActive} />
+                        <Label htmlFor="ad-is-active">Set as active Pop-up</Label>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit">Save</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+
+const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
+    const [code, setCode] = useState('');
+    const [discountPercentage, setDiscountPercentage] = useState(0);
+    const [isActive, setIsActive] = useState(true);
+
+    useEffect(() => {
+        if (coupon) {
+            setCode(coupon.code);
+            setDiscountPercentage(coupon.discountPercentage);
+            setIsActive(coupon.isActive);
+        } else {
+            setCode('');
+            setDiscountPercentage(0);
+            setIsActive(true);
+        }
+    }, [coupon, isOpen]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ code: code.toUpperCase(), discountPercentage, isActive });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{coupon ? 'Edit' : 'Add'} Coupon</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="coupon-code">Coupon Code</Label>
+                        <Input id="coupon-code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="coupon-discount">Discount Percentage (%)</Label>
+                        <Input id="coupon-discount" type="number" value={discountPercentage} onChange={(e) => setDiscountPercentage(parseInt(e.target.value, 10))} required />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="coupon-is-active" checked={isActive} onCheckedChange={setIsActive} />
+                        <Label htmlFor="coupon-is-active">Active</Label>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit">Save Coupon</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 
 export default function AdminDashboard() {
@@ -142,7 +502,7 @@ export default function AdminDashboard() {
         if (type === 'roommate') {
             setRoommates(rms => rms.map(r => r.id === id ? { ...r, status } : r));
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status } : r));
+            setProperties(props => props.map(p => p.id === id ? { ...p, status } : p));
         }
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
@@ -567,6 +927,21 @@ export default function AdminDashboard() {
                                 </div>
                             )}
 
+                            {currentItem.verificationDocumentUrl && (
+                                <div className="border rounded-lg p-4 bg-blue-50">
+                                    <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
+                                        <FileCheck className="w-5 h-5 text-blue-700" />
+                                        Verification Document
+                                    </h4>
+                                    <p className="text-sm text-blue-600 mb-2">This document is visible only to admins.</p>
+                                    <Button asChild variant="outline">
+                                        <a href={currentItem.verificationDocumentUrl} target="_blank" rel="noopener noreferrer">
+                                            View Document
+                                        </a>
+                                    </Button>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">ID</strong>
@@ -645,362 +1020,3 @@ export default function AdminDashboard() {
         </div>
     );
 }
-
-const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
-    const { toast } = useToast();
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [isActive, setIsActive] = useState(false);
-
-    useEffect(() => {
-        if (ad) {
-            setTitle(ad.title);
-            setDescription(ad.description);
-            setImagePreview(ad.imageUrl);
-            setImageFile(null);
-            setIsActive(ad.isActive);
-        } else {
-            setTitle('');
-            setDescription('');
-            setImageFile(null);
-            setImagePreview(null);
-            setIsActive(false);
-        }
-    }, [ad, isOpen]);
-
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!imagePreview) {
-            toast({
-                title: "Image required",
-                description: "Please upload an image for the advertisement.",
-                variant: "destructive",
-            });
-            return;
-        }
-        onSave({ title, description, imageUrl: imagePreview, isActive });
-    };
-
-    return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{ad ? 'Edit' : 'Add'} Advertisement</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <Label htmlFor="ad-title">Title</Label>
-                        <Input id="ad-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                    </div>
-                    <div>
-                        <Label htmlFor="ad-description">Description</Label>
-                        <Textarea id="ad-description" value={description} onChange={(e) => setDescription(e.target.value)} required />
-                    </div>
-                    <div>
-                        <Label htmlFor="ad-image-upload">Image</Label>
-                        <div 
-                            className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md cursor-pointer hover:border-primary"
-                            onClick={() => document.getElementById('ad-image-upload')?.click()}
-                        >
-                            <div className="space-y-1 text-center">
-                                {imagePreview ? (
-                                    <Image src={imagePreview} alt="Preview" width={200} height={100} className="mx-auto h-24 object-contain rounded-md" />
-                                ) : (
-                                    <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-                                )}
-                                <div className="flex text-sm text-muted-foreground justify-center">
-                                    <p className="pl-1">{imageFile ? 'Click to change' : 'Click to upload'}</p>
-                                </div>
-                                <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB</p>
-                            </div>
-                        </div>
-                        <Input 
-                            id="ad-image-upload" 
-                            type="file" 
-                            className="hidden" 
-                            accept="image/*"
-                            onChange={handleImageChange}
-                        />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Switch id="ad-is-active" checked={isActive} onCheckedChange={setIsActive} />
-                        <Label htmlFor="ad-is-active">Set as active Pop-up</Label>
-                    </div>
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit">Save</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
-};
-
-
-const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
-    const [code, setCode] = useState('');
-    const [discountPercentage, setDiscountPercentage] = useState(0);
-    const [isActive, setIsActive] = useState(true);
-
-    useEffect(() => {
-        if (coupon) {
-            setCode(coupon.code);
-            setDiscountPercentage(coupon.discountPercentage);
-            setIsActive(coupon.isActive);
-        } else {
-            setCode('');
-            setDiscountPercentage(0);
-            setIsActive(true);
-        }
-    }, [coupon, isOpen]);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave({ code: code.toUpperCase(), discountPercentage, isActive });
-    };
-
-    return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{coupon ? 'Edit' : 'Add'} Coupon</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <Label htmlFor="coupon-code">Coupon Code</Label>
-                        <Input id="coupon-code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} required />
-                    </div>
-                    <div>
-                        <Label htmlFor="coupon-discount">Discount Percentage (%)</Label>
-                        <Input id="coupon-discount" type="number" value={discountPercentage} onChange={(e) => setDiscountPercentage(parseInt(e.target.value, 10))} required />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Switch id="coupon-is-active" checked={isActive} onCheckedChange={setIsActive} />
-                        <Label htmlFor="coupon-is-active">Active</Label>
-                    </div>
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit">Save Coupon</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
-};
-
-const PasswordChangeForm = ({ currentPassword, onClose }) => {
-    const { toast } = useToast();
-    const [passwords, setPasswords] = useState({
-        current: '',
-        newPass: '',
-        confirmPass: ''
-    });
-
-    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setPasswords(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmitPasswordChange = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (passwords.current !== currentPassword) {
-            toast({ title: 'Error', description: 'Current password is not correct.', variant: 'destructive' });
-            return;
-        }
-        if (passwords.newPass !== passwords.confirmPass) {
-            toast({ title: 'Error', description: 'New passwords do not match.', variant: 'destructive' });
-            return;
-        }
-        if (passwords.newPass.length < 6) {
-             toast({ title: 'Error', description: 'New password must be at least 6 characters.', variant: 'destructive' });
-            return;
-        }
-        toast({ title: 'Success!', description: 'Your password has been changed.' });
-        setPasswords({ current: '', newPass: '', confirmPass: '' });
-        onClose();
-    };
-
-    return (
-        <form onSubmit={handleSubmitPasswordChange} className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input id="current-password" name="current" type="password" value={passwords.current} onChange={handlePasswordChange} required />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" name="newPass" type="password" value={passwords.newPass} onChange={handlePasswordChange} required />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input id="confirm-password" name="confirmPass" type="password" value={passwords.confirmPass} onChange={handlePasswordChange} required />
-            </div>
-            <DialogFooter>
-                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                <Button type="submit">Update Password</Button>
-            </DialogFooter>
-        </form>
-    );
-};
-
-const PinChangeForm = ({ currentPin, onClose }) => {
-    const { toast } = useToast();
-    const [pins, setPins] = useState({
-        current: '',
-        newPin: '',
-    });
-
-    const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setPins(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmitPinChange = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (pins.current !== currentPin) {
-            toast({ title: 'Error', description: 'Current PIN is not correct.', variant: 'destructive' });
-            return;
-        }
-        if (pins.newPin.length !== 8) {
-             toast({ title: 'Error', description: 'New PIN must be 8 digits.', variant: 'destructive' });
-            return;
-        }
-        toast({ title: 'Success!', description: 'Your PIN has been changed.' });
-        setPins({ current: '', newPin: '' });
-        onClose();
-    };
-
-    return (
-        <form onSubmit={handleSubmitPinChange} className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="current-pin">Current PIN</Label>
-                <Input id="current-pin" name="current" type="password" value={pins.current} onChange={handlePinChange} required maxLength={8} />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="new-pin">New PIN</Label>
-                <Input id="new-pin" name="newPin" type="password" value={pins.newPin} onChange={handlePinChange} required maxLength={8} />
-            </div>
-            <DialogFooter>
-                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                <Button type="submit">Update PIN</Button>
-            </DialogFooter>
-        </form>
-    );
-};
-
-const SecurityQuestionChangeForm = ({ currentAnswer, onClose }) => {
-    const { toast } = useToast();
-    const [security, setSecurity] = useState({
-        current: '',
-        newQuestion: '',
-        newAnswer: ''
-    });
-
-    const handleSecurityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setSecurity(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmitSecurityChange = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (security.current.toLowerCase() !== currentAnswer) {
-            toast({ title: 'Error', description: 'Your current security answer is not correct.', variant: 'destructive' });
-            return;
-        }
-        if (!security.newQuestion || !security.newAnswer) {
-             toast({ title: 'Error', description: 'New question and answer cannot be empty.', variant: 'destructive' });
-            return;
-        }
-        toast({ title: 'Success!', description: 'Your security question and answer have been updated.' });
-        setSecurity({ current: '', newQuestion: '', newAnswer: '' });
-        onClose();
-    };
-
-    return (
-        <form onSubmit={handleSubmitSecurityChange} className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="current-answer">Current Security Answer (Who are you?)</Label>
-                <Input id="current-answer" name="current" type="text" value={security.current} onChange={handleSecurityChange} required />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="new-question">New Security Question</Label>
-                <Input id="new-question" name="newQuestion" type="text" value={security.newQuestion} onChange={handleSecurityChange} required />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="new-answer">New Security Answer</Label>
-                <Input id="new-answer" name="newAnswer" type="text" value={security.newAnswer} onChange={handleSecurityChange} required />
-            </div>
-            <DialogFooter>
-                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                <Button type="submit">Update Security Question</Button>
-            </DialogFooter>
-        </form>
-    );
-};
-
-const ContactInfoChangeForm = ({ currentEmail, currentPhone, currentAddress, onClose }) => {
-    const { toast } = useToast();
-    const [info, setInfo] = useState({
-        email: currentEmail,
-        phone: currentPhone,
-        address: currentAddress
-    });
-
-    const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setInfo(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!info.email || !info.phone || !info.address) {
-            toast({ title: 'Error', description: 'All fields are required.', variant: 'destructive' });
-            return;
-        }
-        toast({ title: 'Success!', description: 'Your contact information has been updated.' });
-        onClose();
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" name="email" type="email" value={info.email} onChange={handleInfoChange} required className="pl-10"/>
-                </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                 <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="phone" name="phone" type="tel" value={info.phone} onChange={handleInfoChange} required className="pl-10"/>
-                </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="address">Office Address</Label>
-                 <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Textarea id="address" name="address" value={info.address} onChange={handleInfoChange} required className="pl-10"/>
-                </div>
-            </div>
-            <DialogFooter>
-                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                <Button type="submit">Update Information</Button>
-            </DialogFooter>
-        </form>
-    );
-};
