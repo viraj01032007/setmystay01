@@ -25,6 +25,7 @@ import { FloatingCta } from "@/components/shared/floating-cta";
 import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 import { PaymentConfirmationModal } from "@/components/modals/payment-confirmation-modal";
 import { SlotMachineModal } from "@/components/modals/slot-machine-modal";
+import { ContactFab } from "@/components/shared/contact-fab";
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
@@ -337,6 +338,7 @@ export default function Home() {
 
       <Footer onYourPropertiesClick={() => setAuthModalOpen(true)} onNavigate={setActivePage}/>
       <FloatingCta onGameClick={() => setIsSlotMachineModalOpen(true)} />
+      <ContactFab />
       
       {/* Modals */}
       <PropertyDetails 
