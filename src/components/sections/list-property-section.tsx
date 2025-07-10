@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
@@ -19,6 +19,7 @@ import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
 import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
+import { Badge } from '@/components/ui/badge';
 
 const amenitiesList = ['AC', 'WiFi', 'Parking', 'Gym', 'Pool', 'Elevator', 'Security', 'Balcony', 'Power Backup', 'Meals', 'Laundry', 'Housekeeping', 'Garden'];
 const amenityIcons: { [key: string]: string } = {
@@ -76,6 +77,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [verificationFile, setVerificationFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [customAmenity, setCustomAmenity] = useState('');
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -96,6 +98,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const propertyType = form.watch('propertyType');
   const stateValue = form.watch('state');
   const cityValue = form.watch('city');
+  const selectedAmenities = form.watch('amenities') || [];
 
   const citySuggestions = stateValue ? indianCitiesByState[stateValue] || [] : allIndianCities;
   const areaSuggestions = cityValue ? indianAreas[cityValue] || [] : [];
@@ -133,6 +136,18 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
         form.setValue('videoFile', file, { shouldValidate: true });
     }
   };
+
+  const handleAddCustomAmenity = () => {
+    if (customAmenity && !selectedAmenities.includes(customAmenity)) {
+        form.setValue('amenities', [...selectedAmenities, customAmenity]);
+        setCustomAmenity('');
+    }
+  };
+
+  const handleRemoveAmenity = (amenityToRemove: string) => {
+    form.setValue('amenities', selectedAmenities.filter(a => a !== amenityToRemove));
+  };
+
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -215,7 +230,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
             <Card>
                 <CardHeader>
                     <CardTitle>Amenities</CardTitle>
-                    <CardDescription>Select all the amenities that apply.</CardDescription>
+                    <CardDescription>Select all the amenities that apply, or add your own.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <FormField
@@ -259,6 +274,37 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                     />
                                 ))}
                                 </div>
+                                <div className="mt-6">
+                                  <FormLabel>Add a custom amenity</FormLabel>
+                                  <div className="flex gap-2 mt-2">
+                                      <AutocompleteInput
+                                        placeholder="e.g., Piped Gas"
+                                        value={customAmenity}
+                                        onChange={setCustomAmenity}
+                                        suggestions={amenitiesList}
+                                      />
+                                      <Button type="button" onClick={handleAddCustomAmenity}>
+                                          <Plus className="w-4 h-4 mr-2" /> Add
+                                      </Button>
+                                  </div>
+                                </div>
+
+                                {selectedAmenities.length > 0 && (
+                                    <div className="mt-4 pt-4 border-t">
+                                        <h4 className="text-sm font-medium mb-2">Selected Amenities:</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedAmenities.map((amenity) => (
+                                                <Badge key={amenity} variant="secondary" className="pl-2">
+                                                    {amenity}
+                                                    <button type="button" onClick={() => handleRemoveAmenity(amenity)} className="ml-2 p-0.5 rounded-full hover:bg-destructive/20 text-destructive">
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -423,3 +469,5 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     </div>
   );
 }
+
+    
