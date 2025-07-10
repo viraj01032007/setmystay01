@@ -49,9 +49,9 @@ const formSchema = z.object({
   verificationDocument: z.any().optional(),
   videoFile: z
     .any()
-    .refine((file) => file instanceof File, "Video is required.")
+    .refine((file) => file?.[0], "Video is required.")
     .refine(
-      (file) => file?.type ? ACCEPTED_VIDEO_TYPES.includes(file.type) : false,
+      (file) => file?.[0]?.type ? ACCEPTED_VIDEO_TYPES.includes(file?.[0]?.type) : true,
       ".mp4, .webm and .ogg formats are supported."
     ),
   gender: z.string().optional(),
@@ -68,7 +68,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface ListPropertySectionProps {
-  onSubmit: (data: FormValues & { images: File[] }) => void;
+  onSubmit: (data: FormValues & { images: File[], videoFile: File | null }) => void;
 }
 
 export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
@@ -111,7 +111,8 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
 
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
-    onSubmit({ ...data, images: mediaFiles });
+    const finalData = { ...data, images: mediaFiles, videoFile: videoFile };
+    onSubmit(finalData);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,14 +125,6 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     if (event.target.files && event.target.files[0]) {
       setVerificationFile(event.target.files[0]);
       form.setValue('verificationDocument', event.target.files[0]);
-    }
-  };
-
-  const handleVideoFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-        const file = event.target.files[0];
-        setVideoFile(file);
-        form.setValue('videoFile', file, { shouldValidate: true });
     }
   };
 
@@ -345,7 +338,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 <FormField
                     control={form.control}
                     name="videoFile"
-                    render={() => (
+                    render={({ field }) => (
                         <FormItem>
                             <FormControl>
                                 <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('video-upload')?.click()}>
@@ -353,7 +346,13 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                     <p className="mt-4 text-sm text-muted-foreground">
                                         {videoFile ? videoFile.name : 'Click to upload video file'}
                                     </p>
-                                    <Input id="video-upload" type="file" accept="video/*" className="hidden" onChange={handleVideoFileChange} />
+                                    <Input id="video-upload" type="file" accept="video/*" className="hidden" onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setVideoFile(file);
+                                            field.onChange([file]);
+                                        }
+                                    }} />
                                 </div>
                             </FormControl>
                             <FormMessage />
@@ -467,3 +466,5 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     </div>
   );
 }
+
+    
