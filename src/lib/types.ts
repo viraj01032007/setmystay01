@@ -103,3 +103,10 @@ export interface Purchase {
     amount: number;
     date: Date;
 }
+
+// Add ToggleGroup to components/ui
+export interface ToggleGroupProps
+  extends React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<HTMLElement>> {
+  Item: React.ForwardRefExoticComponent<Omit<any, "ref"> & React.RefAttributes<HTMLButtonElement>>;
+}
+

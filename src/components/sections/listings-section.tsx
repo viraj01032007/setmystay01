@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -18,8 +17,10 @@ import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
 import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
-import { Heart, Filter } from 'lucide-react';
+import { Heart, Filter, LayoutGrid, List } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { cn } from '@/lib/utils';
 
 interface ListingsSectionProps {
   type: ListingType;
@@ -181,6 +182,7 @@ export function ListingsSection({
   const [filters, setFilters] = useState<FilterState>({ ...initialFilters, ...initialSearchFilters });
   const [pageTitle, setPageTitle] = useState('');
   const [pageDescription, setPageDescription] = useState('');
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   
   useEffect(() => {
     if (initialSearchFilters) {
@@ -282,31 +284,42 @@ export function ListingsSection({
           </aside>
 
         <main className={'md:w-2/3 lg:w-3/4'}>
-           <div className="md:hidden mb-4">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="w-full">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0">
-                <ScrollArea className="h-full p-6">
-                  <h3 className="text-xl font-semibold mb-6">Filters</h3>
-                  <FilterPanel {...filterPanelProps} />
-                </ScrollArea>
-              </SheetContent>
-            </Sheet>
+           <div className="flex justify-between items-center mb-6">
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline">
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0">
+                  <ScrollArea className="h-full p-6">
+                    <h3 className="text-xl font-semibold mb-6">Filters</h3>
+                    <FilterPanel {...filterPanelProps} />
+                  </ScrollArea>
+                </SheetContent>
+              </Sheet>
+            </div>
+            <p className="text-sm text-muted-foreground hidden md:block">{filteredListings.length} results found</p>
+            <ToggleGroup type="single" value={layout} onValueChange={(value: 'grid' | 'list') => value && setLayout(value)} aria-label="Layout options">
+                <ToggleGroupItem value="grid" aria-label="Grid view">
+                    <LayoutGrid className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem value="list" aria-label="List view">
+                    <List className="h-4 w-4" />
+                </ToggleGroupItem>
+            </ToggleGroup>
           </div>
-          <div className="flex justify-between items-center mb-6">
-            <p className="text-sm text-muted-foreground">{filteredListings.length} results found</p>
-          </div>
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className={cn(
+            "grid gap-6",
+            layout === 'grid' ? "sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"
+          )}>
             {filteredListings.map(item => {
               const itemType = item.propertyType === 'Roommate' ? 'roommate' : 'listing';
               return itemType === 'roommate' 
-                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
-                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
+                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} isHorizontal={layout === 'list'} />
+                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} isHorizontal={layout === 'list'} />
             })}
           </div>
           {filteredListings.length === 0 && (
