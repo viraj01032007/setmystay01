@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Listing } from "@/lib/types";
-import { MapPin, IndianRupee, Home, Eye, BedDouble, Heart, Star } from "lucide-react";
+import { MapPin, IndianRupee, Home, Eye, BedDouble, Heart, Star, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PropertyCardProps {
@@ -14,9 +14,10 @@ interface PropertyCardProps {
   onViewDetails: (listing: Listing) => void;
   isLiked: boolean;
   onToggleLike: () => void;
+  isUnlocked: boolean;
 }
 
-export function PropertyCard({ listing, onViewDetails, isLiked, onToggleLike }: PropertyCardProps) {
+export function PropertyCard({ listing, onViewDetails, isLiked, onToggleLike, isUnlocked }: PropertyCardProps) {
 
   const handleLikeClick = (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card click event from firing
@@ -73,7 +74,8 @@ export function PropertyCard({ listing, onViewDetails, isLiked, onToggleLike }: 
 
         <div className="flex justify-between items-center mt-auto pt-2">
             <Button variant="default" size="sm" className="w-full">
-                View Details
+                {isUnlocked && <CheckCircle className="w-4 h-4 mr-2" />}
+                {isUnlocked ? 'View Unlocked Details' : 'View Details'}
             </Button>
             <div className="flex items-center text-xs text-muted-foreground ml-4 shrink-0">
                 <Eye className="w-3 h-3 mr-1" />

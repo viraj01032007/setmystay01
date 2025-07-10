@@ -32,6 +32,7 @@ interface ListingsSectionProps {
   initialSearchFilters: Partial<FilterState> | null;
   likedItemIds: Set<string>;
   onToggleLike: (itemId: string) => void;
+  unlockedIds: Set<string>;
   pageTitle?: string;
   inquiries?: Inquiry[];
 }
@@ -183,6 +184,7 @@ export function ListingsSection({
   initialSearchFilters,
   likedItemIds,
   onToggleLike,
+  unlockedIds,
   pageTitle: customPageTitle,
   inquiries
 }: ListingsSectionProps) {
@@ -353,9 +355,10 @@ export function ListingsSection({
           )}>
             {filteredListings.map(item => {
               const itemType = item.propertyType === 'Roommate' ? 'roommate' : 'listing';
+              const isUnlocked = unlockedIds.has(item.id);
               return itemType === 'roommate' 
-                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
-                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} />
+                ? <RoommateCard key={item.id} profile={item as RoommateProfile} onViewDetails={(i) => onViewDetails(i, 'roommate')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} isUnlocked={isUnlocked} />
+                : <PropertyCard key={item.id} listing={item as Listing} onViewDetails={(i) => onViewDetails(i, 'listing')} isLiked={likedItemIds.has(item.id)} onToggleLike={() => onToggleLike(item.id)} isUnlocked={isUnlocked} />
             })}
           </div>
           {filteredListings.length === 0 && (

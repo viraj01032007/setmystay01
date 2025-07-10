@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { RoommateProfile } from "@/lib/types";
-import { MapPin, IndianRupee, Eye, User, Briefcase, Heart } from "lucide-react";
+import { MapPin, IndianRupee, Eye, User, Briefcase, Heart, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RoommateCardProps {
@@ -14,9 +14,10 @@ interface RoommateCardProps {
   onViewDetails: (profile: RoommateProfile) => void;
   isLiked: boolean;
   onToggleLike: () => void;
+  isUnlocked: boolean;
 }
 
-export function RoommateCard({ profile, onViewDetails, isLiked, onToggleLike }: RoommateCardProps) {
+export function RoommateCard({ profile, onViewDetails, isLiked, onToggleLike, isUnlocked }: RoommateCardProps) {
   
   const handleLikeClick = (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card click event from firing
@@ -72,7 +73,8 @@ export function RoommateCard({ profile, onViewDetails, isLiked, onToggleLike }: 
 
          <div className="flex justify-between items-center mt-auto pt-2">
             <Button variant="default" size="sm" className="w-full">
-                View Profile
+               {isUnlocked && <CheckCircle className="w-4 h-4 mr-2" />}
+               {isUnlocked ? 'View Unlocked Profile' : 'View Profile'}
             </Button>
             <div className="flex items-center text-xs text-muted-foreground ml-4 shrink-0">
                 <Eye className="w-3 h-3 mr-1" />

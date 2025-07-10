@@ -28,6 +28,7 @@ import { PaymentConfirmationModal } from "@/components/modals/payment-confirmati
 import { SlotMachineModal } from "@/components/modals/slot-machine-modal";
 import { ContactFab } from "@/components/shared/contact-fab";
 import { HistoryModal } from "@/components/modals/history-modal";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 export default function Home() {
@@ -69,6 +70,7 @@ export default function Home() {
   
   const [availabilityInquiries, setAvailabilityInquiries] = useState<Inquiry[]>([]);
 
+  const [isUnlockConfirmationOpen, setUnlockConfirmationOpen] = useState(false);
 
   const { toast } = useToast();
 
@@ -184,14 +186,22 @@ export default function Home() {
   const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => {
     setSelectedItem({ type, data: item });
   };
+  
+  const handleConfirmUnlock = () => {
+    if (selectedItem?.data.id) {
+      if (useUnlock(selectedItem.data.id)) {
+        // Refresh the selected item to show unlocked state
+        handleViewDetails(selectedItem.data, selectedItem.type);
+      }
+    }
+    setUnlockConfirmationOpen(false);
+  };
 
   const handleUnlockClick = () => {
-    if (selectedItem?.data.id && !unlocks.unlockedIds.has(selectedItem.data.id)) {
-       if (useUnlock(selectedItem.data.id)) {
-        handleViewDetails(selectedItem.data, selectedItem.type);
-       } else {
-        setUnlockModalOpen(true);
-       }
+    if (unlocks.isUnlimited || unlocks.count > 0) {
+      setUnlockConfirmationOpen(true);
+    } else {
+      setUnlockModalOpen(true);
     }
   }
   
@@ -440,6 +450,7 @@ export default function Home() {
             onNavigate={setActivePage}
             likedItemIds={likedItemIds}
             onToggleLike={handleToggleLike}
+            unlockedIds={unlocks.unlockedIds}
           />
         )}
         {(['pg', 'rentals', 'roommates', 'my-properties', 'liked-properties'].includes(activePage)) && (
@@ -451,6 +462,7 @@ export default function Home() {
               initialSearchFilters={null}
               likedItemIds={likedItemIds}
               onToggleLike={handleToggleLike}
+              unlockedIds={unlocks.unlockedIds}
               pageTitle={
                 activePage === 'my-properties' ? 'My Properties' :
                 activePage === 'liked-properties' ? 'My Liked Properties' :
@@ -485,6 +497,21 @@ export default function Home() {
         onUnlock={handleUnlockClick}
         onChat={() => handleChat(selectedItem?.data?.ownerName || 'Roommate')}
       />
+       <AlertDialog open={isUnlockConfirmationOpen} onOpenChange={setUnlockConfirmationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will use one of your unlock credits. This action cannot be undone.
+              You have {unlocks.count} unlocks remaining.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmUnlock}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <UnlockDetailsModal 
         isOpen={isUnlockModalOpen}
         onClose={() => setUnlockModalOpen(false)}
