@@ -54,7 +54,7 @@ const formSchema = z.object({
   amenities: z.array(z.string()).optional(),
   brokerStatus: z.enum(['With Broker', 'Without Broker']),
   aadhaarCard: fileSchema,
-  electricityBill: fileSchema,
+  electricityBill: fileSchema.optional(),
   noc: fileSchema.optional(),
   videoFile: z
     .any()
@@ -64,6 +64,14 @@ const formSchema = z.object({
       ".mp4, .webm and .ogg formats are supported."
     ),
   gender: z.string().optional(),
+}).refine(data => {
+    if (data.propertyType === 'Rental' || data.propertyType === 'PG') {
+        return !!data.electricityBill;
+    }
+    return true;
+}, {
+    message: 'Electricity Bill is required for Rental and PG listings.',
+    path: ['electricityBill'],
 }).refine(data => {
     if (data.propertyType === 'Roommate') {
         return !!data.gender;
@@ -166,8 +174,9 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
         ...data, 
         images: mediaFiles,
         aadhaarCard: data.aadhaarCard[0],
-        electricityBill: data.electricityBill[0],
+        electricityBill: data.electricityBill?.[0],
         noc: data.noc ? data.noc[0] : undefined,
+        videoFile: data.videoFile[0],
     };
     onSubmit(finalData);
   };
@@ -420,10 +429,14 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-6">
                  <FileUploadField name="aadhaarCard" label="Aadhaar Card (Required)" control={form.control} />
-                 <FileUploadField name="electricityBill" label="Electricity Bill (Required)" control={form.control} />
-                 <div className="md:col-span-2">
-                    <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
-                 </div>
+                 {propertyType !== 'Roommate' && (
+                    <>
+                        <FileUploadField name="electricityBill" label="Electricity Bill (Required)" control={form.control} />
+                        <div className="md:col-span-2">
+                            <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
+                        </div>
+                    </>
+                 )}
               </CardContent>
             </Card>
 
