@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -63,6 +63,10 @@ const chartData = [
 const ADMIN_PASSWORD = 'Bluechip@123';
 const ADMIN_OTP = '16082007';
 const ADMIN_ANSWER = 'rohan kholi';
+const ADMIN_EMAIL = 'setmystay02@gmail.com';
+const ADMIN_PHONE = '+918210552902';
+const ADMIN_ADDRESS = 'Office no. 01, Neelsidhi Splendour, Sector 15, CBD Belapur, Navi Mumbai, Maharashtra 400614';
+
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -88,7 +92,7 @@ export default function AdminDashboard() {
 
     const [isMounted, setIsMounted] = useState(false);
     
-    const [activeSettingsDialog, setActiveSettingsDialog] = useState<null | 'password' | 'pin' | 'security'>(null);
+    const [activeSettingsDialog, setActiveSettingsDialog] = useState<null | 'password' | 'pin' | 'security' | 'contact'>(null);
 
     useEffect(() => {
         const authStatus = localStorage.getItem('admin_authenticated');
@@ -138,7 +142,7 @@ export default function AdminDashboard() {
         if (type === 'roommate') {
             setRoommates(rms => rms.map(r => r.id === id ? { ...r, status } : r));
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status } : p));
+            setProperties(props => props.map(p => p.id === id ? { ...p, status } : r));
         }
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
@@ -264,6 +268,7 @@ export default function AdminDashboard() {
                                 <DropdownMenuItem onSelect={() => setActiveSettingsDialog('password')}>Change Password</DropdownMenuItem>
                                 <DropdownMenuItem onSelect={() => setActiveSettingsDialog('pin')}>Change PIN</DropdownMenuItem>
                                 <DropdownMenuItem onSelect={() => setActiveSettingsDialog('security')}>Change Security Question</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => setActiveSettingsDialog('contact')}>Change Contact Info</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <Button variant="outline" onClick={handleLogout}>
@@ -626,6 +631,17 @@ export default function AdminDashboard() {
                     <SecurityQuestionChangeForm currentAnswer={ADMIN_ANSWER} onClose={() => setActiveSettingsDialog(null)} />
                 </DialogContent>
             </Dialog>
+            <Dialog open={activeSettingsDialog === 'contact'} onOpenChange={() => setActiveSettingsDialog(null)}>
+                <DialogContent>
+                    <DialogHeader><DialogTitle>Change Contact Information</DialogTitle></DialogHeader>
+                    <ContactInfoChangeForm 
+                        currentEmail={ADMIN_EMAIL}
+                        currentPhone={ADMIN_PHONE}
+                        currentAddress={ADMIN_ADDRESS}
+                        onClose={() => setActiveSettingsDialog(null)} 
+                    />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
@@ -930,6 +946,60 @@ const SecurityQuestionChangeForm = ({ currentAnswer, onClose }) => {
             <DialogFooter>
                 <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
                 <Button type="submit">Update Security Question</Button>
+            </DialogFooter>
+        </form>
+    );
+};
+
+const ContactInfoChangeForm = ({ currentEmail, currentPhone, currentAddress, onClose }) => {
+    const { toast } = useToast();
+    const [info, setInfo] = useState({
+        email: currentEmail,
+        phone: currentPhone,
+        address: currentAddress
+    });
+
+    const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setInfo(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!info.email || !info.phone || !info.address) {
+            toast({ title: 'Error', description: 'All fields are required.', variant: 'destructive' });
+            return;
+        }
+        toast({ title: 'Success!', description: 'Your contact information has been updated.' });
+        onClose();
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="email" name="email" type="email" value={info.email} onChange={handleInfoChange} required className="pl-10"/>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                 <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="phone" name="phone" type="tel" value={info.phone} onChange={handleInfoChange} required className="pl-10"/>
+                </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="address">Office Address</Label>
+                 <div className="relative">
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Textarea id="address" name="address" value={info.address} onChange={handleInfoChange} required className="pl-10"/>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                <Button type="submit">Update Information</Button>
             </DialogFooter>
         </form>
     );
