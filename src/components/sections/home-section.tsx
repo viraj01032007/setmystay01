@@ -10,6 +10,13 @@ import { Users, Home as HomeIcon, BedDouble } from "lucide-react";
 import { PropertyCard } from "@/components/shared/property-card";
 import { RoommateCard } from "@/components/shared/roommate-card";
 import Image from "next/image";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 interface HomeSectionProps {
   featuredProperties: Listing[];
@@ -98,33 +105,57 @@ export function HomeSection({
       {/* Featured Properties Section */}
       <div>
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Properties</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProperties.map(listing => (
-                <PropertyCard 
-                  key={listing.id} 
-                  listing={listing} 
-                  onViewDetails={(item) => onViewDetails(item, 'listing')}
-                  isLiked={likedItemIds.has(listing.id)}
-                  onToggleLike={() => onToggleLike(listing.id)}
-                />
+        <Carousel
+          opts={{
+            align: "start",
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
+            {featuredProperties.map((listing) => (
+              <CarouselItem key={listing.id} className="md:basis-1/2 lg:basis-1/3">
+                <div className="p-1">
+                  <PropertyCard
+                    listing={listing}
+                    onViewDetails={(item) => onViewDetails(item, 'listing')}
+                    isLiked={likedItemIds.has(listing.id)}
+                    onToggleLike={() => onToggleLike(listing.id)}
+                  />
+                </div>
+              </CarouselItem>
             ))}
-        </div>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
 
       {/* Featured Roommates Section */}
       <div>
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Featured Roommate Profiles</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-           {featuredRoommates.map(profile => (
-                <RoommateCard 
-                  key={profile.id} 
-                  profile={profile} 
-                  onViewDetails={(item) => onViewDetails(item, 'roommate')} 
-                  isLiked={likedItemIds.has(profile.id)}
-                  onToggleLike={() => onToggleLike(profile.id)}
-                />
-           ))}
-        </div>
+        <Carousel
+          opts={{
+            align: "start",
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
+            {featuredRoommates.map((profile) => (
+              <CarouselItem key={profile.id} className="md:basis-1/2 lg:basis-1/3">
+                 <div className="p-1">
+                  <RoommateCard
+                    profile={profile}
+                    onViewDetails={(item) => onViewDetails(item, 'roommate')}
+                    isLiked={likedItemIds.has(profile.id)}
+                    onToggleLike={() => onToggleLike(profile.id)}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </div>
   );
