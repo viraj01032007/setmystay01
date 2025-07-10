@@ -1,5 +1,4 @@
 
-
 // @ts-nocheck
 'use client';
 
@@ -8,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -22,7 +21,8 @@ import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { Advertisement } from '@/lib/types';
+import type { Advertisement, Coupon } from '@/lib/types';
+import { dummyCoupons } from '@/lib/data';
 
 // Mock data similar to the provided script
 const initialProperties = [
@@ -70,6 +70,7 @@ export default function AdminDashboard() {
     const [pricing, setPricing] = useState(null);
     const [analytics, setAnalytics] = useState(null);
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
+    const [coupons, setCoupons] = useState<Coupon[]>([]);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
@@ -78,18 +79,22 @@ export default function AdminDashboard() {
     const [isAdFormModalOpen, setAdFormModalOpen] = useState(false);
     const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
 
+    const [isCouponFormModalOpen, setCouponFormModalOpen] = useState(false);
+    const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        setIsMounted(true);
         const authStatus = localStorage.getItem('admin_authenticated');
         if (authStatus !== 'true') {
             router.replace('/admin/login');
         } else {
+            setIsMounted(true);
             setProperties(initialProperties);
             setRoommates(initialRoommates);
             setPricing(initialPricing);
             setAdvertisements(initialAdvertisements);
+            setCoupons(dummyCoupons);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
@@ -181,6 +186,29 @@ export default function AdminDashboard() {
         setAdvertisements(ads => ads.filter(ad => ad.id !== adId));
         toast({ title: "Advertisement Deleted", variant: 'destructive' });
     };
+    
+    const handleOpenCouponForm = (coupon: Coupon | null) => {
+        setEditingCoupon(coupon);
+        setCouponFormModalOpen(true);
+    };
+
+    const handleSaveCoupon = (couponData: Omit<Coupon, 'id'>) => {
+        if (editingCoupon) {
+            setCoupons(cs => cs.map(c => c.id === editingCoupon.id ? { ...editingCoupon, ...couponData } : c));
+            toast({ title: "Coupon Updated" });
+        } else {
+            const newCoupon: Coupon = { id: `coupon_${Date.now()}`, ...couponData };
+            setCoupons(cs => [newCoupon, ...cs]);
+            toast({ title: "Coupon Added" });
+        }
+        setCouponFormModalOpen(false);
+        setEditingCoupon(null);
+    };
+    
+    const handleDeleteCoupon = (couponId: string) => {
+        setCoupons(cs => cs.filter(c => c.id !== couponId));
+        toast({ title: "Coupon Deleted", variant: 'destructive' });
+    };
 
     const StatusBadge = ({ status }) => {
         const isBoolean = typeof status === 'boolean';
@@ -209,7 +237,7 @@ export default function AdminDashboard() {
         <div className="bg-slate-50 min-h-screen">
             <header className="bg-white shadow-sm">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 h-auto sm:h-20 py-4 sm:py-0">
-                     <h1 className="text-2xl font-bold text-slate-800">SetMyStay Admin</h1>
+                     <h1 className="text-2xl font-bold text-slate-800">StayFinder Admin</h1>
                      <div className="flex items-center gap-4">
                         <Button asChild>
                             <Link href="/">
@@ -302,6 +330,55 @@ export default function AdminDashboard() {
                         <div className="mt-6 flex justify-end">
                             <Button onClick={handleSavePricing}>Save Prices</Button>
                         </div>
+                    </CardContent>
+                </Card>
+
+                {/* Coupon Management */}
+                <Card className="mb-8">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle className="text-2xl">Coupon Code Management</CardTitle>
+                            <CardDescription>Create and manage discount coupons.</CardDescription>
+                        </div>
+                        <Button onClick={() => handleOpenCouponForm(null)}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add New Coupon
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Code</TableHead>
+                                    <TableHead>Discount</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {coupons.map(coupon => (
+                                    <TableRow key={coupon.id}>
+                                        <TableCell className="font-medium">{coupon.code}</TableCell>
+                                        <TableCell>{coupon.discountPercentage}%</TableCell>
+                                        <TableCell><StatusBadge status={coupon.isActive} /></TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => handleOpenCouponForm(coupon)}><Edit className="h-4 w-4" /></Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader><AlertDialogTitle>Delete Coupon?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the coupon.</AlertDialogDescription></AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteCoupon(coupon.id)}>Confirm</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
 
@@ -428,6 +505,14 @@ export default function AdminDashboard() {
                 onClose={() => setAdFormModalOpen(false)}
                 onSave={handleSaveAd}
                 ad={editingAd}
+            />
+            
+            {/* Coupon Form Modal */}
+            <CouponFormDialog
+                isOpen={isCouponFormModalOpen}
+                onClose={() => setCouponFormModalOpen(false)}
+                onSave={handleSaveCoupon}
+                coupon={editingCoupon}
             />
 
             {/* Details Modal */}
@@ -601,6 +686,58 @@ const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
                         <Button type="submit">Save</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+
+const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
+    const [code, setCode] = useState('');
+    const [discountPercentage, setDiscountPercentage] = useState(0);
+    const [isActive, setIsActive] = useState(true);
+
+    useEffect(() => {
+        if (coupon) {
+            setCode(coupon.code);
+            setDiscountPercentage(coupon.discountPercentage);
+            setIsActive(coupon.isActive);
+        } else {
+            setCode('');
+            setDiscountPercentage(0);
+            setIsActive(true);
+        }
+    }, [coupon, isOpen]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ code: code.toUpperCase(), discountPercentage, isActive });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{coupon ? 'Edit' : 'Add'} Coupon</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="coupon-code">Coupon Code</Label>
+                        <Input id="coupon-code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} required />
+                    </div>
+                    <div>
+                        <Label htmlFor="coupon-discount">Discount Percentage (%)</Label>
+                        <Input id="coupon-discount" type="number" value={discountPercentage} onChange={(e) => setDiscountPercentage(parseInt(e.target.value, 10))} required />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="coupon-is-active" checked={isActive} onCheckedChange={setIsActive} />
+                        <Label htmlFor="coupon-is-active">Active</Label>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit">Save Coupon</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

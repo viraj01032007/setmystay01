@@ -17,6 +17,13 @@ export interface Advertisement {
   'data-ai-hint'?: string;
 }
 
+export interface Coupon {
+    id: string;
+    code: string;
+    discountPercentage: number;
+    isActive: boolean;
+}
+
 export interface Listing {
   id: string;
   propertyType: 'PG' | 'Rental';

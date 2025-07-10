@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement } from "@/lib/types";
-import { dummyProperties, dummyRoommates, dummyAdvertisements } from "@/lib/data";
+import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement, Coupon } from "@/lib/types";
+import { dummyProperties, dummyRoommates, dummyAdvertisements, dummyCoupons } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
 import { Header } from "@/components/layout/header";
@@ -32,6 +32,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [featuredProperties, setFeaturedProperties] = useState<Listing[]>([]);
   const [featuredRoommates, setFeaturedRoommates] = useState<RoommateProfile[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
   const [selectedItem, setSelectedItem] = useState<{ type: 'listing' | 'roommate'; data: Listing | RoommateProfile } | null>(null);
   const [isUnlockModalOpen, setUnlockModalOpen] = useState(false);
@@ -59,6 +60,8 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
+    setIsClient(true);
+    // Initial data loading
     const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
     const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
     const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
@@ -68,29 +71,35 @@ export default function Home() {
     setAllListings(dummyProperties);
     setAllRoommates(dummyRoommates);
     setIsLoading(false);
-
-    const savedCount = parseInt(localStorage.getItem('setmystay_unlocks') || '0');
-    const savedIsUnlimited = localStorage.getItem('setmystay_isUnlimited') === 'true';
-    const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
-    setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
-
-    const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
-    setIsLoggedIn(loggedInStatus);
-    
-    // Advertisement Pop-up logic
-    const activeAd = dummyAdvertisements.find(ad => ad.isActive);
-    const adShown = sessionStorage.getItem('setmystay_ad_shown');
-
-    if (activeAd && !adShown) {
-        const timer = setTimeout(() => {
-            setAdToShow(activeAd);
-            setIsAdModalOpen(true);
-            sessionStorage.setItem('setmystay_ad_shown', 'true');
-        }, 5000); // Show after 5 seconds
-
-        return () => clearTimeout(timer);
-    }
   }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      // Client-side only logic for unlocks
+      const savedCount = parseInt(localStorage.getItem('setmystay_unlocks') || '0');
+      const savedIsUnlimited = localStorage.getItem('setmystay_isUnlimited') === 'true';
+      const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
+      setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
+
+      // Client-side only logic for login status
+      const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
+      setIsLoggedIn(loggedInStatus);
+      
+      // Client-side only logic for advertisement pop-up
+      const activeAd = dummyAdvertisements.find(ad => ad.isActive);
+      const adShown = sessionStorage.getItem('setmystay_ad_shown');
+
+      if (activeAd && !adShown) {
+          const timer = setTimeout(() => {
+              setAdToShow(activeAd);
+              setIsAdModalOpen(true);
+              sessionStorage.setItem('setmystay_ad_shown', 'true');
+          }, 5000); // Show after 5 seconds
+
+          return () => clearTimeout(timer);
+      }
+    }
+  }, [isClient]);
 
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
@@ -374,19 +383,20 @@ export default function Home() {
         listing={inquiryData?.listing || null}
         bed={inquiryData?.bed || null}
       />
-      <AdvertisementModal
+      {isClient && <AdvertisementModal
         isOpen={isAdModalOpen}
         onClose={() => setIsAdModalOpen(false)}
         title={adToShow?.title || ''}
         description={adToShow?.description || ''}
         imageUrl={adToShow?.imageUrl || ''}
-      />
+      />}
       <PaymentConfirmationModal
         isOpen={isPaymentConfirmationOpen}
         onClose={() => setIsPaymentConfirmationOpen(false)}
         onConfirm={handleConfirmPayment}
         planName={paymentDetails?.planName || ''}
         amount={paymentDetails?.amount || 0}
+        availableCoupons={dummyCoupons}
       />
     </div>
   );
