@@ -7,8 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, ShieldQuestion, Lock, LogIn } from 'lucide-react';
+import { KeyRound, ShieldQuestion, Lock, LogIn, HelpCircle } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 // Hardcoded credentials for simulation
 const ADMIN_PASSWORD = 'Bluechip@123';
@@ -18,12 +27,13 @@ const ADMIN_ANSWER = 'rohan kholi';
 export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [step, setStep] = useState<'password' | 'otp' | 'question'>('password');
+  const [step, setStep] = useState<'password' | 'otp' | 'question' | 'forgot_password'>('password');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [answer, setAnswer] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isPasswordRevealed, setIsPasswordRevealed] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -67,6 +77,15 @@ export default function AdminLoginPage() {
     }
   };
   
+  const handleForgotPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (answer.toLowerCase() === ADMIN_ANSWER) {
+        setIsPasswordRevealed(true);
+    } else {
+        toast({ title: 'Verification Error', description: 'Incorrect answer.', variant: 'destructive' });
+    }
+  };
+
   if (!isMounted) {
     return (
         <div className="flex min-h-screen items-center justify-center bg-slate-100">
@@ -81,9 +100,10 @@ export default function AdminLoginPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Admin Panel Access</CardTitle>
           <CardDescription>
-            {step === 'password' && 'Factor 1: Enter your password. (Hint: Bluechip@123)'}
+            {step === 'password' && 'Factor 1: Enter your password.'}
             {step === 'otp' && 'Factor 2: Enter your PIN. (Hint: 16082007)'}
             {step === 'question' && 'Factor 3: Answer your security question. (e.g., Rohan Kholi)'}
+            {step === 'forgot_password' && 'Enter your security answer to retrieve your password.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -107,6 +127,9 @@ export default function AdminLoginPage() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 Continue
               </Button>
+               <div className="text-center">
+                 <Button variant="link" type="button" onClick={() => setStep('forgot_password')}>Forgot Password?</Button>
+               </div>
             </form>
           )}
 
@@ -157,8 +180,56 @@ export default function AdminLoginPage() {
               </Button>
             </form>
           )}
+
+          {step === 'forgot_password' && (
+             <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="answer-forgot">Security Question: Who are you?</Label>
+                    <div className="relative">
+                        <ShieldQuestion className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            id="answer-forgot"
+                            type="text"
+                            value={answer}
+                            onChange={(e) => setAnswer(e.target.value)}
+                            placeholder="Your answer (e.g., Rohan Kholi)"
+                            required
+                            className="pl-10"
+                        />
+                    </div>
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    Retrieve Password
+                </Button>
+                <Button variant="link" type="button" onClick={() => setStep('password')} className="w-full">
+                  Back to Login
+                </Button>
+             </form>
+          )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={isPasswordRevealed} onOpenChange={setIsPasswordRevealed}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Password Retrieved</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Your password is: <strong className="font-mono">{ADMIN_PASSWORD}</strong>
+                    <br />
+                    Please copy it and use it to log in.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogAction onClick={() => {
+                    setIsPasswordRevealed(false);
+                    setStep('password');
+                }}>
+                    Got it, Back to Login
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
