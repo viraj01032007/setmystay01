@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement, Coupon, Purchase } from "@/lib/types";
+import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement, Coupon, Purchase, Inquiry } from "@/lib/types";
 import { dummyProperties, dummyRoommates, dummyAdvertisements, dummyCoupons } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
@@ -66,6 +66,8 @@ export default function Home() {
   
   const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
   const [likedItemIds, setLikedItemIds] = useState<Set<string>>(new Set());
+  
+  const [availabilityInquiries, setAvailabilityInquiries] = useState<Inquiry[]>([]);
 
 
   const { toast } = useToast();
@@ -320,12 +322,20 @@ export default function Home() {
     setSelectedItem(null); 
   };
   
-  const handleCheckAvailability = () => {
+  const handleCheckAvailability = (listing: Listing) => {
     toast({
       title: "Inquiry Sent!",
       description: "The owner has been notified of your availability request.",
     });
-    // In a real app, this would trigger an API call to the owner.
+    
+    const newInquiry: Inquiry = {
+        id: `inq_${Date.now()}`,
+        propertyId: listing.id,
+        propertyTitle: listing.title,
+        userName: 'A Potential Tenant', // Simulate a logged-in user's name
+        time: new Date(),
+    };
+    setAvailabilityInquiries(prev => [...prev, newInquiry]);
   };
 
   const handleLoginSuccess = () => {
@@ -446,6 +456,7 @@ export default function Home() {
                 activePage === 'liked-properties' ? 'My Liked Properties' :
                 undefined
               }
+              inquiries={activePage === 'my-properties' ? availabilityInquiries.filter(inq => myProperties.some(p => p.id === inq.propertyId)) : undefined}
             />
         )}
         {activePage === 'list' && (

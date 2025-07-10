@@ -122,6 +122,14 @@ export interface StaffMember {
     password?: string;
 }
 
+export interface Inquiry {
+    id: string;
+    propertyId: string;
+    propertyTitle: string;
+    userName: string;
+    time: Date;
+}
+
 
 // Add ToggleGroup to components/ui
 export interface ToggleGroupProps

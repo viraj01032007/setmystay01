@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import type { Listing, RoommateProfile, ListingType, FilterState } from "@/lib/types";
+import type { Listing, RoommateProfile, ListingType, FilterState, Inquiry } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,10 +18,12 @@ import { AutocompleteInput } from '@/components/shared/autocomplete-input';
 import { indianStates } from '@/lib/states';
 import { allIndianCities, indianCitiesByState } from '@/lib/cities';
 import { indianAreas } from '@/lib/areas';
-import { Heart, Filter, LayoutGrid, List } from 'lucide-react';
+import { Heart, Filter, LayoutGrid, List, Bell } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDistanceToNow } from 'date-fns';
 
 interface ListingsSectionProps {
   type: ListingType;
@@ -31,6 +33,7 @@ interface ListingsSectionProps {
   likedItemIds: Set<string>;
   onToggleLike: (itemId: string) => void;
   pageTitle?: string;
+  inquiries?: Inquiry[];
 }
 
 const initialFilters: FilterState = {
@@ -180,7 +183,8 @@ export function ListingsSection({
   initialSearchFilters,
   likedItemIds,
   onToggleLike,
-  pageTitle: customPageTitle
+  pageTitle: customPageTitle,
+  inquiries
 }: ListingsSectionProps) {
   const [filters, setFilters] = useState<FilterState>({ ...initialFilters, ...initialSearchFilters });
   const [pageTitle, setPageTitle] = useState('');
@@ -273,6 +277,35 @@ export function ListingsSection({
         <h1 className="text-4xl font-bold tracking-tight">{pageTitle}</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">{pageDescription}</p>
       </div>
+
+      {inquiries && (
+        <Card className="mb-8">
+            <CardHeader>
+                <CardTitle className="text-2xl">Availability Inquiries</CardTitle>
+                <CardDescription>Recent inquiries from users about property availability.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {inquiries.length > 0 ? (
+                    <div className="space-y-4">
+                        {inquiries.map(inquiry => (
+                            <div key={inquiry.id} className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                                <div className="flex items-center gap-4">
+                                    <Bell className="w-6 h-6 text-blue-500" />
+                                    <div>
+                                        <p><strong className="font-semibold">{inquiry.userName}</strong> inquired about <strong className="font-semibold">{inquiry.propertyTitle}</strong></p>
+                                        <p className="text-sm text-muted-foreground">{formatDistanceToNow(inquiry.time, { addSuffix: true })}</p>
+                                    </div>
+                                </div>
+                                <Button variant="outline" size="sm" onClick={() => onViewDetails(listings.find(l => l.id === inquiry.propertyId) as Listing, 'listing')}>View Property</Button>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-slate-500 text-center py-4">No new availability inquiries.</p>
+                )}
+            </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col md:flex-row gap-8">
         <aside className="hidden md:block md:w-1/3 lg:w-1/4">

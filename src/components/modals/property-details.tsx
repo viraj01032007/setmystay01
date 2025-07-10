@@ -18,7 +18,7 @@ interface PropertyDetailsProps {
   onUnlock: () => void;
   onChat: () => void;
   onBookInquiry: (listing: Listing, bed: Bed) => void;
-  onCheckAvailability: () => void;
+  onCheckAvailability: (listing: Listing) => void;
 }
 
 const amenityIcons: { [key: string]: React.ReactNode } = {
@@ -252,7 +252,7 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
                 </a>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" variant="secondary" className="flex-1" onClick={onCheckAvailability}>
+                <Button size="lg" variant="secondary" className="flex-1" onClick={() => onCheckAvailability(listing)}>
                     <CheckCircle className="w-5 h-5 mr-2" /> Check Availability
                 </Button>
                 <Button size="lg" variant="ghost" className="flex-1" onClick={onClose}>
