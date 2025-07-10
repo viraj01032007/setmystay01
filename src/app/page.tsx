@@ -66,12 +66,6 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
     // Initial data loading
-    const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
-    const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
-    const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
-    
-    setFeaturedProperties(shuffledListings.slice(0, 3));
-    setFeaturedRoommates(shuffledRoommates.slice(0, 3));
     setAllListings(dummyProperties);
     setAllRoommates(dummyRoommates);
     setIsLoading(false);
@@ -102,6 +96,14 @@ export default function Home() {
 
           return () => clearTimeout(timer);
       }
+
+      // Shuffling logic moved here to avoid hydration errors
+      const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
+      const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
+      const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
+    
+      setFeaturedProperties(shuffledListings.slice(0, 3));
+      setFeaturedRoommates(shuffledRoommates.slice(0, 3));
     }
   }, [isClient]);
 
@@ -173,6 +175,15 @@ export default function Home() {
   }
 
   const handleInitiateListing = (data: any) => {
+    if (!isLoggedIn) {
+      setAuthModalOpen(true);
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to list your property.",
+        variant: "destructive"
+      });
+      return;
+    }
     setPendingListingData(data);
     setListPaymentModalOpen(true);
   };
@@ -285,6 +296,21 @@ export default function Home() {
     navigator.clipboard.writeText(coupon.code);
   };
 
+  const handlePlanSelect = (plan: { plan: UnlockPlan, title: string, price: number }) => {
+    if (isLoggedIn) {
+      setUnlockModalOpen(false);
+      handleOpenConfirmationModal(plan.title, plan.price, () => handleUnlockPurchase(plan.plan));
+    } else {
+      setUnlockModalOpen(false);
+      setAuthModalOpen(true);
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to purchase a plan.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
@@ -359,10 +385,7 @@ export default function Home() {
       <UnlockDetailsModal 
         isOpen={isUnlockModalOpen}
         onClose={() => setUnlockModalOpen(false)}
-        onPlanSelect={(plan) => {
-          setUnlockModalOpen(false);
-          handleOpenConfirmationModal(plan.title, plan.price, () => handleUnlockPurchase(plan.plan));
-        }}
+        onPlanSelect={handlePlanSelect}
         onNavigateToListProperty={() => {
           setUnlockModalOpen(false);
           setActivePage('list');
