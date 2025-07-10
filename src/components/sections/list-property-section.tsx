@@ -84,28 +84,34 @@ const formSchema = z.object({
   }).optional(),
   description: z.string().optional(),
   amenities: z.array(z.string()).optional(),
-  brokerStatus: z.enum(['With Broker', 'Without Broker']),
+  brokerStatus: z.enum(['With Broker', 'Without Broker']).optional(),
   aadhaarCard: fileSchema,
   electricityBill: fileSchema.optional(),
   noc: fileSchema.optional(),
   videoFile: z.any().optional(),
   gender: z.string().optional(),
-}).refine(data => {
-    if (data.propertyType === 'Rental' || data.propertyType === 'PG') {
-        return !!data.electricityBill;
+}).superRefine((data, ctx) => {
+    if (data.propertyType === 'Rental' && !data.brokerStatus) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Broker status is required for rentals.",
+            path: ['brokerStatus'],
+        });
     }
-    return true;
-}, {
-    message: 'Electricity Bill is required for Rental and PG listings.',
-    path: ['electricityBill'],
-}).refine(data => {
-    if (data.propertyType === 'Roommate') {
-        return !!data.gender;
+    if ((data.propertyType === 'Rental' || data.propertyType === 'PG') && !data.electricityBill) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Electricity Bill is required for Rental and PG listings.',
+            path: ['electricityBill'],
+        });
     }
-    return true;
-}, {
-    message: 'Gender is required when looking for a roommate.',
-    path: ['gender'],
+    if (data.propertyType === 'Roommate' && !data.gender) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Gender is required when looking for a roommate.',
+            path: ['gender'],
+        });
+    }
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -284,28 +290,30 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     )}/>
                 )}
                 
-                <FormField control={form.control} name="brokerStatus" render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel>Are you a broker or owner?</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex gap-4"
-                      >
-                        <FormItem className="flex items-center space-x-2 space-y-0">
-                          <FormControl><RadioGroupItem value="Without Broker" /></FormControl>
-                          <FormLabel className="font-normal">Owner</FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-2 space-y-0">
-                          <FormControl><RadioGroupItem value="With Broker" /></FormControl>
-                          <FormLabel className="font-normal">Broker</FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}/>
+                {propertyType === 'Rental' && (
+                  <FormField control={form.control} name="brokerStatus" render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Are you a broker or owner?</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex gap-4"
+                        >
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl><RadioGroupItem value="Without Broker" /></FormControl>
+                            <FormLabel className="font-normal">Owner</FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl><RadioGroupItem value="With Broker" /></FormControl>
+                            <FormLabel className="font-normal">Broker</FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}/>
+                )}
               </CardContent>
             </Card>
 

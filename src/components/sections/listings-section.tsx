@@ -104,16 +104,26 @@ const FilterPanel = ({
 
     <div className="space-y-4">
       {type === 'rental' && (
-        <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
-          <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="any">Any BHK</SelectItem>
-            <SelectItem value="1 BHK">1 BHK</SelectItem>
-            <SelectItem value="2 BHK">2 BHK</SelectItem>
-            <SelectItem value="3 BHK">3 BHK</SelectItem>
+        <>
+          <Select value={filters.propertyType} onValueChange={(val) => handleFilterChange('propertyType', val)}>
+            <SelectTrigger><SelectValue placeholder="Property Type" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="any">Any BHK</SelectItem>
+              <SelectItem value="1 BHK">1 BHK</SelectItem>
+              <SelectItem value="2 BHK">2 BHK</SelectItem>
+              <SelectItem value="3 BHK">3 BHK</SelectItem>
               <SelectItem value="4 BHK">4 BHK</SelectItem>
-          </SelectContent>
-        </Select>
+            </SelectContent>
+          </Select>
+          <div className="space-y-2">
+            <Label>Contact Type</Label>
+            <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
+                <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
+                <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
+                <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
+            </RadioGroup>
+          </div>
+        </>
       )}
       {type === 'pg' && (
         <Select value={filters.roomType} onValueChange={(val) => handleFilterChange('roomType', val)}>
@@ -136,14 +146,6 @@ const FilterPanel = ({
           </RadioGroup>
       </div>
 
-      <div className="space-y-2">
-          <Label>Contact Type</Label>
-          <RadioGroup value={filters.brokerStatus} onValueChange={(val) => handleFilterChange('brokerStatus', val as 'any' | 'With Broker' | 'Without Broker')} className="flex gap-2">
-              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="any" className="sr-only"/>Any</Label>
-              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="With Broker" className="sr-only"/>Broker</Label>
-              <Label className="flex-1 p-2 border rounded-md text-center cursor-pointer has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary"><RadioGroupItem value="Without Broker" className="sr-only"/>Owner</Label>
-          </RadioGroup>
-      </div>
         {type !== 'rental' && (
           <Select value={filters.gender} onValueChange={(val) => handleFilterChange('gender', val)}>
             <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
@@ -242,7 +244,7 @@ export function ListingsSection({
       if (item.propertyType !== 'Roommate') { // Is a Listing
           const l = item as Listing;
           if (filters.furnishedStatus !== 'any' && filters.furnishedStatus !== l.furnishedStatus) return false;
-          if (filters.brokerStatus !== 'any' && filters.brokerStatus !== l.brokerStatus) return false;
+          if (type === 'rental' && filters.brokerStatus !== 'any' && filters.brokerStatus !== l.brokerStatus) return false;
           if (l.propertyType === 'Rental' && filters.propertyType !== 'any' && filters.propertyType !== l.size) return false;
           if (l.propertyType === 'PG' && filters.roomType !== 'any' && filters.roomType !== l.size) return false;
           if (filters.amenities.length > 0 && !filters.amenities.every(a => l.amenities.includes(a))) return false;
@@ -254,7 +256,7 @@ export function ListingsSection({
 
       return true;
     });
-  }, [listings, filters]);
+  }, [listings, filters, type]);
 
   const filterPanelProps = {
     filters,
