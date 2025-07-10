@@ -24,6 +24,7 @@ import { BookingInquiryModal } from "@/components/modals/booking-inquiry-modal";
 import { FloatingCta } from "@/components/shared/floating-cta";
 import { AdvertisementModal } from "@/components/modals/advertisement-modal";
 import { PaymentConfirmationModal } from "@/components/modals/payment-confirmation-modal";
+import { SpinWheelModal } from "@/components/modals/spin-wheel-modal";
 
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
@@ -55,6 +56,8 @@ export default function Home() {
 
   const [isPaymentConfirmationOpen, setIsPaymentConfirmationOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState<{ planName: string; amount: number; onConfirm: () => void; } | null>(null);
+
+  const [isSpinWheelModalOpen, setIsSpinWheelModalOpen] = useState(false);
 
 
   const { toast } = useToast();
@@ -273,6 +276,14 @@ export default function Home() {
     setPaymentDetails(null);
   };
 
+  const handleCouponWin = (coupon: Coupon) => {
+    toast({
+        title: "🎉 You Won a Coupon! 🎉",
+        description: `Code: ${coupon.code} (${coupon.discountPercentage}% off). It has been copied to your clipboard!`,
+    });
+    navigator.clipboard.writeText(coupon.code);
+  };
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
@@ -325,7 +336,7 @@ export default function Home() {
       </main>
 
       <Footer onYourPropertiesClick={() => setAuthModalOpen(true)} onNavigate={setActivePage}/>
-      <FloatingCta />
+      <FloatingCta onSpinWheelClick={() => setIsSpinWheelModalOpen(true)} />
       
       {/* Modals */}
       <PropertyDetails 
@@ -398,6 +409,14 @@ export default function Home() {
         amount={paymentDetails?.amount || 0}
         availableCoupons={dummyCoupons}
       />
+      {isClient && (
+        <SpinWheelModal
+            isOpen={isSpinWheelModalOpen}
+            onClose={() => setIsSpinWheelModalOpen(false)}
+            prizes={dummyCoupons.filter(c => c.isActive)}
+            onWin={handleCouponWin}
+        />
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, X, Mail } from 'lucide-react';
+import { Plus, X, Mail, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -14,18 +14,26 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-export function FloatingCta() {
+interface FloatingCtaProps {
+    onSpinWheelClick: () => void;
+}
+
+export function FloatingCta({ onSpinWheelClick }: FloatingCtaProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
             {/* Action Buttons */}
             <div
                 className={cn(
-                    'flex flex-col items-center gap-3 transition-all duration-300 ease-in-out',
+                    'flex flex-col items-end gap-3 transition-all duration-300 ease-in-out',
                     isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                 )}
             >
+                 <Button onClick={onSpinWheelClick} size="icon" className="rounded-full bg-amber-500 hover:bg-amber-600 text-white w-14 h-14 shadow-lg">
+                    <Gift className="w-6 h-6" />
+                    <span className="sr-only">Spin to Win</span>
+                </Button>
                 <Link href="mailto:setmystay02@gmail.com" target="_blank" rel="noopener noreferrer">
                     <Button size="icon" className="rounded-full bg-slate-700 hover:bg-slate-800 text-white w-14 h-14 shadow-lg">
                         <Mail className="w-6 h-6" />
