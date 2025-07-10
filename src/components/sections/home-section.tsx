@@ -46,14 +46,14 @@ export function HomeSection({
       {/* Hero Section */}
       <div className="relative rounded-2xl overflow-hidden min-h-[50vh] flex items-center justify-center text-center p-6">
         <Image
-          src="https://images.unsplash.com/photo-1519558260268-cde7e03a0152?q=80&w=2070&auto=format&fit=crop"
-          alt="Modern city buildings"
+          src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2071&auto=format&fit=crop"
+          alt="Modern living room"
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="modern architecture"
+          data-ai-hint="modern interior"
         />
-        <div className="relative text-white max-w-4xl space-y-6 w-full bg-black/70 p-4 sm:p-8 rounded-xl shadow-2xl">
+        <div className="relative text-white max-w-4xl space-y-6 w-full bg-blue-900/60 p-4 sm:p-8 rounded-xl shadow-2xl backdrop-blur-sm">
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
             Find Your Perfect Living Space
           </h1>
