@@ -29,7 +29,7 @@ import { SlotMachineModal } from "@/components/modals/slot-machine-modal";
 import { ContactFab } from "@/components/shared/contact-fab";
 import { HistoryModal } from "@/components/modals/history-modal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { getFromLocalStorage } from "@/lib/storage";
+import { getFromLocalStorage, saveToLocalStorage } from "@/lib/storage";
 
 
 export default function Home() {
@@ -79,9 +79,9 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    // Initial data loading - only approved listings are public
-    const approvedListings = dummyProperties.filter(p => p.status === 'approved');
-    const approvedRoommates = dummyRoommates.filter(r => r.status === 'approved');
+    // Initial data loading
+    const approvedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
+    const approvedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
     setAllListings(approvedListings);
     setAllRoommates(approvedRoommates);
     
@@ -113,7 +113,7 @@ export default function Home() {
       const savedLikedItems = new Set<string>(JSON.parse(localStorage.getItem('setmystay_likedItems') || '[]'));
       setLikedItemIds(savedLikedItems);
       
-      const storedAdvertisements = getFromLocalStorage('advertisements', dummyProperties);
+      const storedAdvertisements = getFromLocalStorage('advertisements', []);
       const activeAd = storedAdvertisements.find(ad => ad.isActive);
       const adShown = sessionStorage.getItem('setmystay_ad_shown');
 
@@ -131,6 +131,19 @@ export default function Home() {
       setActiveCoupons(storedCoupons);
     }
   }, [isClient]);
+  
+  const handleNavigate = (page: Page) => {
+    if (page === 'list' && !isLoggedIn) {
+        setAuthModalOpen(true);
+        toast({
+            title: "Authentication Required",
+            description: "Please sign in to list your property.",
+            variant: "destructive"
+        });
+        return;
+    }
+    setActivePage(page);
+  };
 
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
@@ -228,18 +241,16 @@ export default function Home() {
   };
   
   const likedItems = useMemo(() => {
-    const allItems = [...dummyProperties, ...dummyRoommates]; // Check against all possible items
+    const allProps = getFromLocalStorage('properties', dummyProperties);
+    const allMates = getFromLocalStorage('roommates', dummyRoommates);
+    const allItems = [...allProps, ...allMates];
     return allItems.filter(item => likedItemIds.has(item.id));
   }, [likedItemIds]);
   
   const myProperties = useMemo(() => {
-      // In a real app, this would be based on a user ID from the login session.
-      // Here, we simulate it by assigning some listings to a "logged in" user.
-      const userId = 'newUser';
-      // In a real app, you would fetch all user listings regardless of status.
-      // For this simulation, we check the dummy data.
-      const userListings = dummyProperties.filter(l => l.ownerId === userId);
-      const userRoommateProfiles = dummyRoommates.filter(r => r.ownerId === userId);
+      const userId = 'newUser'; // Simulate current user
+      const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
+      const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
       return [...userListings, ...userRoommateProfiles];
   }, []);
 
@@ -300,8 +311,8 @@ export default function Home() {
           status: 'pending', // Set status to pending
           submittedAt: new Date(),
       }
-      // Note: We don't add to `allListings` here because it won't be visible until approved.
-      // In a real app, this would be sent to a backend and the admin/staff would see it.
+      const currentProps = getFromLocalStorage('properties', dummyProperties);
+      saveToLocalStorage('properties', [...currentProps, mappedListing]);
     } else {
        const mappedRoommate: RoommateProfile = {
         id: newId,
@@ -323,12 +334,13 @@ export default function Home() {
         gender: pendingListingData.gender || 'Any',
         views: 0,
         ownerId,
-        hasProperty: true, 
+        hasProperty: pendingListingData.roommateStatus === 'hasProperty', 
         images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/400x400'],
         status: 'pending', // Set status to pending
         submittedAt: new Date(),
     }
-      // Note: We don't add to `allRoommates` here.
+      const currentMates = getFromLocalStorage('roommates', dummyRoommates);
+      saveToLocalStorage('roommates', [...currentMates, mappedRoommate]);
     }
     setPendingListingData(null);
     toast({
@@ -369,6 +381,14 @@ export default function Home() {
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
     localStorage.setItem('setmystay_isLoggedIn', 'true');
+    // If user wanted to list a property, take them there now
+    if (activePage === 'home') { // Heuristic: if they were on home page when auth modal opened
+      const intendedPage = sessionStorage.getItem('setmystay_intended_page');
+      if (intendedPage === 'list') {
+        setActivePage('list');
+        sessionStorage.removeItem('setmystay_intended_page');
+      }
+    }
   };
 
   const handleLogout = () => {
@@ -424,8 +444,8 @@ export default function Home() {
   }
   
   const getListingsForPage = () => {
-    const allApprovedListings = dummyProperties.filter(p => p.status === 'approved');
-    const allApprovedRoommates = dummyRoommates.filter(r => r.status === 'approved');
+    const allApprovedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
+    const allApprovedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
 
     switch (activePage) {
         case 'pg':
@@ -454,7 +474,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background font-body text-foreground">
       <Header 
         activePage={activePage} 
-        setActivePage={setActivePage} 
+        setActivePage={handleNavigate} 
         onSignInClick={() => setAuthModalOpen(true)}
         onSubscriptionClick={() => setUnlockModalOpen(true)}
         isLoggedIn={isLoggedIn}
@@ -468,7 +488,7 @@ export default function Home() {
             featuredProperties={featuredProperties} 
             featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
-            onNavigate={setActivePage}
+            onNavigate={handleNavigate}
             likedItemIds={likedItemIds}
             onToggleLike={handleToggleLike}
             unlockedIds={unlocks.unlockedIds}
@@ -497,7 +517,7 @@ export default function Home() {
         )}
       </main>
 
-      <Footer onNavigate={setActivePage} />
+      <Footer onNavigate={handleNavigate} />
       <FloatingCta onGameClick={() => setIsSlotMachineModalOpen(true)} />
       <ContactFab />
       
@@ -539,7 +559,7 @@ export default function Home() {
         onPlanSelect={handlePlanSelect}
         onNavigateToListProperty={() => {
           setUnlockModalOpen(false);
-          setActivePage('list');
+          handleNavigate('list');
         }}
       />
       <ListPropertyPaymentModal
