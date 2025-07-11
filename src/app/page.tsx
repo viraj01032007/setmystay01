@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type { Listing, RoommateProfile, Page, ListingType, UnlockPlan, Bed, Advertisement, Coupon, Purchase, Inquiry } from "@/lib/types";
-import { dummyProperties, dummyRoommates, dummyAdvertisements, dummyCoupons } from "@/lib/data";
+import { dummyProperties, dummyRoommates, dummyCoupons } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
 import { Header } from "@/components/layout/header";
@@ -29,6 +29,7 @@ import { SlotMachineModal } from "@/components/modals/slot-machine-modal";
 import { ContactFab } from "@/components/shared/contact-fab";
 import { HistoryModal } from "@/components/modals/history-modal";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { getFromLocalStorage } from "@/lib/storage";
 
 
 export default function Home() {
@@ -71,6 +72,8 @@ export default function Home() {
   const [availabilityInquiries, setAvailabilityInquiries] = useState<Inquiry[]>([]);
 
   const [isUnlockConfirmationOpen, setUnlockConfirmationOpen] = useState(false);
+  
+  const [activeCoupons, setActiveCoupons] = useState<Coupon[]>([]);
 
   const { toast } = useToast();
 
@@ -109,8 +112,9 @@ export default function Home() {
       
       const savedLikedItems = new Set<string>(JSON.parse(localStorage.getItem('setmystay_likedItems') || '[]'));
       setLikedItemIds(savedLikedItems);
-
-      const activeAd = dummyAdvertisements.find(ad => ad.isActive);
+      
+      const storedAdvertisements = getFromLocalStorage('advertisements', dummyProperties);
+      const activeAd = storedAdvertisements.find(ad => ad.isActive);
       const adShown = sessionStorage.getItem('setmystay_ad_shown');
 
       if (activeAd && !adShown) {
@@ -122,6 +126,9 @@ export default function Home() {
 
           return () => clearTimeout(timer);
       }
+      
+      const storedCoupons = getFromLocalStorage('coupons', dummyCoupons);
+      setActiveCoupons(storedCoupons);
     }
   }, [isClient]);
 
@@ -581,13 +588,13 @@ export default function Home() {
         onConfirm={handleConfirmPayment}
         planName={paymentDetails?.planName || ''}
         amount={paymentDetails?.amount || 0}
-        availableCoupons={dummyCoupons}
+        availableCoupons={activeCoupons}
       />
       {isClient && (
         <SlotMachineModal
             isOpen={isSlotMachineModalOpen}
             onClose={() => setIsSlotMachineModalOpen(false)}
-            prizes={dummyCoupons.filter(c => c.isActive)}
+            prizes={activeCoupons.filter(c => c.isActive)}
             onWin={handleCouponWin}
         />
       )}

@@ -32,36 +32,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, startOfWeek, addDays, getWeek, formatDistanceToNow, differenceInHours } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { getFromLocalStorage, saveToLocalStorage } from '@/lib/storage';
 
 
 // Mock data similar to the provided script
 const initialProperties = dummyProperties;
 const initialRoommates = dummyRoommates;
-const initialAdvertisements: Advertisement[] = [
-    { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true, 'data-ai-hint': 'sale promotion' },
-    { id: 'ad002', title: 'Unlock Unlimited Connections', description: 'Subscribe to our unlimited plan and find your perfect roommate today.', imageUrl: 'https://placehold.co/600x400', isActive: false, 'data-ai-hint': 'people connecting' }
-];
-
-const initialPricing = {
-    unlocks: {
-        1: 49,
-        5: 199,
-        10: 399,
-        unlimited: 999
-    },
-    listings: {
-        roommate: 149,
-        pg: 349,
-        rental: 999
-    }
-}
-
-const initialAvailabilityInquiries = [
-    { id: 'INQ01', propertyId: 'premium-pg-cbd', propertyTitle: 'Premium PG for Professionals', userName: 'Amit Singh', time: new Date(Date.now() - 15 * 60 * 1000) },
-    { id: 'INQ02', propertyId: 'luxury-2bhk-vashi', propertyTitle: 'Luxury 2BHK Apartment', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
-]
-
-const initialStaff: StaffMember[] = dummyStaff;
 
 const initialRatings: Rating[] = [
     { id: 'rating1', rating: 5, feedback: '', date: new Date('2024-07-20') },
@@ -612,11 +588,22 @@ export default function AdminDashboard() {
             setIsMounted(true);
             setProperties(initialProperties);
             setRoommates(initialRoommates);
-            setPricing(initialPricing);
-            setAdvertisements(initialAdvertisements);
-            setCoupons(dummyCoupons);
-            setAvailabilityInquiries(initialAvailabilityInquiries);
-            setStaff(initialStaff);
+
+            setPricing(getFromLocalStorage('pricing', {
+                unlocks: { 1: 49, 5: 199, 10: 399, unlimited: 999 },
+                listings: { roommate: 149, pg: 349, rental: 999 }
+            }));
+            setAdvertisements(getFromLocalStorage('advertisements', [
+                { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true, 'data-ai-hint': 'sale promotion' },
+                { id: 'ad002', title: 'Unlock Unlimited Connections', description: 'Subscribe to our unlimited plan and find your perfect roommate today.', imageUrl: 'https://placehold.co/600x400', isActive: false, 'data-ai-hint': 'people connecting' }
+            ]));
+            setCoupons(getFromLocalStorage('coupons', dummyCoupons));
+            setStaff(getFromLocalStorage('staff', dummyStaff));
+
+            setAvailabilityInquiries([
+                { id: 'INQ01', propertyId: 'premium-pg-cbd', propertyTitle: 'Premium PG for Professionals', userName: 'Amit Singh', time: new Date(Date.now() - 15 * 60 * 1000) },
+                { id: 'INQ02', propertyId: 'luxury-2bhk-vashi', propertyTitle: 'Luxury 2BHK Apartment', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+            ]);
             setRatings(initialRatings);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
@@ -722,7 +709,7 @@ export default function AdminDashboard() {
     };
 
     const handleSavePricing = () => {
-        console.log("Saving new prices:", pricing);
+        saveToLocalStorage('pricing', pricing);
         toast({ title: "Pricing Updated", description: "The new prices have been saved." });
     }
 
@@ -732,20 +719,25 @@ export default function AdminDashboard() {
     };
 
     const handleSaveAd = (adData) => {
+        let updatedAds;
         if (editingAd) {
-            setAdvertisements(ads => ads.map(ad => ad.id === editingAd.id ? { ...editingAd, ...adData } : ad));
+            updatedAds = advertisements.map(ad => ad.id === editingAd.id ? { ...editingAd, ...adData } : ad);
             toast({ title: "Advertisement Updated" });
         } else {
             const newAd: Advertisement = { id: `ad_${Date.now()}`, ...adData };
-            setAdvertisements(ads => [newAd, ...ads]);
+            updatedAds = [newAd, ...advertisements];
             toast({ title: "Advertisement Added" });
         }
+        setAdvertisements(updatedAds);
+        saveToLocalStorage('advertisements', updatedAds);
         setAdFormModalOpen(false);
         setEditingAd(null);
     };
 
     const handleDeleteAd = (adId: string) => {
-        setAdvertisements(ads => ads.filter(ad => ad.id !== adId));
+        const updatedAds = advertisements.filter(ad => ad.id !== adId);
+        setAdvertisements(updatedAds);
+        saveToLocalStorage('advertisements', updatedAds);
         toast({ title: "Advertisement Deleted", variant: 'destructive' });
     };
     
@@ -755,20 +747,25 @@ export default function AdminDashboard() {
     };
 
     const handleSaveCoupon = (couponData: Omit<Coupon, 'id'>) => {
+        let updatedCoupons;
         if (editingCoupon) {
-            setCoupons(cs => cs.map(c => c.id === editingCoupon.id ? { ...editingCoupon, ...couponData } : c));
+            updatedCoupons = coupons.map(c => c.id === editingCoupon.id ? { ...editingCoupon, ...couponData } : c);
             toast({ title: "Coupon Updated" });
         } else {
             const newCoupon: Coupon = { id: `coupon_${Date.now()}`, ...couponData };
-            setCoupons(cs => [newCoupon, ...cs]);
+            updatedCoupons = [newCoupon, ...coupons];
             toast({ title: "Coupon Added" });
         }
+        setCoupons(updatedCoupons);
+        saveToLocalStorage('coupons', updatedCoupons);
         setCouponFormModalOpen(false);
         setEditingCoupon(null);
     };
     
     const handleDeleteCoupon = (couponId: string) => {
-        setCoupons(cs => cs.filter(c => c.id !== couponId));
+        const updatedCoupons = coupons.filter(c => c.id !== couponId);
+        setCoupons(updatedCoupons);
+        saveToLocalStorage('coupons', updatedCoupons);
         toast({ title: "Coupon Deleted", variant: 'destructive' });
     };
 
@@ -778,20 +775,25 @@ export default function AdminDashboard() {
     };
 
     const handleSaveStaff = (staffData: Omit<StaffMember, 'id'>) => {
+        let updatedStaff;
         if (editingStaff) {
-            setStaff(s => s.map(sm => sm.id === editingStaff.id ? { ...editingStaff, ...staffData } : sm));
+            updatedStaff = staff.map(sm => sm.id === editingStaff.id ? { ...editingStaff, ...staffData } : sm);
             toast({ title: "Staff Member Updated" });
         } else {
             const newStaff: StaffMember = { id: `S${Date.now()}`, ...staffData };
-            setStaff(s => [...s, newStaff]);
+            updatedStaff = [...staff, newStaff];
             toast({ title: "Staff Member Added" });
         }
+        setStaff(updatedStaff);
+        saveToLocalStorage('staff', updatedStaff);
         setStaffFormModalOpen(false);
         setEditingStaff(null);
     };
 
     const handleDeleteStaff = (staffId: string) => {
-        setStaff(s => s.filter(sm => sm.id !== staffId));
+        const updatedStaff = staff.filter(sm => sm.id !== staffId);
+        setStaff(updatedStaff);
+        saveToLocalStorage('staff', updatedStaff);
         toast({ title: "Staff Member Deleted", variant: "destructive" });
     };
 

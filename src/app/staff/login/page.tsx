@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { User, Lock, LogIn, Home } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
+import { getFromLocalStorage } from '@/lib/storage';
 import { dummyStaff } from '@/lib/data';
 import type { StaffMember } from '@/lib/types';
 
@@ -24,6 +25,7 @@ export default function StaffLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -31,13 +33,16 @@ export default function StaffLoginPage() {
     if (localStorage.getItem('staff_authenticated') === 'true') {
       router.replace('/staff');
     }
+    // Load staff data from localStorage, fallback to dummy data
+    const storedStaff = getFromLocalStorage('staff', dummyStaff);
+    setStaffList(storedStaff);
   }, [router]);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const staffMember = dummyStaff.find(
+    const staffMember = staffList.find(
       (staff: StaffMember) => staff.userId === userId && staff.password === password
     );
 
