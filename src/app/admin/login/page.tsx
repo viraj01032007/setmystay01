@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -104,7 +105,7 @@ export default function AdminLoginPage() {
           <CardDescription>
             {step === 'password' && 'Factor 1: Enter your password.'}
             {step === 'otp' && 'Factor 2: Enter your PIN. (Hint: 16082007)'}
-            {step === 'question' && 'Factor 3: Answer your security question. (e.g., Rohan Kholi)'}
+            {step === 'question' && 'Factor 3: Answer your security question.'}
             {step === 'forgot_password' && 'Enter your security answer to retrieve your password.'}
           </CardDescription>
         </CardHeader>
@@ -198,7 +199,7 @@ export default function AdminLoginPage() {
                             type="text"
                             value={answer}
                             onChange={(e) => setAnswer(e.target.value)}
-                            placeholder="Your answer (e.g., Rohan Kholi)"
+                            placeholder="Your answer"
                             required
                             className="pl-10"
                         />
