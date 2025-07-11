@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/icons';
 import { dummyProperties, dummyRoommates } from '@/lib/data';
+import { format } from 'date-fns';
 
 const initialProperties = dummyProperties;
 const initialRoommates = dummyRoommates;
@@ -147,7 +148,7 @@ export default function StaffDashboard() {
                             pendingListings.map(item => (
                                 <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                     <div className="w-full">
-                                        <p className="font-semibold">{item.title || item.name} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
+                                        <p className="font-semibold">{item.title || item.ownerName} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
                                         <p className="text-sm text-slate-600">{item.locality}</p>
                                     </div>
                                     <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">Verify Details</Button>
@@ -283,6 +284,14 @@ export default function StaffDashboard() {
                                     <strong className="block text-sm font-medium text-muted-foreground">Status</strong>
                                     <StatusBadge status={currentItem.status} />
                                 </div>
+                                {currentItem.verifiedBy && (
+                                     <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                        <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Verified By</strong>
+                                        <div>
+                                            Staff ({currentItem.verifiedBy}) on {format(new Date(currentItem.verificationTimestamp), 'dd MMM yyyy, p')}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Owner/User Name</strong>

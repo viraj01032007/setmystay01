@@ -1398,6 +1398,14 @@ export default function AdminDashboard() {
                                     <strong className="block text-sm font-medium text-muted-foreground">Status</strong>
                                     <StatusBadge status={currentItem.status} />
                                 </div>
+                                {currentItem.verifiedBy && (
+                                    <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                        <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Verified By</strong>
+                                        <div>
+                                            {staff.find(s => s.id === currentItem.verifiedBy)?.name || currentItem.verifiedBy} on {format(new Date(currentItem.verificationTimestamp), 'dd MMM yyyy, p')}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Owner/User Name</strong>
