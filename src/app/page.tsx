@@ -77,12 +77,14 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
     // Initial data loading - only approved listings are public
-    setAllListings(dummyProperties.filter(p => p.status === 'approved'));
-    setAllRoommates(dummyRoommates.filter(r => r.status === 'approved'));
+    const approvedListings = dummyProperties.filter(p => p.status === 'approved');
+    const approvedRoommates = dummyRoommates.filter(r => r.status === 'approved');
+    setAllListings(approvedListings);
+    setAllRoommates(approvedRoommates);
     
     // Shuffling logic for initial render
-    const shuffledListings = [...dummyProperties.filter(p => p.status === 'approved')].sort(() => 0.5 - Math.random());
-    const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty && r.status === 'approved');
+    const shuffledListings = [...approvedListings].sort(() => 0.5 - Math.random());
+    const roommatesWithProperty = approvedRoommates.filter(r => r.hasProperty);
     const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
   
     setFeaturedProperties(shuffledListings.slice(0, 3));
@@ -219,9 +221,9 @@ export default function Home() {
   };
   
   const likedItems = useMemo(() => {
-    const allItems = [...allListings, ...allRoommates];
+    const allItems = [...dummyProperties, ...dummyRoommates]; // Check against all possible items
     return allItems.filter(item => likedItemIds.has(item.id));
-  }, [likedItemIds, allListings, allRoommates]);
+  }, [likedItemIds]);
   
   const myProperties = useMemo(() => {
       // In a real app, this would be based on a user ID from the login session.
@@ -415,20 +417,20 @@ export default function Home() {
   }
   
   const getListingsForPage = () => {
+    const allApprovedListings = dummyProperties.filter(p => p.status === 'approved');
+    const allApprovedRoommates = dummyRoommates.filter(r => r.status === 'approved');
+
     switch (activePage) {
         case 'pg':
-            return allListings.filter(l => l.propertyType === 'PG');
+            return allApprovedListings.filter(l => l.propertyType === 'PG');
         case 'rentals':
-            return allListings.filter(l => l.propertyType === 'Rental');
+            return allApprovedListings.filter(l => l.propertyType === 'Rental');
         case 'roommates':
-            return allRoommates;
+            return allApprovedRoommates;
         case 'my-properties':
             return myProperties;
         case 'liked-properties':
-            // Show liked items regardless of their approval status if they are in the public list
-            const publicLikedItems = [...allListings, ...allRoommates].filter(item => likedItemIds.has(item.id));
-            // In a real app, you might fetch liked items by ID from the backend. For simulation, this is sufficient.
-            return publicLikedItems;
+            return likedItems;
         default:
             return [];
     }
