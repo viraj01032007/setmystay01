@@ -14,9 +14,9 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       <rect width="120" height="120" rx="20" fill="hsl(var(--primary))"/>
       
       <g transform="translate(0, -5)">
-        <ellipse cx="60" cy="80" rx="25" ry="5" fill="hsl(var(--foreground))" opacity="0.25" />
+        <ellipse cx="60" cy="80" rx="25" ry="5" fill="hsl(var(--primary))" opacity="0.4" />
         <circle cx="60" cy="51" r="25" fill="hsl(var(--primary-foreground))" />
-        <path d="M60 32C49.507 32 41 40.507 41 51C41 65.5 60 78 60 78C60 78 79 65.5 79 51C79 40.507 70.493 32 60 32Z" fill="hsl(var(--primary))" stroke="hsl(var(--primary-foreground))" strokeWidth="2"/>
+        <path d="M60 32C49.507 32 41 40.507 41 51C41 65.5 60 78 60 78C60 78 79 65.5 79 51C79 40.507 70.493 32 60 32Z" fill="hsl(var(--primary))" stroke="hsl(var(--primary-foreground))" strokeWidth="1.5"/>
         <g strokeWidth="1.5" stroke="hsl(var(--primary-foreground))" fill="hsl(var(--primary))">
             <path d="M60 43.5L53 49.5V58.5H67V49.5L60 43.5Z" />
             <rect x="58" y="54.5" width="4" height="4" rx="0.5" />
