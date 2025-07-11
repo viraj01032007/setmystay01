@@ -522,6 +522,49 @@ const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
     );
 };
 
+const StaffActivityDialog = ({ isOpen, onClose, details }) => {
+    if (!details) return null;
+
+    const { staffName, activityType, listings } = details;
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>{staffName}'s {activityType} Listings</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto">
+                    {listings.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Title</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Date</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {listings.map(listing => (
+                                    <TableRow key={listing.id}>
+                                        <TableCell className="font-medium">{listing.title || listing.ownerName}</TableCell>
+                                        <TableCell>{listing.propertyType || 'Roommate'}</TableCell>
+                                        <TableCell>{format(new Date(listing.verificationTimestamp), 'dd MMM yyyy')}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <p className="text-center text-muted-foreground py-8">No {activityType.toLowerCase()} listings found for {staffName}.</p>
+                    )}
+                </div>
+                 <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>Close</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -550,6 +593,9 @@ export default function AdminDashboard() {
 
     const [isStaffFormModalOpen, setStaffFormModalOpen] = useState(false);
     const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+
+    const [isStaffActivityModalOpen, setStaffActivityModalOpen] = useState(false);
+    const [staffActivityDetails, setStaffActivityDetails] = useState(null);
 
     const [isMounted, setIsMounted] = useState(false);
     
@@ -616,10 +662,10 @@ export default function AdminDashboard() {
     const staffStats = useMemo(() => {
         const allListings = [...properties, ...roommates];
         return staff.map(s => {
-            const verifiedListings = allListings.filter(l => l.verifiedBy === s.id);
-            const approved = verifiedListings.filter(l => l.status === 'approved').length;
-            const rejected = verifiedListings.filter(l => l.status === 'rejected').length;
-
+            const verifiedListings = allListings.filter(l => l.verifiedBy === s.id && l.status !== 'pending');
+            const approvedListings = verifiedListings.filter(l => l.status === 'approved');
+            const rejectedListings = verifiedListings.filter(l => l.status === 'rejected');
+            
             const processingTimes = verifiedListings
                 .map(l => differenceInHours(new Date(l.verificationTimestamp), new Date(l.submittedAt)))
                 .filter(t => t >= 0);
@@ -630,7 +676,11 @@ export default function AdminDashboard() {
 
             return {
                 ...s,
-                stats: { approved, rejected, avgProcessingTime }
+                stats: { 
+                    approved: approvedListings, 
+                    rejected: rejectedListings, 
+                    avgProcessingTime 
+                }
             };
         });
     }, [staff, properties, roommates]);
@@ -795,6 +845,11 @@ export default function AdminDashboard() {
         setStaff(updatedStaff);
         saveToLocalStorage('staff', updatedStaff);
         toast({ title: "Staff Member Deleted", variant: "destructive" });
+    };
+    
+    const handleViewStaffActivity = (staffName, activityType, listings) => {
+        setStaffActivityDetails({ staffName, activityType, listings });
+        setStaffActivityModalOpen(true);
     };
 
     const StatusBadge = ({ status }) => {
@@ -1203,44 +1258,54 @@ export default function AdminDashboard() {
                             </Button>
                         </CardHeader>
                         <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>User ID</TableHead>
-                                        <TableHead>Approved</TableHead>
-                                        <TableHead>Rejected</TableHead>
-                                        <TableHead>Avg. Processing Time</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {staffStats.map(s => (
-                                        <TableRow key={s.id}>
-                                            <TableCell className="font-medium">{s.name}</TableCell>
-                                            <TableCell>{s.userId}</TableCell>
-                                            <TableCell className="text-green-600 font-semibold">{s.stats.approved}</TableCell>
-                                            <TableCell className="text-red-600 font-semibold">{s.stats.rejected}</TableCell>
-                                            <TableCell>{s.stats.avgProcessingTime} hours</TableCell>
-                                            <TableCell className="text-right">
-                                                <Button variant="ghost" size="icon" onClick={() => handleOpenStaffForm(s)}><Edit className="h-4 w-4" /></Button>
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader><AlertDialogTitle>Delete Staff Member?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the staff member's account.</AlertDialogDescription></AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction onClick={() => handleDeleteStaff(s.id)}>Confirm</AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
-                                            </TableCell>
+                             <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>User ID</TableHead>
+                                            <TableHead>Approved</TableHead>
+                                            <TableHead>Rejected</TableHead>
+                                            <TableHead>Avg. Processing Time</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {staffStats.map(s => (
+                                            <TableRow key={s.id}>
+                                                <TableCell className="font-medium">{s.name}</TableCell>
+                                                <TableCell>{s.userId}</TableCell>
+                                                <TableCell>
+                                                    <Button variant="link" className="text-green-600 font-semibold p-0 h-auto" onClick={() => handleViewStaffActivity(s.name, 'Approved', s.stats.approved)}>
+                                                        {s.stats.approved.length}
+                                                    </Button>
+                                                </TableCell>
+                                                <TableCell>
+                                                     <Button variant="link" className="text-red-600 font-semibold p-0 h-auto" onClick={() => handleViewStaffActivity(s.name, 'Rejected', s.stats.rejected)}>
+                                                        {s.stats.rejected.length}
+                                                    </Button>
+                                                </TableCell>
+                                                <TableCell>{s.stats.avgProcessingTime} hours</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button variant="ghost" size="icon" onClick={() => handleOpenStaffForm(s)}><Edit className="h-4 w-4" /></Button>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader><AlertDialogTitle>Delete Staff Member?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the staff member's account.</AlertDialogDescription></AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={() => handleDeleteStaff(s.id)}>Confirm</AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -1313,6 +1378,13 @@ export default function AdminDashboard() {
                 onClose={() => setStaffFormModalOpen(false)}
                 onSave={handleSaveStaff}
                 staffMember={editingStaff}
+            />
+
+            {/* Staff Activity Modal */}
+            <StaffActivityDialog 
+                isOpen={isStaffActivityModalOpen}
+                onClose={() => setStaffActivityModalOpen(false)}
+                details={staffActivityDetails}
             />
 
             {/* Details Modal */}
