@@ -337,11 +337,11 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                                 >
                                     <FormItem className="flex items-center space-x-2 space-y-0">
                                         <FormControl><RadioGroupItem value="hasProperty" /></FormControl>
-                                        <FormLabel className="font-normal">Yes, I have a property</FormLabel>
+                                        <FormLabel className="font-normal">Yes, living in property</FormLabel>
                                     </FormItem>
                                     <FormItem className="flex items-center space-x-2 space-y-0">
                                         <FormControl><RadioGroupItem value="needsProperty" /></FormControl>
-                                        <FormLabel className="font-normal">No, I'm looking for one - going after a month</FormLabel>
+                                        <FormLabel className="font-normal">Going with a month</FormLabel>
                                     </FormItem>
                                 </RadioGroup>
                             </FormControl>
