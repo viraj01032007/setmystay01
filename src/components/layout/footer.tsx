@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Link from "next/link";
@@ -46,7 +45,7 @@ export function Footer({ onNavigate }: FooterProps) {
                 <a href="#" aria-label="Instagram" className="text-slate-400 hover:text-white"><Instagram className="w-5 h-5" /></a>
               </Button>
               <Button variant="ghost" size="icon" asChild>
-                <a href="#" aria-label="LinkedIn" className="text-slate-400 hover:text-white"><Linkedin className="w-5 h-5" /></a>
+                <a href="https://www.linkedin.com/company/setmystay/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-slate-400 hover:text-white"><Linkedin className="w-5 h-5" /></a>
               </Button>
             </div>
           </div>
