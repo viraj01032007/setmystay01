@@ -93,6 +93,7 @@ const formSchema = z.object({
   noc: z.any().optional(),
   videoFile: z.any().optional(),
   gender: z.string().optional(),
+  roommateStatus: z.enum(['hasProperty', 'needsProperty']).optional(),
 }).superRefine((data, ctx) => {
     if (data.propertyType === 'Rental' && !data.brokerStatus) {
         ctx.addIssue({
@@ -101,19 +102,37 @@ const formSchema = z.object({
             path: ['brokerStatus'],
         });
     }
-    if ((data.propertyType === 'Rental' || data.propertyType === 'PG') && !data.electricityBill) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Electricity Bill is required for Rental and PG listings.',
-            path: ['electricityBill'],
-        });
+    if ((data.propertyType === 'Rental' || data.propertyType === 'PG')) {
+        if (!data.electricityBill) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Electricity Bill is required for Rental and PG listings.',
+                path: ['electricityBill'],
+            });
+        }
     }
-    if (data.propertyType === 'Roommate' && !data.gender) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Gender is required when looking for a roommate.',
-            path: ['gender'],
-        });
+    if (data.propertyType === 'Roommate') {
+        if (!data.gender) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Gender is required when looking for a roommate.',
+                path: ['gender'],
+            });
+        }
+        if (!data.roommateStatus) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Please specify if you have a property.',
+                path: ['roommateStatus'],
+            });
+        }
+        if (data.roommateStatus === 'hasProperty' && !data.electricityBill) {
+             ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Electricity Bill is required if you already have a property.',
+                path: ['electricityBill'],
+            });
+        }
     }
 });
 
@@ -187,10 +206,12 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       city: '',
       locality: '',
       sector: '',
+      roommateStatus: undefined,
     },
   });
   
   const propertyType = form.watch('propertyType');
+  const roommateStatus = form.watch('roommateStatus');
   const stateValue = form.watch('state');
   const cityValue = form.watch('city');
   const selectedAmenities = form.watch('amenities') || [];
@@ -206,6 +227,18 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   useEffect(() => {
     form.setValue('locality', '');
   }, [cityValue, form]);
+
+  useEffect(() => {
+    if (propertyType !== 'Roommate') {
+        form.setValue('roommateStatus', undefined);
+    }
+    // Clear electricity bill if roommate has no property
+    if (propertyType === 'Roommate' && roommateStatus === 'needsProperty') {
+        form.setValue('electricityBill', undefined);
+        const fileInput = document.getElementById('upload-electricityBill') as HTMLInputElement | null;
+        if (fileInput) fileInput.value = '';
+    }
+  }, [propertyType, roommateStatus, form]);
 
 
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
@@ -291,11 +324,37 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                     </Select>
                   </FormItem>
                 )}/>
+
+                {propertyType === 'Roommate' && (
+                    <FormField control={form.control} name="roommateStatus" render={({ field }) => (
+                        <FormItem className="space-y-3">
+                            <FormLabel>Do you have a property to share?</FormLabel>
+                            <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-col sm:flex-row gap-4"
+                                >
+                                    <FormItem className="flex items-center space-x-2 space-y-0">
+                                        <FormControl><RadioGroupItem value="hasProperty" /></FormControl>
+                                        <FormLabel className="font-normal">Yes, I have a property</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-2 space-y-0">
+                                        <FormControl><RadioGroupItem value="needsProperty" /></FormControl>
+                                        <FormLabel className="font-normal">No, I'm looking for one</FormLabel>
+                                    </FormItem>
+                                </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}/>
+                )}
+
                 <FormField control={form.control} name="title" render={({ field }) => (
-                  <FormItem><FormLabel>Property Title</FormLabel><FormControl><Input placeholder="e.g., Spacious 2BHK Apartment" {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Property Title / Your Tagline</FormLabel><FormControl><Input placeholder="e.g., Spacious 2BHK Apartment" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="rent" render={({ field }) => (
-                  <FormItem><FormLabel>Monthly Rent (₹)</FormLabel><FormControl><Input type="number" placeholder="25000" {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Monthly Rent / Budget (₹)</FormLabel><FormControl><Input type="number" placeholder="25000" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="area" render={({ field }) => (
                   <FormItem><FormLabel>Area (sq ft)</FormLabel><FormControl><Input type="number" placeholder="1200" {...field} /></FormControl><FormMessage /></FormItem>
@@ -514,20 +573,22 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-6">
                  <FileUploadField name="aadhaarCard" label="Aadhaar Card" control={form.control} required />
+                 
+                 {(propertyType === 'Rental' || propertyType === 'PG' || (propertyType === 'Roommate' && roommateStatus === 'hasProperty')) && (
+                    <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
+                 )}
+                 
                  {propertyType !== 'Roommate' && (
-                    <>
-                        <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
-                        <div className="md:col-span-2">
-                           <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
-                             <Alert className="mt-2">
-                               <ShieldCheck className="h-4 w-4" />
-                               <AlertTitle>Boost Your Listing!</AlertTitle>
-                               <AlertDescription>
-                                 Uploading a No Objection Certificate (NOC) is optional, but it significantly increases trust and can help boost your property's visibility.
-                               </AlertDescription>
-                             </Alert>
-                        </div>
-                    </>
+                    <div className="md:col-span-2">
+                       <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
+                         <Alert className="mt-2">
+                           <ShieldCheck className="h-4 w-4" />
+                           <AlertTitle>Boost Your Listing!</AlertTitle>
+                           <AlertDescription>
+                             Uploading a No Objection Certificate (NOC) is optional, but it significantly increases trust and can help boost your property's visibility.
+                           </AlertDescription>
+                         </Alert>
+                    </div>
                  )}
               </CardContent>
             </Card>
