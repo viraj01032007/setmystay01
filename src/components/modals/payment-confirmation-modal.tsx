@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { IndianRupee, Tag, CheckCircle, XCircle } from "lucide-react";
+import { IndianRupee, Tag, CheckCircle, XCircle, Info } from "lucide-react";
 import type { Coupon } from "@/lib/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 interface PaymentConfirmationModalProps {
   isOpen: boolean;
@@ -48,6 +50,9 @@ export function PaymentConfirmationModal({ isOpen, onClose, onConfirm, planName,
     }
     return amount;
   }, [amount, appliedCoupon]);
+  
+  const isListingPlan = planName.toLowerCase().includes('listing');
+
 
   if (!isOpen) return null;
 
@@ -108,6 +113,16 @@ export function PaymentConfirmationModal({ isOpen, onClose, onConfirm, planName,
                     )}
                 </div>
             </div>
+            
+            {isListingPlan && (
+                <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Important: Listing Verification</AlertTitle>
+                    <AlertDescription>
+                        Your property will be manually reviewed by our staff before it goes live. If it is rejected for any reason, your payment will be fully refunded within 3 working days.
+                    </AlertDescription>
+                </Alert>
+            )}
         </div>
         <DialogFooter className="flex-col gap-2 sm:flex-row">
             <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Cancel</Button>
