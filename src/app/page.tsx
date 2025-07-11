@@ -133,15 +133,6 @@ export default function Home() {
   }, [isClient]);
   
   const handleNavigate = (page: Page) => {
-    if (page === 'list' && !isLoggedIn) {
-        setAuthModalOpen(true);
-        toast({
-            title: "Authentication Required",
-            description: "Please sign in to list your property.",
-            variant: "destructive"
-        });
-        return;
-    }
     setActivePage(page);
   };
 
@@ -434,6 +425,20 @@ export default function Home() {
     }
   };
 
+  const handleNavigationWithAuth = (page: Page) => {
+    if (page === 'list' && !isLoggedIn) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to list a property.',
+        variant: 'destructive',
+      });
+      sessionStorage.setItem('setmystay_intended_page', 'list');
+      setAuthModalOpen(true);
+      return;
+    }
+    handleNavigate(page);
+  };
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
@@ -474,7 +479,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background font-body text-foreground">
       <Header 
         activePage={activePage} 
-        setActivePage={handleNavigate} 
+        setActivePage={handleNavigationWithAuth} 
         onSignInClick={() => setAuthModalOpen(true)}
         onSubscriptionClick={() => setUnlockModalOpen(true)}
         isLoggedIn={isLoggedIn}
@@ -488,7 +493,7 @@ export default function Home() {
             featuredProperties={featuredProperties} 
             featuredRoommates={featuredRoommates.filter(r => r.hasProperty)} 
             onViewDetails={handleViewDetails}
-            onNavigate={handleNavigate}
+            onNavigate={handleNavigationWithAuth}
             likedItemIds={likedItemIds}
             onToggleLike={handleToggleLike}
             unlockedIds={unlocks.unlockedIds}
@@ -559,7 +564,7 @@ export default function Home() {
         onPlanSelect={handlePlanSelect}
         onNavigateToListProperty={() => {
           setUnlockModalOpen(false);
-          handleNavigate('list');
+          handleNavigationWithAuth('list');
         }}
       />
       <ListPropertyPaymentModal
