@@ -15,18 +15,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/icons';
+import { dummyProperties, dummyRoommates } from '@/lib/data';
 
-// Mock data similar to the admin dashboard but can be fetched from a staff-specific API
-const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', ownerName: 'Rajesh Verma', contactPhonePrimary: '9876543210', completeAddress: 'A-101, Star Apartments, Andheri West, Mumbai', submittedAt: new Date(Date.now() - 26 * 60 * 60 * 1000) },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', ownerName: 'Priya Sharma', contactPhonePrimary: '9876543211', completeAddress: 'B-202, Student Hub, Dadar East, Mumbai', verifiedBy: 'S001', submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 40 * 60 * 60 * 1000) },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', ownerName: 'Amit Singh', contactPhonePrimary: '9876543212', completeAddress: 'C-303, Single Quarters, Ghatkopar, Mumbai', verifiedBy: 'S001', submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 68 * 60 * 60 * 1000) },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', ownerName: 'Sunaina Rao', contactPhonePrimary: '9876543213', completeAddress: 'D-404, Luxe Living, Bandra West, Mumbai', submittedAt: new Date(Date.now() - 8 * 60 * 60 * 1000) }
-];
-const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait', ownerName: 'Alok Sharma', contactPhonePrimary: '9876543214', completeAddress: 'Seeking a flat in Powai, Mumbai', submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000) },
-    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait', ownerName: 'Priya Singh', contactPhonePrimary: '9876543215', completeAddress: 'Seeking a flat in Andheri, Mumbai', verifiedBy: 'S001', submittedAt: new Date(Date.now() - 30 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 25 * 60 * 60 * 1000) }
-];
+const initialProperties = dummyProperties;
+const initialRoommates = dummyRoommates;
 
 export default function StaffDashboard() {
     const router = useRouter();
@@ -61,7 +53,7 @@ export default function StaffDashboard() {
     const pendingListings = useMemo(() => {
         if (!properties.length && !roommates.length) return [];
         return [
-            ...properties.filter(p => p.status === 'pending').map(p => ({ ...p, itemType: p.type })),
+            ...properties.filter(p => p.status === 'pending').map(p => ({ ...p, itemType: p.propertyType })),
             ...roommates.filter(r => r.status === 'pending').map(r => ({ ...r, itemType: 'roommate' }))
         ];
     }, [properties, roommates]);
@@ -69,7 +61,7 @@ export default function StaffDashboard() {
     const filteredProperties = useMemo(() => {
         const allSystemItems = [...properties, ...roommates];
         return allSystemItems.filter(p => {
-            const titleOrName = p.title || p.name;
+            const titleOrName = p.title || p.ownerName;
             return propertySearchTerm === '' || titleOrName.toLowerCase().includes(propertySearchTerm.toLowerCase());
         });
     }, [properties, roommates, propertySearchTerm]);
@@ -129,7 +121,7 @@ export default function StaffDashboard() {
     return (
         <div className="bg-slate-50 min-h-screen">
             <header className="bg-white shadow-sm">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 h-auto sm:h-20 py-4 sm:py-0">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4 sm:py-2">
                      <h1 className="text-2xl font-bold text-slate-800">StayFinder Staff Panel</h1>
                      <div className="flex items-center gap-2">
                         <Button asChild>
@@ -200,12 +192,12 @@ export default function StaffDashboard() {
                             <TableBody>
                                 {filteredProperties.map(p => (
                                     <TableRow key={p.id}>
-                                        <TableCell className="font-medium">{p.title || p.name}</TableCell>
-                                        <TableCell className="capitalize">{p.type || p.itemType || 'N/A'}</TableCell>
+                                        <TableCell className="font-medium">{p.title || p.ownerName}</TableCell>
+                                        <TableCell className="capitalize">{p.propertyType || p.type || 'N/A'}</TableCell>
                                         <TableCell>₹{(p.rent || p.budget).toLocaleString()}</TableCell>
                                         <TableCell><StatusBadge status={p.status} /></TableCell>
                                         <TableCell>
-                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.type || p.itemType)}>View</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.propertyType || p.type || 'roommate')}>View</Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -219,23 +211,23 @@ export default function StaffDashboard() {
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
                 <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle>{currentItem?.title || currentItem?.name}</DialogTitle>
+                        <DialogTitle>{currentItem?.title || currentItem?.ownerName}</DialogTitle>
                     </DialogHeader>
                     {currentItem && (
                         <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
-                             {currentItem.media?.length > 0 && (
+                             {currentItem.images?.length > 0 && (
                                 <div className="relative w-full h-64 bg-slate-200 rounded-lg overflow-hidden">
                                      <Image 
-                                        src={currentItem.media[currentMediaIndex]} 
+                                        src={currentItem.images[currentMediaIndex]} 
                                         alt="Listing Media" 
                                         layout="fill" 
                                         objectFit="contain" 
                                         className="p-2"
                                      />
-                                     {currentItem.media.length > 1 && (
+                                     {currentItem.images.length > 1 && (
                                          <>
                                             <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={() => setCurrentMediaIndex(i => Math.max(0, i-1))} disabled={currentMediaIndex === 0}><ChevronLeft /></Button>
-                                            <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={() => setCurrentMediaIndex(i => Math.min(currentItem.media.length - 1, i+1))} disabled={currentMediaIndex === currentItem.media.length - 1}><ChevronRight /></Button>
+                                            <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={() => setCurrentMediaIndex(i => Math.min(currentItem.images.length - 1, i+1))} disabled={currentMediaIndex === currentItem.images.length - 1}><ChevronRight /></Button>
                                          </>
                                      )}
                                 </div>
@@ -281,7 +273,7 @@ export default function StaffDashboard() {
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Type</strong>
-                                    <div className="capitalize">{currentItem.type}</div>
+                                    <div className="capitalize">{currentItem.propertyType || currentItem.type}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Locality</strong>

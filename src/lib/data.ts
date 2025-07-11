@@ -59,6 +59,10 @@ export const dummyProperties: Listing[] = [
             { id: 'bed4', status: 'occupied' },
         ],
         lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        status: 'approved',
+        submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        verifiedBy: 'S001',
     },
     {
         id: 'luxury-2bhk-vashi',
@@ -89,6 +93,10 @@ export const dummyProperties: Listing[] = [
         ownerId: 'dummyOwner2',
         brokerStatus: 'With Broker',
         lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+        status: 'approved',
+        submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 48 * 60 * 60 * 1000),
+        verifiedBy: 'S002',
     },
     {
         id: 'spacious-3bhk-kharghar',
@@ -116,6 +124,10 @@ export const dummyProperties: Listing[] = [
         ownerId: 'dummyOwner1',
         brokerStatus: 'Without Broker',
         lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+        status: 'rejected',
+        submittedAt: new Date(Date.now() - 96 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 72 * 60 * 60 * 1000),
+        verifiedBy: 'S001',
     },
     {
         id: 'modern-2bhk-nerul',
@@ -143,6 +155,8 @@ export const dummyProperties: Listing[] = [
         ownerId: 'dummyOwner3',
         brokerStatus: 'With Broker',
         lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+        status: 'pending',
+        submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
     },
     {
         id: 'affordable-1bhk-panvel',
@@ -170,6 +184,10 @@ export const dummyProperties: Listing[] = [
         ownerId: 'dummyOwner4',
         brokerStatus: 'Without Broker',
         lastAvailabilityCheck: new Date(),
+        status: 'approved',
+        submittedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+        verifiedBy: 'S001',
     },
     {
         id: 'cozy-1bhk-andheri',
@@ -194,6 +212,10 @@ export const dummyProperties: Listing[] = [
         ownerId: 'dummyOwner6',
         brokerStatus: 'Without Broker',
         lastAvailabilityCheck: new Date(),
+        status: 'approved',
+        submittedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        verifiedBy: 'S002',
     },
     {
         id: 'student-pg-airoli',
@@ -228,6 +250,8 @@ export const dummyProperties: Listing[] = [
             { id: 'bed6', status: 'vacant' },
         ],
         lastAvailabilityCheck: new Date(),
+        status: 'pending',
+        submittedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
     }
 ];
 
@@ -255,6 +279,10 @@ export const dummyRoommates: RoommateProfile[] = [
         views: 75,
         ownerId: 'dummyRoommateOwner1',
         hasProperty: false,
+        status: 'approved',
+        submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        verifiedBy: 'S001',
     },
     {
         id: 'ankita-reddy-kharghar',
@@ -279,6 +307,10 @@ export const dummyRoommates: RoommateProfile[] = [
         views: 180,
         ownerId: 'dummyRoommateOwner2',
         hasProperty: true,
+        status: 'approved',
+        submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 48 * 60 * 60 * 1000),
+        verifiedBy: 'S002',
     },
     {
         id: 'vikram-singh-vashi',
@@ -302,6 +334,8 @@ export const dummyRoommates: RoommateProfile[] = [
         views: 220,
         ownerId: 'dummyRoommateOwner3',
         hasProperty: true,
+        status: 'pending',
+        submittedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
     },
     {
         id: 'priya-nair-nerul',
@@ -325,6 +359,10 @@ export const dummyRoommates: RoommateProfile[] = [
         views: 155,
         ownerId: 'dummyRoommateOwner4',
         hasProperty: true,
+        status: 'approved',
+        submittedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        verificationTimestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+        verifiedBy: 'S001',
     },
     {
         id: 'neha-gupta-pune',
@@ -346,5 +384,7 @@ export const dummyRoommates: RoommateProfile[] = [
         views: 95,
         ownerId: 'dummyRoommateOwner5',
         hasProperty: false,
+        status: 'pending',
+        submittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
     }
 ];

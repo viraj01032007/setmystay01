@@ -25,7 +25,7 @@ import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { Advertisement, Coupon, StaffMember, Rating } from '@/lib/types';
-import { dummyCoupons } from '@/lib/data';
+import { dummyCoupons, dummyProperties, dummyRoommates } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,16 +35,8 @@ import { cn } from '@/lib/utils';
 
 
 // Mock data similar to the provided script
-const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', area: 1200, lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 26 * 60 * 60 * 1000), ownerName: 'Rajesh Verma', contactPhonePrimary: '9876543210', completeAddress: 'A-101, Star Apartments, Andheri West, Mumbai' },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', area: 250, lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000), verifiedBy: 'S001', submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 40 * 60 * 60 * 1000), ownerName: 'Priya Sharma', contactPhonePrimary: '9876543211', completeAddress: 'B-202, Student Hub, Dadar East, Mumbai' },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', area: 650, lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), verifiedBy: 'S002', submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 68 * 60 * 60 * 1000), ownerName: 'Amit Singh', contactPhonePrimary: '9876543212', completeAddress: 'C-303, Single Quarters, Ghatkopar, Mumbai' },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', area: 300, lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 8 * 60 * 60 * 1000), ownerName: 'Sunaina Rao', contactPhonePrimary: '9876543213', completeAddress: 'D-404, Luxe Living, Bandra West, Mumbai' }
-];
-const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait', submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000), ownerName: 'Alok Sharma', contactPhonePrimary: '9876543214', completeAddress: 'Seeking a flat in Powai, Mumbai' },
-    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait', verifiedBy: 'S001', submittedAt: new Date(Date.now() - 30 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 25 * 60 * 60 * 1000), ownerName: 'Priya Singh', contactPhonePrimary: '9876543215', completeAddress: 'Seeking a flat in Andheri, Mumbai' }
-];
+const initialProperties = dummyProperties;
+const initialRoommates = dummyRoommates;
 const initialAdvertisements: Advertisement[] = [
     { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true, 'data-ai-hint': 'sale promotion' },
     { id: 'ad002', title: 'Unlock Unlimited Connections', description: 'Subscribe to our unlimited plan and find your perfect roommate today.', imageUrl: 'https://placehold.co/600x400', isActive: false, 'data-ai-hint': 'people connecting' }
@@ -832,9 +824,9 @@ export default function AdminDashboard() {
     return (
         <div className="bg-slate-50 min-h-screen">
             <header className="bg-white shadow-sm">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 h-auto sm:h-20 py-4 sm:py-0">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4 sm:py-2">
                      <h1 className="text-2xl font-bold text-slate-800">StayFinder Admin</h1>
-                     <div className="flex items-center gap-2">
+                     <div className="flex items-center gap-2 flex-wrap">
                         <Button asChild>
                             <Link href="/">
                                 <Home className="w-4 h-4 mr-2" />
@@ -867,7 +859,7 @@ export default function AdminDashboard() {
 
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <Tabs defaultValue="dashboard">
-                <TabsList className="mb-8">
+                <TabsList className="mb-8 overflow-x-auto whitespace-nowrap">
                     <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                     <TabsTrigger value="listings">Listings</TabsTrigger>
                     <TabsTrigger value="management">Management</TabsTrigger>
@@ -901,15 +893,15 @@ export default function AdminDashboard() {
                             </div>
                             <div className="mt-6">
                                 <Tabs value={chartView} onValueChange={setChartView} className="w-full">
-                                    <div className="flex justify-between items-center mb-4">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                                         <h3 className="text-xl font-semibold text-slate-800">Property Views</h3>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                                             {(chartView === 'daily' || chartView === 'hourly') && (
                                                 <Popover>
                                                     <PopoverTrigger asChild>
                                                         <Button
                                                             variant={"outline"}
-                                                            className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}
+                                                            className={cn("w-full sm:w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}
                                                         >
                                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                                             {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
@@ -922,7 +914,7 @@ export default function AdminDashboard() {
                                             )}
                                             {(chartView === 'monthly' || chartView === 'weekly') && (
                                                 <Select value={selectedYear.toString()} onValueChange={(val) => setSelectedYear(parseInt(val))}>
-                                                    <SelectTrigger className="w-[120px]">
+                                                    <SelectTrigger className="w-full sm:w-[120px]">
                                                         <SelectValue placeholder="Select year" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -930,7 +922,7 @@ export default function AdminDashboard() {
                                                     </SelectContent>
                                                 </Select>
                                             )}
-                                            <TabsList>
+                                            <TabsList className="overflow-x-auto whitespace-nowrap">
                                                 <TabsTrigger value="hourly">Hourly</TabsTrigger>
                                                 <TabsTrigger value="daily">Daily</TabsTrigger>
                                                 <TabsTrigger value="weekly">Weekly</TabsTrigger>
@@ -1048,10 +1040,10 @@ export default function AdminDashboard() {
                                         {filteredProperties.map(p => (
                                             <TableRow key={p.id}>
                                                 <TableCell className="font-medium">{p.title}</TableCell>
-                                                <TableCell>{p.type}</TableCell>
+                                                <TableCell>{p.propertyType}</TableCell>
                                                 <TableCell>₹{p.rent.toLocaleString()}</TableCell>
                                                 <TableCell><StatusBadge status={p.status} /></TableCell>
-                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.type)}>View</Button></TableCell>
+                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.propertyType)}>View</Button></TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -1070,8 +1062,8 @@ export default function AdminDashboard() {
                                     <TableBody>
                                         {roommates.map(r => (
                                             <TableRow key={r.id}>
-                                                <TableCell className="font-medium">{r.name}</TableCell>
-                                                <TableCell>₹{r.budget.toLocaleString()}</TableCell>
+                                                <TableCell className="font-medium">{r.ownerName}</TableCell>
+                                                <TableCell>₹{r.rent.toLocaleString()}</TableCell>
                                                 <TableCell><StatusBadge status={r.status} /></TableCell>
                                                 <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(r.id, 'roommate')}>View</Button></TableCell>
                                             </TableRow>
@@ -1328,19 +1320,19 @@ export default function AdminDashboard() {
                     </DialogHeader>
                     {currentItem && (
                         <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
-                             {currentItem.media?.length > 0 && (
+                             {currentItem.images?.length > 0 && (
                                 <div className="relative w-full h-64 bg-slate-200 rounded-lg overflow-hidden">
                                      <Image 
-                                        src={currentItem.media[currentMediaIndex]} 
+                                        src={currentItem.images[currentMediaIndex]} 
                                         alt="Listing Media" 
                                         layout="fill" 
                                         objectFit="contain" 
                                         className="p-2"
                                      />
-                                     {currentItem.media.length > 1 && (
+                                     {currentItem.images.length > 1 && (
                                          <>
                                             <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={() => setCurrentMediaIndex(i => Math.max(0, i-1))} disabled={currentMediaIndex === 0}><ChevronLeft /></Button>
-                                            <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={() => setCurrentMediaIndex(i => Math.min(currentItem.media.length - 1, i+1))} disabled={currentMediaIndex === currentItem.media.length - 1}><ChevronRight /></Button>
+                                            <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={() => setCurrentMediaIndex(i => Math.min(currentItem.images.length - 1, i+1))} disabled={currentMediaIndex === currentItem.images.length - 1}><ChevronRight /></Button>
                                          </>
                                      )}
                                 </div>
@@ -1392,7 +1384,7 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Type</strong>
-                                    <div className="capitalize">{currentItem.type}</div>
+                                    <div className="capitalize">{currentItem.propertyType || currentItem.type}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Locality</strong>
