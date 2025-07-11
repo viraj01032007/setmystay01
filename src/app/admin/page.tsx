@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock, User as UserIcon } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock, User as UserIcon, Star } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -622,6 +622,7 @@ export default function AdminDashboard() {
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
+                averageRating: 4.5, // Simulated average rating
                 lastUpdated: new Date().toLocaleString()
             });
         }
@@ -684,10 +685,12 @@ export default function AdminDashboard() {
     };
     
     const handleUpdateStatus = (id, type, status) => {
+        const staffId = 'S_Admin'; // Using a placeholder for admin approvals
+        const timestamp = new Date();
         if (type === 'roommate') {
-            setRoommates(rms => rms.map(r => r.id === id ? { ...r, status } : r));
+            setRoommates(rms => rms.map(r => r.id === id ? { ...r, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status } : p));
+            setProperties(props => props.map(p => p.id === id ? { ...p, status, verifiedBy: staffId, verificationTimestamp: timestamp } : p));
         }
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
@@ -862,7 +865,7 @@ export default function AdminDashboard() {
                             <CardTitle className="text-2xl">Analytics Overview</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                                 <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
                                     <div><p className="text-sm font-medium text-blue-700">Total Page Views</p><p className="text-2xl font-bold text-blue-900">{analytics.totalPageViews.toLocaleString()}</p></div>
                                     <Eye className="text-3xl text-blue-400 w-8 h-8"/>
@@ -878,6 +881,16 @@ export default function AdminDashboard() {
                                 <div className="bg-yellow-50 p-4 rounded-lg flex items-center justify-between">
                                     <div><p className="text-sm font-medium text-yellow-700">Total Unlocks</p><p className="text-2xl font-bold text-yellow-900">{analytics.totalUnlocks.toLocaleString()}</p></div>
                                     <LockOpen className="text-3xl text-yellow-400 w-8 h-8"/>
+                                </div>
+                                <div className="bg-amber-50 p-4 rounded-lg flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-amber-700">Average Rating</p>
+                                        <div className="flex items-center">
+                                            <p className="text-2xl font-bold text-amber-900">{analytics.averageRating.toFixed(1)}</p>
+                                            <Star className="text-2xl text-amber-400 w-5 h-5 ml-1 fill-amber-400"/>
+                                        </div>
+                                    </div>
+                                    <Star className="text-3xl text-amber-400 w-8 h-8"/>
                                 </div>
                             </div>
                             <div className="mt-6">

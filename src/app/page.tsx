@@ -76,13 +76,13 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    // Initial data loading
-    setAllListings(dummyProperties);
-    setAllRoommates(dummyRoommates);
+    // Initial data loading - only approved listings are public
+    setAllListings(dummyProperties.filter(p => p.status === 'approved'));
+    setAllRoommates(dummyRoommates.filter(r => r.status === 'approved'));
     
     // Shuffling logic for initial render
-    const shuffledListings = [...dummyProperties].sort(() => 0.5 - Math.random());
-    const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty);
+    const shuffledListings = [...dummyProperties.filter(p => p.status === 'approved')].sort(() => 0.5 - Math.random());
+    const roommatesWithProperty = dummyRoommates.filter(r => r.hasProperty && r.status === 'approved');
     const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
   
     setFeaturedProperties(shuffledListings.slice(0, 3));
@@ -227,8 +227,12 @@ export default function Home() {
       // In a real app, this would be based on a user ID from the login session.
       // Here, we simulate it by assigning some listings to a "logged in" user.
       const userId = 'newUser';
-      return allListings.filter(l => l.ownerId === userId);
-  }, [allListings]);
+      // In a real app, you would fetch all user listings regardless of status.
+      // For this simulation, we check the dummy data.
+      const userListings = dummyProperties.filter(l => l.ownerId === userId);
+      const userRoommateProfiles = dummyRoommates.filter(r => r.ownerId === userId);
+      return [...userListings, ...userRoommateProfiles];
+  }, []);
 
 
   const handleInitiateListing = (data: any) => {
@@ -284,8 +288,11 @@ export default function Home() {
           ownerId,
           brokerStatus: pendingListingData.brokerStatus,
           lastAvailabilityCheck: new Date(),
+          status: 'pending', // Set status to pending
+          submittedAt: new Date(),
       }
-      setAllListings(prev => [mappedListing, ...prev]);
+      // Note: We don't add to `allListings` here because it won't be visible until approved.
+      // In a real app, this would be sent to a backend and the admin/staff would see it.
     } else {
        const mappedRoommate: RoommateProfile = {
         id: newId,
@@ -309,13 +316,15 @@ export default function Home() {
         ownerId,
         hasProperty: true, 
         images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/400x400'],
+        status: 'pending', // Set status to pending
+        submittedAt: new Date(),
     }
-      setAllRoommates(prev => [mappedRoommate, ...prev]);
+      // Note: We don't add to `allRoommates` here.
     }
     setPendingListingData(null);
     toast({
-      title: "Listing Submitted!",
-      description: "Your property is now live. You will receive a call from our staff for manual verification shortly.",
+      title: "Listing Submitted for Review!",
+      description: "Your property is now under review. You will receive a call from our staff for manual verification shortly.",
     });
     setTimeout(() => setRateUsModalOpen(true), 500);
   };
@@ -416,7 +425,10 @@ export default function Home() {
         case 'my-properties':
             return myProperties;
         case 'liked-properties':
-            return likedItems;
+            // Show liked items regardless of their approval status if they are in the public list
+            const publicLikedItems = [...allListings, ...allRoommates].filter(item => likedItemIds.has(item.id));
+            // In a real app, you might fetch liked items by ID from the backend. For simulation, this is sufficient.
+            return publicLikedItems;
         default:
             return [];
     }
