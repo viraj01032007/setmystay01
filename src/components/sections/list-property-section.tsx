@@ -22,6 +22,7 @@ import { indianAreas } from '@/lib/areas';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useToast } from '@/hooks/use-toast';
 
 
 const amenitiesList = [
@@ -169,6 +170,7 @@ const FileUploadField = ({ name, label, control, required = false }: { name: "aa
 export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [customAmenity, setCustomAmenity] = useState('');
+  const { toast } = useToast();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -207,6 +209,15 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
 
   const handleFormSubmit: SubmitHandler<FormValues> = (data) => {
+    if (mediaFiles.length === 0) {
+        toast({
+            title: "Photos Required",
+            description: "Please upload at least one photo of your property.",
+            variant: "destructive",
+        });
+        return;
+    }
+    
     const videoFile = data.videoFile?.[0];
     const finalData = { 
         ...data, 
@@ -221,7 +232,21 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      setMediaFiles(prev => [...prev, ...Array.from(event.target.files)]);
+        const newFiles = Array.from(event.target.files);
+        const totalFiles = mediaFiles.length + newFiles.length;
+        if (totalFiles > 8) {
+            toast({
+                title: 'Upload Limit Exceeded',
+                description: 'You can upload a maximum of 8 photos.',
+                variant: 'destructive',
+            });
+            const remainingSlots = 8 - mediaFiles.length;
+            if (remainingSlots > 0) {
+                 setMediaFiles(prev => [...prev, ...newFiles.slice(0, remainingSlots)]);
+            }
+        } else {
+             setMediaFiles(prev => [...prev, ...newFiles]);
+        }
     }
   };
 
@@ -414,15 +439,26 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Photo & Video Upload</CardTitle>
-                <CardDescription>Add photos and an optional video tour.</CardDescription>
+                <CardDescription>Add up to 8 photos and an optional video tour.</CardDescription>
               </CardHeader>
               <CardContent>
                  <div className="mb-6">
                     <FormLabel>Photos</FormLabel>
-                    <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('media-upload')?.click()}>
+                    <div 
+                        className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" 
+                        onClick={() => mediaFiles.length < 8 && document.getElementById('media-upload')?.click()}
+                    >
                       <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground"/>
                       <p className="mt-4 text-sm text-muted-foreground">Drag & drop or click to upload photos</p>
-                      <Input id="media-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                       <p className="text-xs text-muted-foreground mt-1">{mediaFiles.length}/8 photos uploaded</p>
+                      <Input 
+                        id="media-upload" 
+                        type="file" multiple 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleFileChange} 
+                        disabled={mediaFiles.length >= 8}
+                      />
                     </div>
                     {mediaFiles.length > 0 && (
                       <div className="mt-4 grid grid-cols-3 sm:grid-cols-5 gap-4">
