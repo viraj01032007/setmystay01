@@ -3,13 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { User, Lock, LogIn } from 'lucide-react';
+import { User, Lock, LogIn, Home } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
 
 // Hardcoded credentials for staff simulation
@@ -104,6 +105,11 @@ export default function StaffLoginPage() {
                 {isLoading ? <LoadingSpinner className="w-4 h-4" /> : <LogIn className="w-4 h-4 mr-2" />}
                 {isLoading ? 'Verifying...' : 'Login'}
               </Button>
+               <div className="text-center">
+                 <Button variant="link" asChild>
+                    <Link href="/"><Home className="w-4 h-4 mr-2"/>Go to Main Site</Link>
+                 </Button>
+               </div>
             </form>
         </CardContent>
       </Card>
