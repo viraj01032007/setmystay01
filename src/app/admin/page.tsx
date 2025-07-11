@@ -57,8 +57,8 @@ const initialPricing = {
 }
 
 const initialAvailabilityInquiries = [
-    { id: 'INQ01', propertyId: 'P002', propertyTitle: 'Cozy PG near College', userName: 'Amit Singh', time: new Date(Date.now() - 15 * 60 * 1000) },
-    { id: 'INQ02', propertyId: 'P004', propertyTitle: 'Luxury PG with all amenities', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+    { id: 'INQ01', propertyId: 'premium-pg-cbd', propertyTitle: 'Premium PG for Professionals', userName: 'Amit Singh', time: new Date(Date.now() - 15 * 60 * 1000) },
+    { id: 'INQ02', propertyId: 'luxury-2bhk-vashi', propertyTitle: 'Luxury 2BHK Apartment', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
 ]
 
 const initialStaff: StaffMember[] = [
@@ -859,13 +859,15 @@ export default function AdminDashboard() {
 
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <Tabs defaultValue="dashboard">
-                <TabsList className="mb-8 overflow-x-auto whitespace-nowrap">
-                    <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                    <TabsTrigger value="listings">Listings</TabsTrigger>
-                    <TabsTrigger value="management">Management</TabsTrigger>
-                    <TabsTrigger value="staff">Staff</TabsTrigger>
-                    <TabsTrigger value="ratings">Ratings</TabsTrigger>
-                </TabsList>
+                <div className="overflow-x-auto">
+                    <TabsList className="mb-8 whitespace-nowrap">
+                        <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                        <TabsTrigger value="listings">Listings</TabsTrigger>
+                        <TabsTrigger value="management">Management</TabsTrigger>
+                        <TabsTrigger value="staff">Staff</TabsTrigger>
+                        <TabsTrigger value="ratings">Ratings</TabsTrigger>
+                    </TabsList>
+                </div>
                 
                 <TabsContent value="dashboard">
                     <Card className="mb-8">
@@ -922,13 +924,15 @@ export default function AdminDashboard() {
                                                     </SelectContent>
                                                 </Select>
                                             )}
-                                            <TabsList className="overflow-x-auto whitespace-nowrap">
-                                                <TabsTrigger value="hourly">Hourly</TabsTrigger>
-                                                <TabsTrigger value="daily">Daily</TabsTrigger>
-                                                <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                                                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                                                <TabsTrigger value="yearly">Yearly</TabsTrigger>
-                                            </TabsList>
+                                            <div className="overflow-x-auto">
+                                                <TabsList className="whitespace-nowrap">
+                                                    <TabsTrigger value="hourly">Hourly</TabsTrigger>
+                                                    <TabsTrigger value="daily">Daily</TabsTrigger>
+                                                    <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                                                    <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                                                    <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                                                </TabsList>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="h-80">
@@ -983,7 +987,7 @@ export default function AdminDashboard() {
                                 pendingListings.map(item => (
                                     <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                         <div className="w-full">
-                                            <p className="font-semibold">{item.title || item.name} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
+                                            <p className="font-semibold">{item.title || item.ownerName} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
                                             <p className="text-sm text-slate-600">{item.locality}</p>
                                         </div>
                                         <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">View Details</Button>
@@ -1316,7 +1320,7 @@ export default function AdminDashboard() {
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
                 <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle>{currentItem?.title || currentItem?.name}</DialogTitle>
+                        <DialogTitle>{currentItem?.title || currentItem?.ownerName}</DialogTitle>
                     </DialogHeader>
                     {currentItem && (
                         <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
