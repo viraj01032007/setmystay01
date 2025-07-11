@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search, Phone, MapPin, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -18,14 +18,14 @@ import { LoadingSpinner } from '@/components/icons';
 
 // Mock data similar to the admin dashboard but can be fetched from a staff-specific API
 const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior' },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room' },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment' },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room' }
+    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', ownerName: 'Rajesh Verma', contactPhonePrimary: '9876543210', completeAddress: 'A-101, Star Apartments, Andheri West, Mumbai' },
+    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', ownerName: 'Priya Sharma', contactPhonePrimary: '9876543211', completeAddress: 'B-202, Student Hub, Dadar East, Mumbai' },
+    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', ownerName: 'Amit Singh', contactPhonePrimary: '9876543212', completeAddress: 'C-303, Single Quarters, Ghatkopar, Mumbai' },
+    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', ownerName: 'Sunaina Rao', contactPhonePrimary: '9876543213', completeAddress: 'D-404, Luxe Living, Bandra West, Mumbai' }
 ];
 const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait' },
-    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait' }
+    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait', ownerName: 'Alok Sharma', contactPhonePrimary: '9876543214', completeAddress: 'Seeking a flat in Powai, Mumbai' },
+    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait', ownerName: 'Priya Singh', contactPhonePrimary: '9876543215', completeAddress: 'Seeking a flat in Andheri, Mumbai' }
 ];
 
 export default function StaffDashboard() {
@@ -272,7 +272,7 @@ export default function StaffDashboard() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">ID</strong>
                                     <div>{currentItem.id}</div>
@@ -289,7 +289,21 @@ export default function StaffDashboard() {
                                     <strong className="block text-sm font-medium text-muted-foreground">Status</strong>
                                     <StatusBadge status={currentItem.status} />
                                 </div>
-                                <div className="p-3 bg-slate-50 rounded-md col-span-2 space-y-1">
+
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Owner/User Name</strong>
+                                    <div>{currentItem.ownerName || currentItem.name}</div>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Phone className="w-4 h-4" /> Phone Number</strong>
+                                    <div>{currentItem.contactPhonePrimary}</div>
+                                </div>
+                                <div className="md:col-span-2 p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><MapPin className="w-4 h-4" /> Full Address</strong>
+                                    <div>{currentItem.completeAddress}</div>
+                                </div>
+
+                                <div className="md:col-span-2 p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Description</strong>
                                     <div>{currentItem.description}</div>
                                 </div>
@@ -319,5 +333,3 @@ export default function StaffDashboard() {
         </div>
     );
 }
-
-    

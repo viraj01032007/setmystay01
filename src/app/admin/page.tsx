@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock, User as UserIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -36,14 +36,14 @@ import { cn } from '@/lib/utils';
 
 // Mock data similar to the provided script
 const initialProperties = [
-    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', area: 1200, lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 26 * 60 * 60 * 1000) },
-    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', area: 250, lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000), verifiedBy: 'S001', submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 40 * 60 * 60 * 1000) },
-    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', area: 650, lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), verifiedBy: 'S002', submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 68 * 60 * 60 * 1000) },
-    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', area: 300, lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 8 * 60 * 60 * 1000) }
+    { id: 'P001', type: 'rental', title: 'Spacious 2BHK Apartment', locality: 'Andheri West', rent: 35000, status: 'pending', description: 'A beautiful and spacious 2BHK apartment...', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'apartment interior', area: 1200, lastAvailabilityCheck: new Date(Date.now() - 2 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 26 * 60 * 60 * 1000), ownerName: 'Rajesh Verma', contactPhonePrimary: '9876543210', completeAddress: 'A-101, Star Apartments, Andheri West, Mumbai' },
+    { id: 'P002', type: 'pg', title: 'Cozy PG near College', locality: 'Dadar East', rent: 8000, status: 'approved', description: 'Comfortable PG accommodation for students...', media: ['https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'student room', area: 250, lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000), verifiedBy: 'S001', submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 40 * 60 * 60 * 1000), ownerName: 'Priya Sharma', contactPhonePrimary: '9876543211', completeAddress: 'B-202, Student Hub, Dadar East, Mumbai' },
+    { id: 'P003', type: 'rental', title: '1BHK for Bachelors', locality: 'Ghatkopar', rent: 18000, status: 'rejected', description: 'Compact 1BHK suitable for single working professionals.', media: [], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'small apartment', area: 650, lastAvailabilityCheck: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), verifiedBy: 'S002', submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 68 * 60 * 60 * 1000), ownerName: 'Amit Singh', contactPhonePrimary: '9876543212', completeAddress: 'C-303, Single Quarters, Ghatkopar, Mumbai' },
+    { id: 'P004', type: 'pg', title: 'Luxury PG with all amenities', locality: 'Bandra', rent: 15000, status: 'pending', description: 'High-end PG with AC, food, and laundry.', media: ['https://placehold.co/600x400', 'https://placehold.co/600x400', 'https://placehold.co/600x400'], aadhaarCardUrl: 'https://placehold.co/600x800', electricityBillUrl: 'https://placehold.co/600x800', nocUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'luxury room', area: 300, lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000), submittedAt: new Date(Date.now() - 8 * 60 * 60 * 1000), ownerName: 'Sunaina Rao', contactPhonePrimary: '9876543213', completeAddress: 'D-404, Luxe Living, Bandra West, Mumbai' }
 ];
 const initialRoommates = [
-    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait', submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000) },
-    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait', verifiedBy: 'S001', submittedAt: new Date(Date.now() - 30 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 25 * 60 * 60 * 1000) }
+    { id: 'R001', name: 'Alok Sharma', profession: 'Software Engineer', gender: 'Male', locality: 'Powai', budget: 10000, status: 'pending', description: 'Looking for a male roommate in a 2BHK.', media: ['https://placehold.co/400x400'], aadhaarCardUrl: 'https://placehold.co/600x800', 'data-ai-hint': 'male portrait', submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000), ownerName: 'Alok Sharma', contactPhonePrimary: '9876543214', completeAddress: 'Seeking a flat in Powai, Mumbai' },
+    { id: 'R002', name: 'Priya Singh', profession: 'Student', gender: 'Female', locality: 'Andheri', budget: 7000, status: 'approved', description: 'Seeking a female roommate for a shared apartment.', media: [], 'data-ai-hint': 'female portrait', verifiedBy: 'S001', submittedAt: new Date(Date.now() - 30 * 60 * 60 * 1000), verificationTimestamp: new Date(Date.now() - 25 * 60 * 60 * 1000), ownerName: 'Priya Singh', contactPhonePrimary: '9876543215', completeAddress: 'Seeking a flat in Andheri, Mumbai' }
 ];
 const initialAdvertisements: Advertisement[] = [
     { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true, 'data-ai-hint': 'sale promotion' },
@@ -1322,7 +1322,7 @@ export default function AdminDashboard() {
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">ID</strong>
                                     <div>{currentItem.id}</div>
@@ -1339,7 +1339,21 @@ export default function AdminDashboard() {
                                     <strong className="block text-sm font-medium text-muted-foreground">Status</strong>
                                     <StatusBadge status={currentItem.status} />
                                 </div>
-                                <div className="p-3 bg-slate-50 rounded-md col-span-2 space-y-1">
+
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Owner/User Name</strong>
+                                    <div>{currentItem.ownerName || currentItem.name}</div>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Phone className="w-4 h-4" /> Phone Number</strong>
+                                    <div>{currentItem.contactPhonePrimary}</div>
+                                </div>
+                                <div className="md:col-span-2 p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><MapPin className="w-4 h-4" /> Full Address</strong>
+                                    <div>{currentItem.completeAddress}</div>
+                                </div>
+
+                                <div className="md:col-span-2 p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Description</strong>
                                     <div>{currentItem.description}</div>
                                 </div>
