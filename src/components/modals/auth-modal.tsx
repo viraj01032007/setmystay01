@@ -2,13 +2,13 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Smartphone, Mail, KeyRound, Lock, LogIn } from "lucide-react";
+import { Smartphone, Mail, KeyRound, Lock, LogIn, RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -30,12 +30,27 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [countryCode, setCountryCode] = useState('+91');
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+
+  const startCooldown = () => {
+    setResendCooldown(20);
+  };
 
   const handleSendOtp = () => {
     // Basic validation, can be improved with a library like libphonenumber-js
     if (mobileNumber.length >= 7) { // Loosely check for a valid number length
       setIsOtpSent(true);
+      startCooldown();
       toast({
         title: "OTP Sent!",
         description: `An OTP has been sent to ${countryCode} ${mobileNumber}. (Simulated)`,
@@ -49,14 +64,38 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
     }
   };
 
+  const handleResendOtp = () => {
+    if (resendCooldown === 0) {
+        startCooldown();
+        toast({
+            title: "OTP Resent!",
+            description: `A new OTP has been sent to ${countryCode} ${mobileNumber}. (Simulated)`,
+        });
+    }
+  }
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Login Successful!",
-      description: "Welcome back to SetMyStay! (Simulated)",
-    });
-    onLoginSuccess();
-    onClose();
+    if (!isOtpSent) {
+      handleSendOtp();
+      return;
+    }
+    
+    // Simulate OTP verification
+    if (otp.length === 6) {
+        toast({
+          title: "Login Successful!",
+          description: "Welcome back to SetMyStay! (Simulated)",
+        });
+        onLoginSuccess();
+        onClose();
+    } else {
+        toast({
+            title: "Invalid OTP",
+            description: "Please enter a valid 6-digit OTP.",
+            variant: "destructive",
+        });
+    }
   };
   
   const handleSocialLogin = (provider: string) => {
@@ -67,6 +106,16 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
     onLoginSuccess();
     onClose();
   }
+  
+  // Reset state when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+        setIsOtpSent(false);
+        setMobileNumber('');
+        setOtp('');
+        setResendCooldown(0);
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -99,7 +148,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
           <form onSubmit={handleLogin}>
             <div className="grid gap-2">
               <div className="flex gap-2">
-                <Select value={countryCode} onValueChange={setCountryCode}>
+                <Select value={countryCode} onValueChange={setCountryCode} disabled={isOtpSent}>
                   <SelectTrigger className="w-28">
                     <SelectValue placeholder="Country Code" />
                   </SelectTrigger>
@@ -119,6 +168,7 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
                     className="pl-10"
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
+                    disabled={isOtpSent}
                   />
                 </div>
               </div>
@@ -136,14 +186,21 @@ export function AuthModal({ isOpen, onClose, onLoginSuccess }: AuthModalProps) {
                   />
                 </div>
               )}
-               {!isOtpSent ? (
-                <Button type="button" onClick={handleSendOtp} variant="secondary">
+              
+              {!isOtpSent ? (
+                <Button type="submit" variant="secondary">
                   <Mail className="mr-2 h-4 w-4" /> Send OTP
                 </Button>
               ) : (
-                <Button type="submit">
-                  <LogIn className="mr-2 h-4 w-4" /> Verify & Sign In
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                    <Button type="button" variant="outline" onClick={handleResendOtp} disabled={resendCooldown > 0}>
+                       <RefreshCw className="mr-2 h-4 w-4" />
+                       {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                    </Button>
+                    <Button type="submit">
+                      <LogIn className="mr-2 h-4 w-4" /> Verify & Sign In
+                    </Button>
+                </div>
               )}
             </div>
           </form>
