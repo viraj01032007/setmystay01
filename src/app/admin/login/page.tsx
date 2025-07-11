@@ -3,13 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, ShieldQuestion, Lock, LogIn, HelpCircle } from 'lucide-react';
+import { KeyRound, ShieldQuestion, Lock, LogIn, HelpCircle, Home } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
 import {
   AlertDialog,
@@ -134,8 +135,11 @@ export default function AdminLoginPage() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 Continue
               </Button>
-               <div className="text-center">
+               <div className="text-center flex justify-center items-center gap-4">
                  <Button variant="link" type="button" onClick={() => setStep('forgot_password')}>Forgot Password?</Button>
+                 <Button variant="link" asChild>
+                    <Link href="/"><Home className="w-4 h-4 mr-2"/>Go to Main Site</Link>
+                 </Button>
                </div>
             </form>
           )}
