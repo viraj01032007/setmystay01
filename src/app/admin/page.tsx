@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock, User as UserIcon, Star } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock, User as UserIcon, Star, MessageSquare } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { Advertisement, Coupon, StaffMember } from '@/lib/types';
+import type { Advertisement, Coupon, StaffMember, Rating } from '@/lib/types';
 import { dummyCoupons } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -72,6 +72,14 @@ const initialAvailabilityInquiries = [
 const initialStaff: StaffMember[] = [
     { id: 'S001', name: 'Ravi Kumar', userId: 'StaffRavi', password: 'password1' },
     { id: 'S002', name: 'Sunita Sharma', userId: 'StaffSunita', password: 'password2' }
+];
+
+const initialRatings: Rating[] = [
+    { id: 'rating1', rating: 5, feedback: '', date: new Date('2024-07-20') },
+    { id: 'rating2', rating: 4, feedback: 'The user interface is a bit confusing on the listings page.', date: new Date('2024-07-19') },
+    { id: 'rating3', rating: 2, feedback: 'Took too long to find a relevant property. Need better filters.', date: new Date('2024-07-18') },
+    { id: 'rating4', rating: 5, feedback: 'Found a great roommate, thanks!', date: new Date('2024-07-17') },
+    { id: 'rating5', rating: 3, feedback: 'The unlock process was not very clear.', date: new Date('2024-07-16') },
 ];
 
 
@@ -563,6 +571,7 @@ export default function AdminDashboard() {
     const [coupons, setCoupons] = useState<Coupon[]>([]);
     const [availabilityInquiries, setAvailabilityInquiries] = useState([]);
     const [staff, setStaff] = useState<StaffMember[]>([]);
+    const [ratings, setRatings] = useState<Rating[]>([]);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
@@ -619,10 +628,10 @@ export default function AdminDashboard() {
             setCoupons(dummyCoupons);
             setAvailabilityInquiries(initialAvailabilityInquiries);
             setStaff(initialStaff);
+            setRatings(initialRatings);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
-                averageRating: 4.5, // Simulated average rating
                 lastUpdated: new Date().toLocaleString()
             });
         }
@@ -649,6 +658,12 @@ export default function AdminDashboard() {
             };
         });
     }, [staff, properties, roommates]);
+    
+    const averageRating = useMemo(() => {
+        if (ratings.length === 0) return 0;
+        const total = ratings.reduce((sum, r) => sum + r.rating, 0);
+        return (total / ratings.length);
+    }, [ratings]);
 
 
     const handleLogout = () => {
@@ -856,7 +871,8 @@ export default function AdminDashboard() {
                     <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                     <TabsTrigger value="listings">Listings</TabsTrigger>
                     <TabsTrigger value="management">Management</TabsTrigger>
-                    <TabsTrigger value="staff">Staff Management</TabsTrigger>
+                    <TabsTrigger value="staff">Staff</TabsTrigger>
+                    <TabsTrigger value="ratings">Ratings</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="dashboard">
@@ -865,7 +881,7 @@ export default function AdminDashboard() {
                             <CardTitle className="text-2xl">Analytics Overview</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                 <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
                                     <div><p className="text-sm font-medium text-blue-700">Total Page Views</p><p className="text-2xl font-bold text-blue-900">{analytics.totalPageViews.toLocaleString()}</p></div>
                                     <Eye className="text-3xl text-blue-400 w-8 h-8"/>
@@ -881,16 +897,6 @@ export default function AdminDashboard() {
                                 <div className="bg-yellow-50 p-4 rounded-lg flex items-center justify-between">
                                     <div><p className="text-sm font-medium text-yellow-700">Total Unlocks</p><p className="text-2xl font-bold text-yellow-900">{analytics.totalUnlocks.toLocaleString()}</p></div>
                                     <LockOpen className="text-3xl text-yellow-400 w-8 h-8"/>
-                                </div>
-                                <div className="bg-amber-50 p-4 rounded-lg flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-amber-700">Average Rating</p>
-                                        <div className="flex items-center">
-                                            <p className="text-2xl font-bold text-amber-900">{analytics.averageRating.toFixed(1)}</p>
-                                            <Star className="text-2xl text-amber-400 w-5 h-5 ml-1 fill-amber-400"/>
-                                        </div>
-                                    </div>
-                                    <Star className="text-3xl text-amber-400 w-8 h-8"/>
                                 </div>
                             </div>
                             <div className="mt-6">
@@ -1240,6 +1246,50 @@ export default function AdminDashboard() {
                                     ))}
                                 </TableBody>
                             </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="ratings">
+                    <Card>
+                         <CardHeader>
+                            <CardTitle className="text-2xl">User Ratings & Feedback</CardTitle>
+                            <CardDescription>Review what users are saying about their experience.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                <div className="lg:col-span-1">
+                                    <Card className="bg-amber-50 border-amber-200 text-center p-6">
+                                        <CardTitle className="text-amber-800">Average Rating</CardTitle>
+                                        <div className="flex items-center justify-center gap-2 my-4">
+                                            <p className="text-6xl font-bold text-amber-900">{averageRating.toFixed(1)}</p>
+                                            <Star className="text-6xl text-amber-400 fill-amber-400" />
+                                        </div>
+                                        <CardDescription>{ratings.length} total ratings</CardDescription>
+                                    </Card>
+                                </div>
+                                <div className="lg:col-span-2">
+                                     <h3 className="text-lg font-semibold mb-4">Feedback Comments</h3>
+                                     <div className="space-y-4 max-h-96 overflow-y-auto pr-4">
+                                        {ratings.filter(r => r.feedback).map(r => (
+                                            <Card key={r.id} className="p-4">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex items-center gap-2">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star key={i} className={cn("w-5 h-5", i < r.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-300")} />
+                                                        ))}
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground">{format(r.date, 'dd MMM, yyyy')}</p>
+                                                </div>
+                                                <p className="mt-2 text-sm text-foreground flex items-start gap-2">
+                                                    <MessageSquare className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" /> 
+                                                    <span>{r.feedback}</span>
+                                                </p>
+                                            </Card>
+                                        ))}
+                                     </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>

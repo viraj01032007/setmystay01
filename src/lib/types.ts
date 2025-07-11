@@ -130,6 +130,13 @@ export interface Inquiry {
     time: Date;
 }
 
+export interface Rating {
+    id: string;
+    rating: number;
+    feedback?: string;
+    date: Date;
+}
+
 
 // Add ToggleGroup to components/ui
 export interface ToggleGroupProps
