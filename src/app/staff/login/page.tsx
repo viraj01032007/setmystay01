@@ -12,10 +12,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { User, Lock, LogIn, Home } from 'lucide-react';
 import { LoadingSpinner } from '@/components/icons';
+import { dummyStaff } from '@/lib/data';
+import type { StaffMember } from '@/lib/types';
 
-// Hardcoded credentials for staff simulation
-const STAFF_USERID = 'staff1';
-const STAFF_PASSWORD = 'Bluechip@1';
 
 export default function StaffLoginPage() {
   const router = useRouter();
@@ -37,7 +36,12 @@ export default function StaffLoginPage() {
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    if (userId === STAFF_USERID && password === STAFF_PASSWORD) {
+
+    const staffMember = dummyStaff.find(
+      (staff: StaffMember) => staff.userId === userId && staff.password === password
+    );
+
+    if (staffMember) {
       toast({ title: 'Authentication Successful!', description: 'Redirecting to staff dashboard...' });
       // In a real app, you'd get a session token from the server
       localStorage.setItem('staff_authenticated', 'true');

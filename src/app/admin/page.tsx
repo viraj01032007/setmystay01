@@ -25,7 +25,7 @@ import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { Advertisement, Coupon, StaffMember, Rating } from '@/lib/types';
-import { dummyCoupons, dummyProperties, dummyRoommates } from '@/lib/data';
+import { dummyCoupons, dummyProperties, dummyRoommates, dummyStaff } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -61,10 +61,7 @@ const initialAvailabilityInquiries = [
     { id: 'INQ02', propertyId: 'luxury-2bhk-vashi', propertyTitle: 'Luxury 2BHK Apartment', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
 ]
 
-const initialStaff: StaffMember[] = [
-    { id: 'S001', name: 'Ravi Kumar', userId: 'StaffRavi', password: 'password1' },
-    { id: 'S002', name: 'Sunita Sharma', userId: 'StaffSunita', password: 'password2' }
-];
+const initialStaff: StaffMember[] = dummyStaff;
 
 const initialRatings: Rating[] = [
     { id: 'rating1', rating: 5, feedback: '', date: new Date('2024-07-20') },

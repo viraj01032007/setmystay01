@@ -1,5 +1,5 @@
 
-import type { Listing, RoommateProfile, Advertisement, Coupon } from './types';
+import type { Listing, RoommateProfile, Advertisement, Coupon, StaffMember } from './types';
 
 export const dummyAdvertisements: Advertisement[] = [
     {
@@ -24,6 +24,11 @@ export const dummyCoupons: Coupon[] = [
     { id: 'coupon001', code: 'STAY20', discountPercentage: 20, isActive: true },
     { id: 'coupon002', code: 'NEWUSER', discountPercentage: 15, isActive: true },
     { id: 'coupon003', code: 'EXPIRED', discountPercentage: 50, isActive: false },
+];
+
+export const dummyStaff: StaffMember[] = [
+    { id: 'S001', name: 'Ravi Kumar', userId: 'StaffRavi', password: 'password1' },
+    { id: 'S002', name: 'Sunita Sharma', userId: 'StaffSunita', password: 'password2' }
 ];
 
 export const dummyProperties: Listing[] = [
