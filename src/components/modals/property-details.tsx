@@ -52,16 +52,11 @@ const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isU
       : allImages.slice(0, 2);
 
   const nextMedia = () => {
-    if (currentIndex < mediaToShow.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
+    setCurrentIndex((prev) => (prev + 1) % mediaToShow.length);
   };
   const prevMedia = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
+    setCurrentIndex((prev) => (prev - 1 + mediaToShow.length) % mediaToShow.length);
   };
-
 
   if (mediaToShow.length === 0) {
     return (
@@ -79,7 +74,7 @@ const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isU
           return (
             <div
               key="unlock-placeholder"
-              className={`absolute inset-0 bg-slate-300 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+              className={`absolute inset-0 bg-slate-300 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             >
               {allImages.length > 1 && (
                 <Image src={allImages[1]} alt="Blurred background" fill className="object-cover filter blur-md scale-110" />
@@ -100,7 +95,7 @@ const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isU
         return (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute inset-0 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
           >
             {isVideo ? (
               // This part is only reachable if isUnlocked is true
@@ -114,10 +109,10 @@ const MediaGallery = ({ listing, isUnlocked, onUnlock }: { listing: Listing; isU
       
       {mediaToShow.length > 1 && (
         <>
-          <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={prevMedia} disabled={currentIndex === 0}>
+          <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={prevMedia}>
             <ChevronLeft />
           </Button>
-          <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={nextMedia} disabled={currentIndex === mediaToShow.length - 1}>
+          <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50" onClick={nextMedia}>
             <ChevronRight />
           </Button>
         </>

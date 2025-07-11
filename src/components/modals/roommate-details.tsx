@@ -47,7 +47,7 @@ const MediaGallery = ({ profile }: { profile: RoommateProfile }) => {
         {media.map((src, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute inset-0 transition-opacity duration-300 ${index === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
           >
             <Image src={src} alt={`${profile.ownerName} media ${index + 1}`} fill className="object-cover" />
           </div>
