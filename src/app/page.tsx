@@ -139,7 +139,7 @@ export default function Home() {
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
     if (itemToUnlock) {
-        handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
+        useUnlock(itemToUnlock.data.id, true);
         setItemToUnlock(null);
     }
   }
@@ -178,27 +178,36 @@ export default function Home() {
     setTimeout(() => setRateUsModalOpen(true), 500);
   }, [toast]);
 
-  const useUnlock = useCallback((itemId: string) => {
-    if (unlocks.isUnlimited) {
-      const newUnlockedIds = new Set(unlocks.unlockedIds).add(itemId);
-      setUnlocks(prev => ({...prev, unlockedIds: newUnlockedIds}));
-      localStorage.setItem('setmystay_unlockedIds', JSON.stringify(Array.from(newUnlockedIds)));
-      return true;
+  const useUnlock = useCallback((itemId: string, forceView: boolean = false) => {
+    const performUnlock = () => {
+      if (unlocks.isUnlimited) {
+        const newUnlockedIds = new Set(unlocks.unlockedIds).add(itemId);
+        setUnlocks(prev => ({...prev, unlockedIds: newUnlockedIds}));
+        localStorage.setItem('setmystay_unlockedIds', JSON.stringify(Array.from(newUnlockedIds)));
+        return true;
+      }
+      if (unlocks.count > 0) {
+        const newCount = unlocks.count - 1;
+        const newUnlockedIds = new Set(unlocks.unlockedIds).add(itemId);
+        setUnlocks({ count: newCount, isUnlimited: false, unlockedIds: newUnlockedIds });
+        localStorage.setItem('setmystay_unlocks', newCount.toString());
+        localStorage.setItem('setmystay_unlockedIds', JSON.stringify(Array.from(newUnlockedIds)));
+        toast({
+          title: "Details Unlocked!",
+          description: `You have ${newCount} unlocks remaining.`,
+        });
+        return true;
+      }
+      return false;
+    };
+    
+    if (performUnlock() && forceView) {
+      if (itemToUnlock) {
+          handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
+      }
     }
-    if (unlocks.count > 0) {
-      const newCount = unlocks.count - 1;
-      const newUnlockedIds = new Set(unlocks.unlockedIds).add(itemId);
-      setUnlocks({ count: newCount, isUnlimited: false, unlockedIds: newUnlockedIds });
-      localStorage.setItem('setmystay_unlocks', newCount.toString());
-      localStorage.setItem('setmystay_unlockedIds', JSON.stringify(Array.from(newUnlockedIds)));
-      toast({
-        title: "Details Unlocked!",
-        description: `You have ${newCount} unlocks remaining.`,
-      });
-      return true;
-    }
-    return false;
-  }, [unlocks, toast]);
+    return true; // Assume success for flow
+  }, [unlocks, toast, itemToUnlock]);
 
   const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate', forceOpen = false) => {
     if (forceOpen) {

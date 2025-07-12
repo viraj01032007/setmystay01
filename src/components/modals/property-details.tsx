@@ -202,6 +202,16 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
             </div>
           </div>
         )}
+
+        <div className='space-y-4'>
+            <Button size="lg" variant="secondary" className="w-full" onClick={() => onCheckAvailability(listing)}>
+                <CheckCircle className="w-5 h-5 mr-2" /> Check Availability
+            </Button>
+            <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+                <Clock className="w-3 h-3"/>
+                Availability last updated: {formatDistanceToNow(new Date(listing.lastAvailabilityCheck), { addSuffix: true })}
+            </p>
+        </div>
         
         <div>
           <h3 className="text-lg font-semibold mb-2">Contact Details</h3>
@@ -235,7 +245,7 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pt-4 border-t">
             <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="flex-1" onClick={onChat} disabled={!isUnlocked}>
                     <MessageSquare className="w-5 h-5 mr-2" /> Chat with Owner
@@ -246,18 +256,9 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
                     </Button>
                 </a>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" variant="secondary" className="flex-1" onClick={() => onCheckAvailability(listing)}>
-                    <CheckCircle className="w-5 h-5 mr-2" /> Check Availability
-                </Button>
-                <Button size="lg" variant="ghost" className="flex-1" onClick={onClose}>
-                    Close
-                </Button>
-            </div>
-            <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
-                <Clock className="w-3 h-3"/>
-                Availability last updated: {formatDistanceToNow(new Date(listing.lastAvailabilityCheck), { addSuffix: true })}
-            </p>
+             <Button size="lg" variant="ghost" className="w-full" onClick={onClose}>
+                Close
+            </Button>
         </div>
       </div>
     </DetailsModalWrapper>

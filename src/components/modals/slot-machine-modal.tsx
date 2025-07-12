@@ -163,28 +163,24 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
     
     const getDescription = () => {
         if (winner) return "Congratulations! You've won a prize!";
-        if (resultMessage) {
-            return (
-                <>
-                    {resultMessage}
-                    {!canPlay && <div className="mt-1">You can play again in: {cooldownTime}</div>}
-                </>
-            );
-        }
+        if (!isSpinning && resultMessage) return null; // We will show the result message in a bigger format
         if (!canPlay) return `You can play again in: ${cooldownTime}`;
         if (isLuckySpin) return "You have a Lucky Spin! Good luck!";
         return "Pull the lever to win a discount coupon!";
     };
 
+    const description = getDescription();
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-2xl text-center">Slot Machine Fun!</DialogTitle>
-                     <DialogDescription className="text-center">
-                        {getDescription()}
-                    </DialogDescription>
+                    {description && (
+                        <DialogDescription className="text-center">
+                            {description}
+                        </DialogDescription>
+                    )}
                 </DialogHeader>
 
                 <div className="py-8 flex flex-col items-center justify-center gap-6">
@@ -227,6 +223,11 @@ export function SlotMachineModal({ isOpen, onClose, prizes, onWin }: SlotMachine
                                 </Button>
                             </div>
                         </div>
+                    ) : !isSpinning && resultMessage ? (
+                         <div className="text-center space-y-2 mt-4">
+                            <p className="text-3xl font-bold text-muted-foreground">{resultMessage}</p>
+                            {!canPlay && <div className="mt-1 text-sm text-muted-foreground">You can play again in: {cooldownTime}</div>}
+                         </div>
                     ) : (
                          <Button size="lg" onClick={handleSpin} disabled={isSpinning || !canPlay} className="w-full mt-4">
                             {isSpinning ? "Spinning..." : !canPlay ? "On Cooldown" : isLuckySpin ? "Use Lucky Spin!" : "Pull Lever to Spin!"}
