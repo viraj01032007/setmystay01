@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
@@ -42,6 +41,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
 
   const [selectedItem, setSelectedItem] = useState<{ type: 'listing' | 'roommate'; data: Listing | RoommateProfile } | null>(null);
+  const [itemToUnlock, setItemToUnlock] = useState<{ type: 'listing' | 'roommate'; data: Listing | RoommateProfile } | null>(null);
   const [isUnlockModalOpen, setUnlockModalOpen] = useState(false);
   const [isListPaymentModalOpen, setListPaymentModalOpen] = useState(false);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
@@ -138,6 +138,10 @@ export default function Home() {
 
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
+    if (itemToUnlock) {
+        handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
+        setItemToUnlock(null);
+    }
   }
 
   const handleUnlockPurchase = useCallback((plan: UnlockPlan, planName: string, amount: number) => {
@@ -196,21 +200,29 @@ export default function Home() {
     return false;
   }, [unlocks, toast]);
 
-  const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => {
-    setSelectedItem({ type, data: item });
+  const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate', forceOpen = false) => {
+    if (forceOpen) {
+        setSelectedItem({ type, data: item });
+    } else {
+        setSelectedItem({ type, data: item });
+    }
   };
   
   const handleConfirmUnlock = () => {
     if (selectedItem?.data.id) {
       if (useUnlock(selectedItem.data.id)) {
         // Refresh the selected item to show unlocked state
-        handleViewDetails(selectedItem.data, selectedItem.type);
+        handleViewDetails(selectedItem.data, selectedItem.type, true);
       }
     }
     setUnlockConfirmationOpen(false);
   };
 
   const handleUnlockClick = () => {
+    if (selectedItem) {
+        setItemToUnlock(selectedItem);
+        setSelectedItem(null);
+    }
     if (unlocks.isUnlimited || unlocks.count > 0) {
       setUnlockConfirmationOpen(true);
     } else {
@@ -560,7 +572,13 @@ export default function Home() {
       </AlertDialog>
       <UnlockDetailsModal 
         isOpen={isUnlockModalOpen}
-        onClose={() => setUnlockModalOpen(false)}
+        onClose={() => {
+            setUnlockModalOpen(false);
+            if (itemToUnlock) {
+                setSelectedItem(itemToUnlock);
+                setItemToUnlock(null);
+            }
+        }}
         onPlanSelect={handlePlanSelect}
         onNavigateToListProperty={() => {
           setUnlockModalOpen(false);
