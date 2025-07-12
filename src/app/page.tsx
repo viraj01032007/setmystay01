@@ -175,8 +175,15 @@ export default function Home() {
       variant: "default",
     });
 
-    setTimeout(() => setRateUsModalOpen(true), 500);
-  }, [toast]);
+    setTimeout(() => {
+        if (itemToUnlock) {
+            handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
+            setItemToUnlock(null);
+        } else {
+            setRateUsModalOpen(true);
+        }
+    }, 500);
+  }, [toast, itemToUnlock]);
 
   const useUnlock = useCallback((itemId: string, forceView: boolean = false) => {
     const performUnlock = () => {
