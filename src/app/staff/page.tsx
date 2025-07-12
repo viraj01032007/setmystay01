@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/icons';
 import { dummyProperties, dummyRoommates } from '@/lib/data';
 import { format } from 'date-fns';
-import { getFromLocalStorage } from '@/lib/storage';
+import { getFromLocalStorage, saveToLocalStorage } from '@/lib/storage';
 
 export default function StaffDashboard() {
     const router = useRouter();
@@ -43,7 +43,6 @@ export default function StaffDashboard() {
     
     useEffect(() => {
         if (isMounted) {
-            // In a real app, fetch data from an API
             setProperties(getFromLocalStorage('properties', dummyProperties));
             setRoommates(getFromLocalStorage('roommates', dummyRoommates));
         }
@@ -85,10 +84,23 @@ export default function StaffDashboard() {
     const handleUpdateStatus = (id, type, status) => {
         const staffId = 'Staff1'; // In a real app, this would come from the logged-in staff's session
         const timestamp = new Date();
+
+        const update = (items) => items.map(item => 
+            item.id === id ? { ...item, status, verifiedBy: staffId, verificationTimestamp: timestamp } : item
+        );
+
         if (type === 'roommate') {
-            setRoommates(rms => rms.map(r => r.id === id ? { ...r, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
+            setRoommates(prev => {
+                const updated = update(prev);
+                saveToLocalStorage('roommates', updated);
+                return updated;
+            });
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
+            setProperties(prev => {
+                const updated = update(prev);
+                saveToLocalStorage('properties', updated);
+                return updated;
+            });
         }
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
@@ -96,9 +108,17 @@ export default function StaffDashboard() {
 
     const handleDeleteItem = (id, type) => {
         if (type === 'roommate') {
-            setRoommates(rms => rms.filter(r => r.id !== id));
+             setRoommates(prev => {
+                const updated = prev.filter(r => r.id !== id);
+                saveToLocalStorage('roommates', updated);
+                return updated;
+            });
         } else {
-            setProperties(props => props.filter(p => p.id !== id));
+            setProperties(prev => {
+                const updated = prev.filter(p => p.id !== id);
+                saveToLocalStorage('properties', updated);
+                return updated;
+            });
         }
         setDetailsModalOpen(false);
         toast({ title: "Item Deleted", description: `Item ${id} has been removed.`, variant: 'destructive' });

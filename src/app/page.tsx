@@ -83,7 +83,72 @@ export default function Home() {
   const [activeCoupons, setActiveCoupons] = useState<Coupon[]>([]);
 
   const { toast } = useToast();
-  
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      // Initial data loading
+      const approvedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
+      const approvedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
+      setAllListings(approvedListings);
+      setAllRoommates(approvedRoommates);
+      
+      // Shuffling logic for initial render
+      const shuffledListings = [...approvedListings].sort(() => 0.5 - Math.random());
+      const roommatesWithProperty = approvedRoommates.filter(r => r.hasProperty);
+      const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
+    
+      setFeaturedProperties(shuffledListings.slice(0, 3));
+      setFeaturedRoommates(shuffledRoommates.slice(0, 3));
+      
+      const loggedInStatus = getFromLocalStorage('setmystay_isLoggedIn', false);
+      setIsLoggedIn(loggedInStatus);
+      
+      const allUserData = getFromLocalStorage('setmystay_user_data', {});
+      const userData = loggedInStatus ? (allUserData.defaultUser || defaultUserState) : defaultUserState;
+      
+      setUnlocks({
+          count: userData.unlocks.count || 0,
+          isUnlimited: userData.unlocks.isUnlimited || false,
+          unlockedIds: new Set(userData.unlocks.unlockedIds || []),
+      });
+      setPurchaseHistory((userData.purchaseHistory || []).map((p: any) => ({...p, date: new Date(p.date)})));
+      setLikedItemIds(new Set(userData.likedItemIds || []));
+      
+      const storedAdvertisements = getFromLocalStorage('advertisements', []);
+      const activeAd = storedAdvertisements.find(ad => ad.isActive);
+      const adShown = sessionStorage.getItem('setmystay_ad_shown');
+
+      if (activeAd && !adShown) {
+          const timer = setTimeout(() => {
+              setAdToShow(activeAd);
+              setIsAdModalOpen(true);
+              sessionStorage.setItem('setmystay_ad_shown', 'true');
+          }, 5000); 
+
+          return () => clearTimeout(timer);
+      }
+      
+      setActiveCoupons(getFromLocalStorage('coupons', dummyCoupons));
+      
+      const allProps = getFromLocalStorage('properties', dummyProperties);
+      const allMates = getFromLocalStorage('roommates', dummyRoommates);
+      const allItems = [...allProps, ...allMates];
+      const userLikedItems = allItems.filter(item => (userData.likedItemIds || []).includes(item.id));
+      setLikedItems(userLikedItems);
+
+      const userId = 'newUser'; // Simulate current user
+      const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
+      const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
+      setMyProperties([...userListings, ...userRoommateProfiles]);
+      
+      setIsLoading(false);
+    }
+  }, [isClient, isLoggedIn]);
+
   const saveUserData = useCallback(() => {
     if (isLoggedIn && isClient) {
       const allUserData = getFromLocalStorage('setmystay_user_data', {});
@@ -103,91 +168,10 @@ export default function Home() {
   }, [isLoggedIn, isClient, unlocks, purchaseHistory, likedItemIds]);
 
   useEffect(() => {
-    if (isLoggedIn && isClient) {
+    if (isClient) {
       saveUserData();
     }
-  }, [unlocks, purchaseHistory, likedItemIds, isLoggedIn, saveUserData, isClient]);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (isClient) {
-        // Initial data loading
-        const approvedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
-        const approvedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
-        setAllListings(approvedListings);
-        setAllRoommates(approvedRoommates);
-        
-        // Shuffling logic for initial render
-        const shuffledListings = [...approvedListings].sort(() => 0.5 - Math.random());
-        const roommatesWithProperty = approvedRoommates.filter(r => r.hasProperty);
-        const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
-      
-        setFeaturedProperties(shuffledListings.slice(0, 3));
-        setFeaturedRoommates(shuffledRoommates.slice(0, 3));
-        
-        setIsLoading(false);
-      
-      // Client-side only logic
-      const loggedInStatus = getFromLocalStorage('setmystay_isLoggedIn', false);
-      setIsLoggedIn(loggedInStatus);
-      
-      if (loggedInStatus) {
-        const allUserData = getFromLocalStorage('setmystay_user_data', {});
-        const userData = allUserData.defaultUser || defaultUserState;
-        
-        setUnlocks({
-            count: userData.unlocks.count || 0,
-            isUnlimited: userData.unlocks.isUnlimited || false,
-            unlockedIds: new Set(userData.unlocks.unlockedIds || []),
-        });
-        setPurchaseHistory((userData.purchaseHistory || []).map((p: any) => ({...p, date: new Date(p.date)})));
-        setLikedItemIds(new Set(userData.likedItemIds || []));
-      } else {
-        // Reset to defaults if not logged in
-        setUnlocks(defaultUserState.unlocks);
-        setPurchaseHistory(defaultUserState.purchaseHistory);
-        setLikedItemIds(new Set());
-      }
-      
-      const storedAdvertisements = getFromLocalStorage('advertisements', []);
-      const activeAd = storedAdvertisements.find(ad => ad.isActive);
-      const adShown = sessionStorage.getItem('setmystay_ad_shown');
-
-      if (activeAd && !adShown) {
-          const timer = setTimeout(() => {
-              setAdToShow(activeAd);
-              setIsAdModalOpen(true);
-              sessionStorage.setItem('setmystay_ad_shown', 'true');
-          }, 5000); // Show after 5 seconds
-
-          return () => clearTimeout(timer);
-      }
-      
-      const storedCoupons = getFromLocalStorage('coupons', dummyCoupons);
-      setActiveCoupons(storedCoupons);
-    }
-  }, [isClient]);
-  
-  useEffect(() => {
-      if (isClient) {
-          const allProps = getFromLocalStorage('properties', dummyProperties);
-          const allMates = getFromLocalStorage('roommates', dummyRoommates);
-          const allItems = [...allProps, ...allMates];
-          setLikedItems(allItems.filter(item => likedItemIds.has(item.id)));
-      }
-  }, [likedItemIds, isClient]);
-
-  useEffect(() => {
-      if(isClient) {
-          const userId = 'newUser'; // Simulate current user
-          const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
-          const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
-          setMyProperties([...userListings, ...userRoommateProfiles]);
-      }
-  }, [isClient]);
+  }, [isClient, saveUserData, unlocks, purchaseHistory, likedItemIds]);
 
   const handleNavigate = (page: Page) => {
     setActivePage(page);
@@ -196,9 +180,10 @@ export default function Home() {
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
   }
-
+  
   const useUnlock = useCallback((itemId: string) => {
     let success = false;
+    let newCount: number | undefined;
     setUnlocks(currentUnlocks => {
         if (currentUnlocks.isUnlimited) {
             success = true;
@@ -209,18 +194,24 @@ export default function Home() {
         }
         if (currentUnlocks.count > 0) {
             success = true;
-            toast({
-                title: "Details Unlocked!",
-                description: `You have ${currentUnlocks.count - 1} unlocks remaining.`,
-            });
+            newCount = currentUnlocks.count - 1;
             return {
                 ...currentUnlocks,
-                count: currentUnlocks.count - 1,
+                count: newCount,
                 unlockedIds: new Set(currentUnlocks.unlockedIds).add(itemId),
             };
         }
         return currentUnlocks;
     });
+    
+    // Show toast AFTER state update
+    if (success && newCount !== undefined) {
+        toast({
+            title: "Details Unlocked!",
+            description: `You have ${newCount} unlocks remaining.`,
+        });
+    }
+    
     return success;
   }, [toast]);
   
@@ -431,13 +422,23 @@ export default function Home() {
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
     saveToLocalStorage('setmystay_isLoggedIn', true);
+    
+    // Reload user-specific data
+    const allUserData = getFromLocalStorage('setmystay_user_data', {});
+    const userData = allUserData.defaultUser || defaultUserState;
+    setUnlocks({
+      count: userData.unlocks.count || 0,
+      isUnlimited: userData.unlocks.isUnlimited || false,
+      unlockedIds: new Set(userData.unlocks.unlockedIds || []),
+    });
+    setPurchaseHistory((userData.purchaseHistory || []).map((p: any) => ({...p, date: new Date(p.date)})));
+    setLikedItemIds(new Set(userData.likedItemIds || []));
+
     // If user wanted to list a property, take them there now
-    if (activePage === 'home') { // Heuristic: if they were on home page when auth modal opened
-      const intendedPage = sessionStorage.getItem('setmystay_intended_page');
-      if (intendedPage === 'list') {
-        setActivePage('list');
-        sessionStorage.removeItem('setmystay_intended_page');
-      }
+    const intendedPage = sessionStorage.getItem('setmystay_intended_page');
+    if (intendedPage === 'list') {
+      setActivePage('list');
+      sessionStorage.removeItem('setmystay_intended_page');
     }
   };
 
@@ -493,7 +494,6 @@ export default function Home() {
       toast({
         title: 'Authentication Required',
         description: 'Please sign in to list a property.',
-        variant: 'destructive',
       });
       sessionStorage.setItem('setmystay_intended_page', 'list');
       setAuthModalOpen(true);
@@ -507,13 +507,32 @@ export default function Home() {
       toast({
         title: 'Authentication Required',
         description: 'Please sign in to play the game.',
-        variant: 'destructive',
       });
       setAuthModalOpen(true);
     } else {
       setIsSlotMachineModalOpen(true);
     }
   };
+
+  useEffect(() => {
+    // This effect ensures that the liked items list is updated whenever the likedItemIds change.
+    if(isClient) {
+      const allProps = getFromLocalStorage('properties', dummyProperties);
+      const allMates = getFromLocalStorage('roommates', dummyRoommates);
+      const allItems = [...allProps, ...allMates];
+      setLikedItems(allItems.filter(item => likedItemIds.has(item.id)));
+    }
+  }, [likedItemIds, isClient]);
+
+  useEffect(() => {
+      // This effect ensures that the user's own properties are loaded correctly.
+      if(isClient) {
+          const userId = 'newUser'; // Simulate current user
+          const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
+          const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
+          setMyProperties([...userListings, ...userRoommateProfiles]);
+      }
+  }, [isClient]);
 
   if (isLoading || !isClient) {
     return (
@@ -554,7 +573,10 @@ export default function Home() {
         activePage={activePage} 
         setActivePage={handleNavigationWithAuth} 
         onSignInClick={() => setAuthModalOpen(true)}
-        onSubscriptionClick={() => setUnlockModalOpen(true)}
+        onSubscriptionClick={() => {
+          setItemToUnlock(null); // Clear any specific item context when opening pricing generally
+          setUnlockModalOpen(true);
+        }}
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
         onHistoryClick={() => setHistoryModalOpen(true)}

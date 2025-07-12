@@ -696,7 +696,7 @@ export default function AdminDashboard() {
     const pendingListings = useMemo(() => {
         if (!properties.length && !roommates.length) return [];
         return [
-            ...properties.filter(p => p.status === 'pending').map(p => ({ ...p, itemType: p.type })),
+            ...properties.filter(p => p.status === 'pending').map(p => ({ ...p, itemType: p.propertyType })),
             ...roommates.filter(r => r.status === 'pending').map(r => ({ ...r, itemType: 'roommate' }))
         ];
     }, [properties, roommates]);
@@ -724,20 +724,42 @@ export default function AdminDashboard() {
     const handleUpdateStatus = (id, type, status) => {
         const staffId = 'S_Admin'; // Using a placeholder for admin approvals
         const timestamp = new Date();
+        
+        const update = (items) => items.map(item => 
+            item.id === id ? { ...item, status, verifiedBy: staffId, verificationTimestamp: timestamp } : item
+        );
+
         if (type === 'roommate') {
-            setRoommates(rms => rms.map(r => r.id === id ? { ...r, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
+            setRoommates(prev => {
+                const updated = update(prev);
+                saveToLocalStorage('roommates', updated);
+                return updated;
+            });
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
+            setProperties(prev => {
+                const updated = update(prev);
+                saveToLocalStorage('properties', updated);
+                return updated;
+            });
         }
+
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
     };
 
     const handleDeleteItem = (id, type) => {
         if (type === 'roommate') {
-            setRoommates(rms => rms.filter(r => r.id !== id));
+            setRoommates(prev => {
+                const updated = prev.filter(r => r.id !== id);
+                saveToLocalStorage('roommates', updated);
+                return updated;
+            });
         } else {
-            setProperties(props => props.filter(p => p.id !== id));
+            setProperties(prev => {
+                const updated = prev.filter(p => p.id !== id);
+                saveToLocalStorage('properties', updated);
+                return updated;
+            });
         }
         setDetailsModalOpen(false);
         toast({ title: "Item Deleted", description: `Item ${id} has been removed.`, variant: 'destructive' });
@@ -765,25 +787,32 @@ export default function AdminDashboard() {
     };
 
     const handleSaveAd = (adData) => {
-        let updatedAds;
         if (editingAd) {
-            updatedAds = advertisements.map(ad => ad.id === editingAd.id ? { ...editingAd, ...adData } : ad);
+            setAdvertisements(prevAds => {
+                const updated = prevAds.map(ad => ad.id === editingAd.id ? { ...editingAd, ...adData } : ad);
+                saveToLocalStorage('advertisements', updated);
+                return updated;
+            });
             toast({ title: "Advertisement Updated" });
         } else {
-            const newAd: Advertisement = { id: `ad_${Date.now()}`, ...adData };
-            updatedAds = [newAd, ...advertisements];
+            setAdvertisements(prevAds => {
+                const newAd: Advertisement = { id: `ad_${Date.now()}`, ...adData };
+                const updated = [newAd, ...prevAds];
+                saveToLocalStorage('advertisements', updated);
+                return updated;
+            });
             toast({ title: "Advertisement Added" });
         }
-        setAdvertisements(updatedAds);
-        saveToLocalStorage('advertisements', updatedAds);
         setAdFormModalOpen(false);
         setEditingAd(null);
     };
 
     const handleDeleteAd = (adId: string) => {
-        const updatedAds = advertisements.filter(ad => ad.id !== adId);
-        setAdvertisements(updatedAds);
-        saveToLocalStorage('advertisements', updatedAds);
+        setAdvertisements(prevAds => {
+            const updated = prevAds.filter(ad => ad.id !== adId);
+            saveToLocalStorage('advertisements', updated);
+            return updated;
+        });
         toast({ title: "Advertisement Deleted", variant: 'destructive' });
     };
     
@@ -793,25 +822,32 @@ export default function AdminDashboard() {
     };
 
     const handleSaveCoupon = (couponData: Omit<Coupon, 'id'>) => {
-        let updatedCoupons;
         if (editingCoupon) {
-            updatedCoupons = coupons.map(c => c.id === editingCoupon.id ? { ...editingCoupon, ...couponData } : c);
+            setCoupons(prevCoupons => {
+                const updated = prevCoupons.map(c => c.id === editingCoupon.id ? { ...editingCoupon, ...couponData } : c);
+                saveToLocalStorage('coupons', updated);
+                return updated;
+            });
             toast({ title: "Coupon Updated" });
         } else {
-            const newCoupon: Coupon = { id: `coupon_${Date.now()}`, ...couponData };
-            updatedCoupons = [newCoupon, ...coupons];
+            setCoupons(prevCoupons => {
+                const newCoupon: Coupon = { id: `coupon_${Date.now()}`, ...couponData };
+                const updated = [newCoupon, ...prevCoupons];
+                saveToLocalStorage('coupons', updated);
+                return updated;
+            });
             toast({ title: "Coupon Added" });
         }
-        setCoupons(updatedCoupons);
-        saveToLocalStorage('coupons', updatedCoupons);
         setCouponFormModalOpen(false);
         setEditingCoupon(null);
     };
     
     const handleDeleteCoupon = (couponId: string) => {
-        const updatedCoupons = coupons.filter(c => c.id !== couponId);
-        setCoupons(updatedCoupons);
-        saveToLocalStorage('coupons', updatedCoupons);
+        setCoupons(prevCoupons => {
+            const updated = prevCoupons.filter(c => c.id !== couponId);
+            saveToLocalStorage('coupons', updated);
+            return updated;
+        });
         toast({ title: "Coupon Deleted", variant: 'destructive' });
     };
 
@@ -821,25 +857,32 @@ export default function AdminDashboard() {
     };
 
     const handleSaveStaff = (staffData: Omit<StaffMember, 'id'>) => {
-        let updatedStaff;
         if (editingStaff) {
-            updatedStaff = staff.map(sm => sm.id === editingStaff.id ? { ...editingStaff, ...staffData } : sm);
+            setStaff(prevStaff => {
+                const updated = prevStaff.map(sm => sm.id === editingStaff.id ? { ...editingStaff, ...staffData } : sm);
+                saveToLocalStorage('staff', updated);
+                return updated;
+            });
             toast({ title: "Staff Member Updated" });
         } else {
-            const newStaff: StaffMember = { id: `S${Date.now()}`, ...staffData };
-            updatedStaff = [...staff, newStaff];
+            setStaff(prevStaff => {
+                const newStaff: StaffMember = { id: `S${Date.now()}`, ...staffData };
+                const updated = [...prevStaff, newStaff];
+                saveToLocalStorage('staff', updated);
+                return updated;
+            });
             toast({ title: "Staff Member Added" });
         }
-        setStaff(updatedStaff);
-        saveToLocalStorage('staff', updatedStaff);
         setStaffFormModalOpen(false);
         setEditingStaff(null);
     };
 
     const handleDeleteStaff = (staffId: string) => {
-        const updatedStaff = staff.filter(sm => sm.id !== staffId);
-        setStaff(updatedStaff);
-        saveToLocalStorage('staff', updatedStaff);
+        setStaff(prevStaff => {
+            const updated = prevStaff.filter(sm => sm.id !== staffId);
+            saveToLocalStorage('staff', updated);
+            return updated;
+        });
         toast({ title: "Staff Member Deleted", variant: "destructive" });
     };
     
