@@ -1,6 +1,4 @@
 
-
-// @ts-nocheck
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -24,7 +22,7 @@ import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { Advertisement, Coupon, StaffMember, Rating, Listing } from '@/lib/types';
+import type { Advertisement, Coupon, StaffMember, Rating, Listing, RoommateProfile } from '@/lib/types';
 import { dummyCoupons, dummyProperties, dummyRoommates, dummyStaff } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -34,6 +32,7 @@ import { format, startOfWeek, addDays, getWeek, formatDistanceToNow, differenceI
 import { cn } from '@/lib/utils';
 import { getFromLocalStorage, saveToLocalStorage } from '@/lib/storage';
 
+type AnyListing = Listing | RoommateProfile;
 
 // Chart data generation functions
 const generateHourlyData = (date: Date) => {
@@ -86,7 +85,7 @@ const ADMIN_PHONE = '+918210552902';
 const ADMIN_ADDRESS = 'Office no. 01, Neelsidhi Splendour, Sector 15, CBD Belapur, Navi Mumbai, Maharashtra 400614';
 
 
-const PasswordChangeForm = ({ currentPassword, onClose }) => {
+const PasswordChangeForm = ({ currentPassword, onClose }: { currentPassword: string; onClose: () => void; }) => {
     const { toast } = useToast();
     const [passwords, setPasswords] = useState({
         current: '',
@@ -140,7 +139,7 @@ const PasswordChangeForm = ({ currentPassword, onClose }) => {
     );
 };
 
-const PinChangeForm = ({ currentPin, onClose }) => {
+const PinChangeForm = ({ currentPin, onClose }: { currentPin: string; onClose: () => void; }) => {
     const { toast } = useToast();
     const [pins, setPins] = useState({
         current: '',
@@ -185,7 +184,7 @@ const PinChangeForm = ({ currentPin, onClose }) => {
     );
 };
 
-const SecurityQuestionChangeForm = ({ currentAnswer, onClose }) => {
+const SecurityQuestionChangeForm = ({ currentAnswer, onClose }: { currentAnswer: string, onClose: () => void; }) => {
     const { toast } = useToast();
     const [security, setSecurity] = useState({
         current: '',
@@ -235,7 +234,7 @@ const SecurityQuestionChangeForm = ({ currentAnswer, onClose }) => {
     );
 };
 
-const ContactInfoChangeForm = ({ currentEmail, currentPhone, currentAddress, onClose }) => {
+const ContactInfoChangeForm = ({ currentEmail, currentPhone, currentAddress, onClose }: { currentEmail: string; currentPhone: string; currentAddress: string; onClose: () => void; }) => {
     const { toast } = useToast();
     const [info, setInfo] = useState({
         email: currentEmail,
@@ -289,7 +288,14 @@ const ContactInfoChangeForm = ({ currentEmail, currentPhone, currentAddress, onC
     );
 };
 
-const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
+interface AdFormDialogProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (ad: Omit<Advertisement, 'id'>) => void;
+    ad: Advertisement | null;
+}
+
+const AdFormDialog = ({ isOpen, onClose, onSave, ad }: AdFormDialogProps) => {
     const { toast } = useToast();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -325,7 +331,7 @@ const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!imagePreview) {
             toast({
@@ -394,7 +400,14 @@ const AdFormDialog = ({ isOpen, onClose, onSave, ad }) => {
 };
 
 
-const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
+interface CouponFormDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (coupon: Omit<Coupon, 'id'>) => void;
+  coupon: Coupon | null;
+}
+
+const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }: CouponFormDialogProps) => {
     const [code, setCode] = useState('');
     const [discountPercentage, setDiscountPercentage] = useState(0);
     const [isActive, setIsActive] = useState(true);
@@ -411,7 +424,7 @@ const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
         }
     }, [coupon, isOpen]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave({ code: code.toUpperCase(), discountPercentage, isActive });
     };
@@ -445,7 +458,14 @@ const CouponFormDialog = ({ isOpen, onClose, onSave, coupon }) => {
     );
 };
 
-const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
+interface StaffFormDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (staff: Omit<StaffMember, 'id'>) => void;
+  staffMember: StaffMember | null;
+}
+
+const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }: StaffFormDialogProps) => {
     const [name, setName] = useState('');
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
@@ -455,7 +475,7 @@ const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
         if (staffMember) {
             setName(staffMember.name);
             setUserId(staffMember.userId);
-            setPassword(staffMember.password);
+            setPassword(staffMember.password || '');
         } else {
             setName('');
             setUserId('');
@@ -464,7 +484,7 @@ const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
         setShowPassword(false);
     }, [staffMember, isOpen]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave({ name, userId, password });
     };
@@ -509,7 +529,7 @@ const StaffFormDialog = ({ isOpen, onClose, onSave, staffMember }) => {
     );
 };
 
-const StaffActivityDialog = ({ isOpen, onClose, details }) => {
+const StaffActivityDialog = ({ isOpen, onClose, details }: { isOpen: boolean; onClose: () => void; details: { staffName: string; activityType: string; listings: AnyListing[] } | null }) => {
     if (!details) return null;
 
     const { staffName, activityType, listings } = details;
@@ -533,9 +553,9 @@ const StaffActivityDialog = ({ isOpen, onClose, details }) => {
                             <TableBody>
                                 {listings.map(listing => (
                                     <TableRow key={listing.id}>
-                                        <TableCell className="font-medium">{listing.title || listing.ownerName}</TableCell>
+                                        <TableCell className="font-medium">{'title' in listing ? listing.title : listing.ownerName}</TableCell>
                                         <TableCell>{listing.propertyType || 'Roommate'}</TableCell>
-                                        <TableCell>{format(new Date(listing.verificationTimestamp), 'dd MMM yyyy')}</TableCell>
+                                        <TableCell>{listing.verificationTimestamp ? format(new Date(listing.verificationTimestamp), 'dd MMM yyyy') : 'N/A'}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -552,7 +572,12 @@ const StaffActivityDialog = ({ isOpen, onClose, details }) => {
     );
 };
 
-const VendorDetailsDialog = ({ isOpen, onClose, details }) => {
+interface VendorDetails {
+    vendorNumber: string;
+    properties: { propertyId: string; propertyTitle: string; }[];
+}
+
+const VendorDetailsDialog = ({ isOpen, onClose, details }: { isOpen: boolean; onClose: () => void; details: VendorDetails | null; }) => {
     if (!details) return null;
 
     const { vendorNumber, properties } = details;
@@ -593,11 +618,11 @@ const VendorDetailsDialog = ({ isOpen, onClose, details }) => {
     );
 };
 
-const CreateVendorDialog = ({ isOpen, onClose, onCreate }) => {
+const CreateVendorDialog = ({ isOpen, onClose, onCreate }: { isOpen: boolean; onClose: () => void; onCreate: (vendorNumber: string) => void; }) => {
     const { toast } = useToast();
     const [vendorNumber, setVendorNumber] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!vendorNumber.trim()) {
             toast({ title: 'Error', description: 'Vendor number cannot be empty.', variant: 'destructive' });
@@ -634,6 +659,16 @@ const CreateVendorDialog = ({ isOpen, onClose, onCreate }) => {
     );
 };
 
+interface AnalyticsData {
+    totalPageViews: number;
+    totalUnlocks: number;
+    lastUpdated: string;
+}
+
+interface PricingData {
+    unlocks: { [key: string]: number };
+    listings: { [key: string]: number };
+}
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -641,18 +676,18 @@ export default function AdminDashboard() {
     
     // State management
     const [properties, setProperties] = useState<Listing[]>([]);
-    const [roommates, setRoommates] = useState([]);
-    const [pricing, setPricing] = useState(null);
-    const [analytics, setAnalytics] = useState(null);
+    const [roommates, setRoommates] = useState<RoommateProfile[]>([]);
+    const [pricing, setPricing] = useState<PricingData | null>(null);
+    const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
     const [coupons, setCoupons] = useState<Coupon[]>([]);
-    const [availabilityInquiries, setAvailabilityInquiries] = useState([]);
+    const [availabilityInquiries, setAvailabilityInquiries] = useState<any[]>([]);
     const [staff, setStaff] = useState<StaffMember[]>([]);
     const [ratings, setRatings] = useState<Rating[]>([]);
     const [explicitVendors, setExplicitVendors] = useState<string[]>([]);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
-    const [currentItem, setCurrentItem] = useState(null);
+    const [currentItem, setCurrentItem] = useState<AnyListing | null>(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
     const [isAdFormModalOpen, setAdFormModalOpen] = useState(false);
@@ -665,10 +700,10 @@ export default function AdminDashboard() {
     const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
 
     const [isStaffActivityModalOpen, setStaffActivityModalOpen] = useState(false);
-    const [staffActivityDetails, setStaffActivityDetails] = useState(null);
+    const [staffActivityDetails, setStaffActivityDetails] = useState<{ staffName: string; activityType: string; listings: AnyListing[] } | null>(null);
 
     const [isVendorDetailsModalOpen, setVendorDetailsModalOpen] = useState(false);
-    const [vendorDetails, setVendorDetails] = useState(null);
+    const [vendorDetails, setVendorDetails] = useState<VendorDetails | null>(null);
     
     const [isCreateVendorModalOpen, setCreateVendorModalOpen] = useState(false);
 
@@ -755,7 +790,7 @@ export default function AdminDashboard() {
             const rejectedListings = verifiedListings.filter(l => l.status === 'rejected');
             
             const processingTimes = verifiedListings
-                .map(l => differenceInHours(new Date(l.verificationTimestamp), new Date(l.submittedAt)))
+                .map(l => differenceInHours(new Date(l.verificationTimestamp!), new Date(l.submittedAt!)))
                 .filter(t => t >= 0);
 
             const avgProcessingTime = processingTimes.length > 0
@@ -781,19 +816,19 @@ export default function AdminDashboard() {
 
     const vendorNumbers = useMemo(() => {
         // Start with explicitly created vendors
-        const vendorData = explicitVendors.reduce((acc, vendorNumber) => {
+        const vendorData: { [key: string]: { propertyId: string; propertyTitle: string }[] } = explicitVendors.reduce((acc, vendorNumber) => {
             acc[vendorNumber] = [];
             return acc;
-        }, {});
+        }, {} as { [key: string]: { propertyId: string; propertyTitle: string }[] });
 
         // Add vendors from properties
         properties
             .filter(p => p.vendorNumber)
             .forEach(p => {
-                if (!vendorData[p.vendorNumber]) {
-                    vendorData[p.vendorNumber] = [];
+                if (!vendorData[p.vendorNumber!]) {
+                    vendorData[p.vendorNumber!] = [];
                 }
-                vendorData[p.vendorNumber].push({ propertyId: p.id, propertyTitle: p.title });
+                vendorData[p.vendorNumber!].push({ propertyId: p.id, propertyTitle: p.title });
             });
 
         return Object.entries(vendorData).map(([vendorNumber, properties]) => ({
@@ -842,47 +877,47 @@ export default function AdminDashboard() {
         if (!properties.length && !roommates.length) return [];
         return [
             ...properties.filter(p => p.status === 'pending').map(p => ({ ...p, itemType: p.propertyType })),
-            ...roommates.filter(r => r.status === 'pending').map(r => ({ ...r, itemType: 'roommate' }))
+            ...roommates.filter(r => r.status === 'pending').map(r => ({ ...r, itemType: 'Roommate' }))
         ];
     }, [properties, roommates]);
 
     const filteredProperties = useMemo(() => {
         return properties.filter(p => {
             const matchesSearch = propertySearchTerm === '' || p.title.toLowerCase().includes(propertySearchTerm.toLowerCase());
-            const matchesType = propertyTypeFilter === 'all' || p.type === propertyTypeFilter;
+            const matchesType = propertyTypeFilter === 'all' || p.propertyType === propertyTypeFilter;
             return matchesSearch && matchesType;
         });
     }, [properties, propertySearchTerm, propertyTypeFilter]);
     
-    const handleViewDetails = (id, type) => {
-        const item = type === 'roommate'
+    const handleViewDetails = (id: string, type: 'PG' | 'Rental' | 'Roommate') => {
+        const item = type === 'Roommate'
             ? roommates.find(r => r.id === id)
             : properties.find(p => p.id === id);
         
         if (item) {
-            setCurrentItem({ ...item, type });
+            setCurrentItem(item);
             setCurrentMediaIndex(0);
             setDetailsModalOpen(true);
         }
     };
     
-    const handleUpdateStatus = (id, type, status) => {
+    const handleUpdateStatus = (id: string, type: 'PG' | 'Rental' | 'Roommate', status: 'approved' | 'rejected') => {
         const staffId = 'S_Admin'; // Using a placeholder for admin approvals
         const timestamp = new Date();
         
-        const update = (items) => items.map(item => 
+        const update = (items: AnyListing[]) => items.map(item => 
             item.id === id ? { ...item, status, verifiedBy: staffId, verificationTimestamp: timestamp } : item
         );
 
-        if (type === 'roommate') {
+        if (type === 'Roommate') {
             setRoommates(prev => {
-                const updated = update(prev);
+                const updated = update(prev) as RoommateProfile[];
                 saveToLocalStorage('roommates', updated);
                 return updated;
             });
         } else {
             setProperties(prev => {
-                const updated = update(prev);
+                const updated = update(prev) as Listing[];
                 saveToLocalStorage('properties', updated);
                 return updated;
             });
@@ -892,8 +927,8 @@ export default function AdminDashboard() {
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
     };
 
-    const handleDeleteItem = (id, type) => {
-        if (type === 'roommate') {
+    const handleDeleteItem = (id: string, type: 'PG' | 'Rental' | 'Roommate') => {
+        if (type === 'Roommate') {
             setRoommates(prev => {
                 const updated = prev.filter(r => r.id !== id);
                 saveToLocalStorage('roommates', updated);
@@ -910,12 +945,12 @@ export default function AdminDashboard() {
         toast({ title: "Item Deleted", description: `Item ${id} has been removed.`, variant: 'destructive' });
     };
 
-    const handlePriceChange = (category, plan, value) => {
+    const handlePriceChange = (category: 'unlocks' | 'listings', plan: string, value: number) => {
         if (!pricing) return;
         setPricing(prev => ({
-            ...prev,
+            ...prev!,
             [category]: {
-                ...prev[category],
+                ...prev![category],
                 [plan]: value
             }
         }));
@@ -931,7 +966,7 @@ export default function AdminDashboard() {
         setAdFormModalOpen(true);
     };
 
-    const handleSaveAd = (adData) => {
+    const handleSaveAd = (adData: Omit<Advertisement, 'id'>) => {
         if (editingAd) {
             setAdvertisements(prevAds => {
                 const updated = prevAds.map(ad => ad.id === editingAd.id ? { ...editingAd, ...adData } : ad);
@@ -1031,22 +1066,23 @@ export default function AdminDashboard() {
         toast({ title: "Staff Member Deleted", variant: "destructive" });
     };
     
-    const handleViewStaffActivity = (staffName, activityType, listings) => {
+    const handleViewStaffActivity = (staffName: string, activityType: string, listings: AnyListing[]) => {
         setStaffActivityDetails({ staffName, activityType, listings });
         setStaffActivityModalOpen(true);
     };
 
-    const handleViewVendorDetails = (vendorData) => {
+    const handleViewVendorDetails = (vendorData: VendorDetails) => {
         setVendorDetails(vendorData);
         setVendorDetailsModalOpen(true);
     };
 
-    const StatusBadge = ({ status }) => {
+    const StatusBadge = ({ status }: { status?: 'pending' | 'approved' | 'rejected' | boolean }) => {
         const isBoolean = typeof status === 'boolean';
         const currentStatus = isBoolean ? (status ? 'active' : 'inactive') : status;
+        if (!currentStatus) return null;
     
         const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold capitalize";
-        const statusClasses = {
+        const statusClasses: { [key: string]: string } = {
             pending: "bg-yellow-200 text-yellow-800",
             approved: "bg-green-200 text-green-800",
             rejected: "bg-red-200 text-red-800",
@@ -1211,7 +1247,7 @@ export default function AdminDashboard() {
                                                     <p className="text-sm text-muted-foreground">{formatDistanceToNow(inquiry.time, { addSuffix: true })}</p>
                                                 </div>
                                             </div>
-                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(inquiry.propertyId, 'rental')}>View Property</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(inquiry.propertyId, 'Rental')}>View Property</Button>
                                         </div>
                                     ))}
                                 </div>
@@ -1230,7 +1266,7 @@ export default function AdminDashboard() {
                                 pendingListings.map(item => (
                                     <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                         <div className="w-full">
-                                            <p className="font-semibold">{item.title || item.ownerName} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
+                                            <p className="font-semibold">{'title' in item ? item.title : item.ownerName} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
                                             <p className="text-sm text-slate-600">{item.locality}</p>
                                         </div>
                                         <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">View Details</Button>
@@ -1269,8 +1305,8 @@ export default function AdminDashboard() {
                                                 <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem onSelect={() => setPropertyTypeFilter('all')}>All</DropdownMenuItem>
-                                                <DropdownMenuItem onSelect={() => setPropertyTypeFilter('pg')}>PG</DropdownMenuItem>
-                                                <DropdownMenuItem onSelect={() => setPropertyTypeFilter('rental')}>Rental</DropdownMenuItem>
+                                                <DropdownMenuItem onSelect={() => setPropertyTypeFilter('PG')}>PG</DropdownMenuItem>
+                                                <DropdownMenuItem onSelect={() => setPropertyTypeFilter('Rental')}>Rental</DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </div>
@@ -1312,7 +1348,7 @@ export default function AdminDashboard() {
                                                 <TableCell className="font-medium">{r.ownerName}</TableCell>
                                                 <TableCell>₹{r.rent.toLocaleString()}</TableCell>
                                                 <TableCell><StatusBadge status={r.status} /></TableCell>
-                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(r.id, 'roommate')}>View</Button></TableCell>
+                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(r.id, 'Roommate')}>View</Button></TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -1647,7 +1683,7 @@ export default function AdminDashboard() {
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
                 <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle>{currentItem?.title || currentItem?.ownerName}</DialogTitle>
+                        <DialogTitle>{currentItem && 'title' in currentItem ? currentItem.title : currentItem?.ownerName}</DialogTitle>
                     </DialogHeader>
                     {currentItem && (
                         <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
@@ -1714,11 +1750,11 @@ export default function AdminDashboard() {
                                 </div>
                                  <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> Vendor Number</strong>
-                                    <div className="font-mono">{currentItem.vendorNumber || 'N/A'}</div>
+                                    <div className="font-mono">{'vendorNumber' in currentItem ? currentItem.vendorNumber || 'N/A' : 'N/A'}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Type</strong>
-                                    <div className="capitalize">{currentItem.propertyType || currentItem.type}</div>
+                                    <div className="capitalize">{currentItem.propertyType}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Locality</strong>
@@ -1732,14 +1768,14 @@ export default function AdminDashboard() {
                                     <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                         <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Verified By</strong>
                                         <div>
-                                            {staff.find(s => s.id === currentItem.verifiedBy)?.name || currentItem.verifiedBy} on {format(new Date(currentItem.verificationTimestamp), 'dd MMM yyyy, p')}
+                                            {staff.find(s => s.id === currentItem.verifiedBy)?.name || currentItem.verifiedBy} on {format(new Date(currentItem.verificationTimestamp!), 'dd MMM yyyy, p')}
                                         </div>
                                     </div>
                                 )}
 
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Owner/User Name</strong>
-                                    <div>{currentItem.ownerName || currentItem.name}</div>
+                                    <div>{currentItem.ownerName}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Phone className="w-4 h-4" /> Phone Number</strong>
@@ -1766,12 +1802,12 @@ export default function AdminDashboard() {
                                         <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the item.</AlertDialogDescription></AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteItem(currentItem.id, currentItem.type)}>Confirm Delete</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => handleDeleteItem(currentItem.id, currentItem.propertyType)}>Confirm Delete</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
-                                {currentItem.status !== 'rejected' && <Button variant="secondary" onClick={() => handleUpdateStatus(currentItem.id, currentItem.type, 'rejected')}><XCircle className="w-4 h-4 mr-2" />Reject</Button>}
-                                {currentItem.status !== 'approved' && <Button onClick={() => handleUpdateStatus(currentItem.id, currentItem.type, 'approved')}><CheckCircle className="w-4 h-4 mr-2" />Approve</Button>}
+                                {currentItem.status !== 'rejected' && <Button variant="secondary" onClick={() => handleUpdateStatus(currentItem.id, currentItem.propertyType, 'rejected')}><XCircle className="w-4 h-4 mr-2" />Reject</Button>}
+                                {currentItem.status !== 'approved' && <Button onClick={() => handleUpdateStatus(currentItem.id, currentItem.propertyType, 'approved')}><CheckCircle className="w-4 h-4 mr-2" />Approve</Button>}
                             </div>
                         </div>
                     )}

@@ -572,57 +572,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
               </CardContent>
             </Card>
 
-            {(propertyType === 'Rental' || propertyType === 'PG') && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Vendor Information</CardTitle>
-                    <CardDescription>This is optional. If you have a vendor number from our admin, please enter it here.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <FormField control={form.control} name="vendorNumber" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Vendor Number</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="e.g., Admin1234" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
-                  </CardContent>
-                </Card>
-            )}
-
              <Card>
-              <CardHeader>
-                <CardTitle>Verification Documents</CardTitle>
-                <CardDescription>Upload these documents for verification. This will only be visible to our admin team.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-6">
-                 <FileUploadField name="aadhaarCard" label="Aadhaar Card" control={form.control} required />
-                 
-                 {(propertyType === 'Rental' || propertyType === 'PG' || (propertyType === 'Roommate' && roommateStatus === 'hasProperty')) && (
-                    <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
-                 )}
-                 
-                 {propertyType !== 'Roommate' && (
-                    <div className="md:col-span-2">
-                       <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
-                         <Alert className="mt-2">
-                           <ShieldCheck className="h-4 w-4" />
-                           <AlertTitle>Boost Your Listing!</AlertTitle>
-                           <AlertDescription>
-                             Uploading a No Objection Certificate (NOC) is optional, but it significantly increases trust and can help boost your property's visibility.
-                           </AlertDescription>
-                         </Alert>
-                    </div>
-                 )}
-              </CardContent>
-            </Card>
-
-            <Card>
               <CardHeader>
                 <CardTitle>Location</CardTitle>
               </CardHeader>
@@ -705,6 +655,57 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 )}/>
               </CardContent>
             </Card>
+            
+            {(propertyType === 'Rental' || propertyType === 'PG') && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Vendor Information</CardTitle>
+                    <CardDescription>This is optional. If you have a vendor number from our admin, please enter it here.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <FormField control={form.control} name="vendorNumber" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vendor Number</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="e.g., Admin1234" {...field} className="pl-10" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                  </CardContent>
+                </Card>
+            )}
+
+             <Card>
+              <CardHeader>
+                <CardTitle>Verification Documents</CardTitle>
+                <CardDescription>Upload these documents for verification. This will only be visible to our admin team.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid md:grid-cols-2 gap-6">
+                 <FileUploadField name="aadhaarCard" label="Aadhaar Card" control={form.control} required />
+                 
+                 {(propertyType === 'Rental' || propertyType === 'PG' || (propertyType === 'Roommate' && roommateStatus === 'hasProperty')) && (
+                    <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
+                 )}
+                 
+                 {propertyType !== 'Roommate' && (
+                    <div className="md:col-span-2">
+                       <FileUploadField name="noc" label="NOC (Optional)" control={form.control} />
+                         <Alert className="mt-2">
+                           <ShieldCheck className="h-4 w-4" />
+                           <AlertTitle>Boost Your Listing!</AlertTitle>
+                           <AlertDescription>
+                             Uploading a No Objection Certificate (NOC) is optional, but it significantly increases trust and can help boost your property's visibility.
+                           </AlertDescription>
+                         </Alert>
+                    </div>
+                 )}
+              </CardContent>
+            </Card>
+
 
             <Button type="submit" size="lg" className="w-full">
                 Proceed to Payment & List
