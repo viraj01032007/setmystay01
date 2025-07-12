@@ -1297,12 +1297,12 @@ export default function AdminDashboard() {
                         </Card>
                         <div className="space-y-8">
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between">
+                                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
                                         <CardTitle className="text-2xl">Coupon Code Management</CardTitle>
                                         <CardDescription>Create and manage discount coupons.</CardDescription>
                                     </div>
-                                    <Button onClick={() => handleOpenCouponForm(null)}>
+                                    <Button onClick={() => handleOpenCouponForm(null)} className="w-full sm:w-auto">
                                         <PlusCircle className="mr-2 h-4 w-4" /> Add
                                     </Button>
                                 </CardHeader>
@@ -1333,12 +1333,12 @@ export default function AdminDashboard() {
                                 </CardContent>
                             </Card>
                             <Card>
-                                <CardHeader className="flex flex-row items-center justify-between">
+                                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
                                         <CardTitle className="text-2xl">Pop-up Ads</CardTitle>
                                         <CardDescription>Manage pop-up advertisements.</CardDescription>
                                     </div>
-                                    <Button onClick={() => handleOpenAdForm(null)}>
+                                    <Button onClick={() => handleOpenAdForm(null)} className="w-full sm:w-auto">
                                         <PlusCircle className="mr-2 h-4 w-4" /> Add New
                                     </Button>
                                 </CardHeader>
@@ -1368,12 +1368,12 @@ export default function AdminDashboard() {
                                 </CardContent>
                             </Card>
                              <Card>
-                                <CardHeader className="flex flex-row items-center justify-between">
+                                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
                                         <CardTitle className="text-2xl">Vendor Management</CardTitle>
                                         <CardDescription>Generate and track vendor numbers.</CardDescription>
                                     </div>
-                                    <Button onClick={handleGenerateVendorNumber}>
+                                    <Button onClick={handleGenerateVendorNumber} className="w-full sm:w-auto">
                                         <PlusCircle className="mr-2 h-4 w-4" /> Generate
                                     </Button>
                                 </CardHeader>
@@ -1422,12 +1422,12 @@ export default function AdminDashboard() {
 
                 <TabsContent value="staff">
                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
+                        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div>
                                 <CardTitle className="text-2xl">Staff Management</CardTitle>
                                 <CardDescription>Add, edit, and monitor staff performance.</CardDescription>
                             </div>
-                            <Button onClick={() => handleOpenStaffForm(null)}>
+                            <Button onClick={() => handleOpenStaffForm(null)} className="w-full sm:w-auto">
                                 <UserPlus className="mr-2 h-4 w-4" /> Add New Staff
                             </Button>
                         </CardHeader>
