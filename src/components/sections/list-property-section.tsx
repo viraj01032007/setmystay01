@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -147,7 +147,7 @@ interface ListPropertySectionProps {
   onSubmit: (data: FormValues & { images: File[] }) => void;
 }
 
-const FileUploadField = ({ name, label, control, required = false }: { name: "aadhaarCard" | "electricityBill" | "noc", label: string, control: any, required?: boolean }) => {
+const FileUploadField = ({ name, label, control, required = false, inputRef }: { name: "aadhaarCard" | "electricityBill" | "noc", label: string, control: any, required?: boolean, inputRef?: React.Ref<HTMLInputElement> }) => {
     const [fileName, setFileName] = useState<string | null>(null);
 
     return (
@@ -160,7 +160,7 @@ const FileUploadField = ({ name, label, control, required = false }: { name: "aa
                     <FormControl>
                         <div
                             className="border-2 border-dashed border-muted rounded-lg p-4 text-center cursor-pointer hover:border-primary"
-                            onClick={() => document.getElementById(`upload-${name}`)?.click()}
+                            onClick={() => (inputRef as React.RefObject<HTMLInputElement>)?.current?.click()}
                         >
                             <FileUp className="mx-auto h-8 w-8 text-muted-foreground" />
                             <p className="mt-2 text-sm text-muted-foreground">
@@ -180,7 +180,7 @@ const FileUploadField = ({ name, label, control, required = false }: { name: "aa
                                         setFileName(file.name);
                                     }
                                 }}
-                                ref={field.ref}
+                                ref={inputRef}
                             />
                         </div>
                     </FormControl>
@@ -195,6 +195,8 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [customAmenity, setCustomAmenity] = useState('');
   const { toast } = useToast();
+  
+  const electricityBillRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -241,8 +243,9 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     // Clear electricity bill if roommate has no property
     if (propertyType === 'Roommate' && roommateStatus === 'needsProperty') {
         form.setValue('electricityBill', undefined);
-        const fileInput = document.getElementById('upload-electricityBill') as HTMLInputElement | null;
-        if (fileInput) fileInput.value = '';
+        if (electricityBillRef.current) {
+            electricityBillRef.current.value = "";
+        }
     }
   }, [propertyType, roommateStatus, form]);
 
@@ -261,9 +264,6 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
     const finalData = { 
         ...data, 
         images: mediaFiles,
-        aadhaarCard: data.aadhaarCard[0],
-        electricityBill: data.electricityBill?.[0],
-        noc: data.noc ? data.noc[0] : undefined,
         videoFile,
     };
     onSubmit(finalData);
@@ -656,28 +656,26 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
               </CardContent>
             </Card>
             
-            {(propertyType === 'Rental' || propertyType === 'PG') && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Vendor Information</CardTitle>
-                    <CardDescription>This is optional. If you have a vendor number from our admin, please enter it here.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <FormField control={form.control} name="vendorNumber" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Vendor Number</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="e.g., Admin1234" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
-                  </CardContent>
-                </Card>
-            )}
+            <Card>
+              <CardHeader>
+                <CardTitle>Vendor Information</CardTitle>
+                <CardDescription>This is optional. If you have a vendor number from our admin, please enter it here.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField control={form.control} name="vendorNumber" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Vendor Number</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="e.g., Admin1234" {...field} className="pl-10" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}/>
+              </CardContent>
+            </Card>
 
              <Card>
               <CardHeader>
@@ -688,7 +686,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                  <FileUploadField name="aadhaarCard" label="Aadhaar Card" control={form.control} required />
                  
                  {(propertyType === 'Rental' || propertyType === 'PG' || (propertyType === 'Roommate' && roommateStatus === 'hasProperty')) && (
-                    <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required />
+                    <FileUploadField name="electricityBill" label="Electricity Bill" control={form.control} required inputRef={electricityBillRef}/>
                  )}
                  
                  {propertyType !== 'Roommate' && (

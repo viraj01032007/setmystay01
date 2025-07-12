@@ -358,13 +358,16 @@ export default function Home() {
           size: '2 BHK', 
           images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/600x400'],
           videoUrl: pendingListingData.videoFile ? URL.createObjectURL(pendingListingData.videoFile) : undefined,
+          aadhaarCardUrl: pendingListingData.aadhaarCard ? URL.createObjectURL(pendingListingData.aadhaarCard) : undefined,
+          electricityBillUrl: pendingListingData.electricityBill ? URL.createObjectURL(pendingListingData.electricityBill) : undefined,
           nocUrl: pendingListingData.noc ? URL.createObjectURL(pendingListingData.noc) : undefined,
           views: 0,
           ownerId,
           brokerStatus: pendingListingData.brokerStatus,
-          lastAvailabilityCheck: new Date(),
+          lastAvailabilityCheck: new Date().toISOString(),
           status: 'pending', // Set status to pending
-          submittedAt: new Date(),
+          submittedAt: new Date().toISOString(),
+          vendorNumber: pendingListingData.vendorNumber,
       }
       const currentProps = getFromLocalStorage('properties', dummyProperties);
       saveToLocalStorage('properties', [...currentProps, mappedListing]);
@@ -391,8 +394,10 @@ export default function Home() {
         ownerId,
         hasProperty: pendingListingData.roommateStatus === 'hasProperty', 
         images: pendingListingData.images?.length ? pendingListingData.images.map((f: File) => URL.createObjectURL(f)) : ['https://placehold.co/400x400'],
+        aadhaarCardUrl: pendingListingData.aadhaarCard ? URL.createObjectURL(pendingListingData.aadhaarCard) : undefined,
+        electricityBillUrl: pendingListingData.electricityBill ? URL.createObjectURL(pendingListingData.electricityBill) : undefined,
         status: 'pending', // Set status to pending
-        submittedAt: new Date(),
+        submittedAt: new Date().toISOString(),
     }
       const currentMates = getFromLocalStorage('roommates', dummyRoommates);
       saveToLocalStorage('roommates', [...currentMates, mappedRoommate]);

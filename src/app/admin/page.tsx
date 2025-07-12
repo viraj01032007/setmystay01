@@ -22,7 +22,7 @@ import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { Advertisement, Coupon, StaffMember, Rating, Listing, RoommateProfile } from '@/lib/types';
+import type { Advertisement, Coupon, StaffMember, Rating, Listing, RoommateProfile, AnyListing, Inquiry } from '@/lib/types';
 import { dummyCoupons, dummyProperties, dummyRoommates, dummyStaff } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -32,7 +32,6 @@ import { format, startOfWeek, addDays, getWeek, formatDistanceToNow, differenceI
 import { cn } from '@/lib/utils';
 import { getFromLocalStorage, saveToLocalStorage } from '@/lib/storage';
 
-type AnyListing = Listing | RoommateProfile;
 
 // Chart data generation functions
 const generateHourlyData = (date: Date) => {
@@ -681,7 +680,7 @@ export default function AdminDashboard() {
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
     const [coupons, setCoupons] = useState<Coupon[]>([]);
-    const [availabilityInquiries, setAvailabilityInquiries] = useState<any[]>([]);
+    const [availabilityInquiries, setAvailabilityInquiries] = useState<Inquiry[]>([]);
     const [staff, setStaff] = useState<StaffMember[]>([]);
     const [ratings, setRatings] = useState<Rating[]>([]);
     const [explicitVendors, setExplicitVendors] = useState<string[]>([]);
@@ -754,7 +753,7 @@ export default function AdminDashboard() {
             setRoommates(getFromLocalStorage('roommates', dummyRoommates));
             setExplicitVendors(getFromLocalStorage('explicitVendors', []));
             setPricing(getFromLocalStorage('pricing', {
-                unlocks: { 1: 49, 5: 199, 10: 399, unlimited: 999 },
+                unlocks: { '1': 49, '5': 199, '10': 399, unlimited: 999 },
                 listings: { roommate: 149, pg: 349, rental: 999 }
             }));
             setAdvertisements(getFromLocalStorage('advertisements', [
@@ -876,8 +875,8 @@ export default function AdminDashboard() {
     const pendingListings = useMemo(() => {
         if (!properties.length && !roommates.length) return [];
         return [
-            ...properties.filter(p => p.status === 'pending').map(p => ({ ...p, itemType: p.propertyType })),
-            ...roommates.filter(r => r.status === 'pending').map(r => ({ ...r, itemType: 'Roommate' }))
+            ...properties.filter(p => p.status === 'pending'),
+            ...roommates.filter(r => r.status === 'pending')
         ];
     }, [properties, roommates]);
 
@@ -889,16 +888,10 @@ export default function AdminDashboard() {
         });
     }, [properties, propertySearchTerm, propertyTypeFilter]);
     
-    const handleViewDetails = (id: string, type: 'PG' | 'Rental' | 'Roommate') => {
-        const item = type === 'Roommate'
-            ? roommates.find(r => r.id === id)
-            : properties.find(p => p.id === id);
-        
-        if (item) {
-            setCurrentItem(item);
-            setCurrentMediaIndex(0);
-            setDetailsModalOpen(true);
-        }
+    const handleViewDetails = (item: AnyListing) => {
+        setCurrentItem(item);
+        setCurrentMediaIndex(0);
+        setDetailsModalOpen(true);
     };
     
     const handleUpdateStatus = (id: string, type: 'PG' | 'Rental' | 'Roommate', status: 'approved' | 'rejected') => {
@@ -906,7 +899,7 @@ export default function AdminDashboard() {
         const timestamp = new Date();
         
         const update = (items: AnyListing[]) => items.map(item => 
-            item.id === id ? { ...item, status, verifiedBy: staffId, verificationTimestamp: timestamp } : item
+            item.id === id ? { ...item, status, verifiedBy: staffId, verificationTimestamp: timestamp.toISOString() } : item
         );
 
         if (type === 'Roommate') {
@@ -1247,7 +1240,7 @@ export default function AdminDashboard() {
                                                     <p className="text-sm text-muted-foreground">{formatDistanceToNow(inquiry.time, { addSuffix: true })}</p>
                                                 </div>
                                             </div>
-                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(inquiry.propertyId, 'Rental')}>View Property</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(properties.find(p => p.id === inquiry.propertyId)!)}>View Property</Button>
                                         </div>
                                     ))}
                                 </div>
@@ -1266,10 +1259,10 @@ export default function AdminDashboard() {
                                 pendingListings.map(item => (
                                     <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                         <div className="w-full">
-                                            <p className="font-semibold">{'title' in item ? item.title : item.ownerName} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
+                                            <p className="font-semibold">{'title' in item ? item.title : item.ownerName} <span className="text-xs font-medium text-slate-500">({item.propertyType})</span></p>
                                             <p className="text-sm text-slate-600">{item.locality}</p>
                                         </div>
-                                        <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">View Details</Button>
+                                        <Button onClick={() => handleViewDetails(item)} className="w-full sm:w-auto">View Details</Button>
                                     </div>
                                 ))
                             ) : (
@@ -1326,7 +1319,7 @@ export default function AdminDashboard() {
                                                 <TableCell>{p.propertyType}</TableCell>
                                                 <TableCell>{p.vendorNumber || 'N/A'}</TableCell>
                                                 <TableCell><StatusBadge status={p.status} /></TableCell>
-                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.propertyType)}>View</Button></TableCell>
+                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(p)}>View</Button></TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -1348,7 +1341,7 @@ export default function AdminDashboard() {
                                                 <TableCell className="font-medium">{r.ownerName}</TableCell>
                                                 <TableCell>₹{r.rent.toLocaleString()}</TableCell>
                                                 <TableCell><StatusBadge status={r.status} /></TableCell>
-                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(r.id, 'Roommate')}>View</Button></TableCell>
+                                                <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(r)}>View</Button></TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -1683,7 +1676,7 @@ export default function AdminDashboard() {
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
                 <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle>{currentItem && 'title' in currentItem ? currentItem.title : currentItem?.ownerName}</DialogTitle>
+                        <DialogTitle>{currentItem && ('title' in currentItem ? currentItem.title : currentItem?.ownerName)}</DialogTitle>
                     </DialogHeader>
                     {currentItem && (
                         <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
@@ -1705,14 +1698,14 @@ export default function AdminDashboard() {
                                 </div>
                             )}
 
-                             {(currentItem.aadhaarCardUrl || currentItem.electricityBillUrl || currentItem.nocUrl) && (
+                             {('aadhaarCardUrl' in currentItem || 'electricityBillUrl' in currentItem || 'nocUrl' in currentItem) && (
                                 <div className="border rounded-lg p-4 bg-blue-50">
                                     <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
                                         <FileCheck className="w-5 h-5 text-blue-700" />
                                         Verification Documents
                                     </h4>
                                     <div className="flex flex-wrap gap-4">
-                                        {currentItem.aadhaarCardUrl && (
+                                        {'aadhaarCardUrl' in currentItem && currentItem.aadhaarCardUrl && (
                                             <div className="flex flex-col items-center gap-2">
                                                 <FileText className="w-8 h-8 text-blue-600"/>
                                                 <p className="text-sm font-medium">Aadhaar Card</p>
@@ -1721,7 +1714,7 @@ export default function AdminDashboard() {
                                                 </Button>
                                             </div>
                                         )}
-                                        {currentItem.electricityBillUrl && (
+                                        {'electricityBillUrl' in currentItem && currentItem.electricityBillUrl && (
                                             <div className="flex flex-col items-center gap-2">
                                                 <FileText className="w-8 h-8 text-blue-600"/>
                                                 <p className="text-sm font-medium">Electricity Bill</p>
@@ -1730,7 +1723,7 @@ export default function AdminDashboard() {
                                                 </Button>
                                             </div>
                                         )}
-                                        {currentItem.nocUrl && (
+                                        {'nocUrl' in currentItem && currentItem.nocUrl && (
                                             <div className="flex flex-col items-center gap-2">
                                                 <FileText className="w-8 h-8 text-blue-600"/>
                                                 <p className="text-sm font-medium">NOC</p>
@@ -1764,11 +1757,11 @@ export default function AdminDashboard() {
                                     <strong className="block text-sm font-medium text-muted-foreground">Status</strong>
                                     <StatusBadge status={currentItem.status} />
                                 </div>
-                                {currentItem.verifiedBy && (
+                                {currentItem.verifiedBy && currentItem.verificationTimestamp && (
                                     <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                         <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Verified By</strong>
                                         <div>
-                                            {staff.find(s => s.id === currentItem.verifiedBy)?.name || currentItem.verifiedBy} on {format(new Date(currentItem.verificationTimestamp!), 'dd MMM yyyy, p')}
+                                            {staff.find(s => s.id === currentItem.verifiedBy)?.name || currentItem.verifiedBy} on {format(new Date(currentItem.verificationTimestamp), 'dd MMM yyyy, p')}
                                         </div>
                                     </div>
                                 )}
@@ -1788,7 +1781,7 @@ export default function AdminDashboard() {
 
                                 <div className="md:col-span-2 p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Description</strong>
-                                    <div>{currentItem.description}</div>
+                                    <div>{'description' in currentItem && currentItem.description}</div>
                                 </div>
                             </div>
 

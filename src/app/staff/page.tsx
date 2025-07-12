@@ -19,18 +19,19 @@ import { dummyProperties, dummyRoommates } from '@/lib/data';
 import { format } from 'date-fns';
 import { getFromLocalStorage, saveToLocalStorage } from '@/lib/storage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Listing, RoommateProfile, AnyListing } from '@/lib/types';
 
 
 export default function StaffDashboard() {
     const router = useRouter();
     const { toast } = useToast();
     
-    const [properties, setProperties] = useState([]);
-    const [roommates, setRoommates] = useState([]);
+    const [properties, setProperties] = useState<Listing[]>([]);
+    const [roommates, setRoommates] = useState<RoommateProfile[]>([]);
     const [isMounted, setIsMounted] = useState(false);
     
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
-    const [currentItem, setCurrentItem] = useState(null);
+    const [currentItem, setCurrentItem] = useState<AnyListing | null>(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [searchTerms, setSearchTerms] = useState({
         pending: '',
@@ -59,15 +60,14 @@ export default function StaffDashboard() {
         router.replace('/staff/login');
     };
     
-    const handleSearchChange = (status, value) => {
+    const handleSearchChange = (status: 'pending' | 'approved' | 'rejected', value: string) => {
         setSearchTerms(prev => ({ ...prev, [status]: value }));
     };
 
-    const getListingsByStatus = (status: 'pending' | 'approved' | 'rejected') => {
-        const allSystemItems = [...properties, ...roommates];
+    const getListingsByStatus = (status: 'pending' | 'approved' | 'rejected'): AnyListing[] => {
+        const allSystemItems: AnyListing[] = [...properties, ...roommates];
         return allSystemItems
-            .filter(item => item.status === status)
-            .map(item => ({...item, itemType: item.propertyType || 'roommate'}));
+            .filter(item => item.status === status);
     };
     
     const filterAndSearchListings = (status: 'pending' | 'approved' | 'rejected') => {
@@ -77,39 +77,33 @@ export default function StaffDashboard() {
         if (!searchTerm) return listings;
         
         return listings.filter(item => 
-            (item.title || item.ownerName).toLowerCase().includes(searchTerm)
+            ('title' in item ? item.title : item.ownerName).toLowerCase().includes(searchTerm)
         );
     };
 
-    const handleViewDetails = (id, type) => {
-        const item = type === 'roommate'
-            ? roommates.find(r => r.id === id)
-            : properties.find(p => p.id === id);
-        
-        if (item) {
-            setCurrentItem({ ...item, type });
-            setCurrentMediaIndex(0);
-            setDetailsModalOpen(true);
-        }
+    const handleViewDetails = (item: AnyListing) => {
+        setCurrentItem(item);
+        setCurrentMediaIndex(0);
+        setDetailsModalOpen(true);
     };
     
-    const handleUpdateStatus = (id, type, status) => {
+    const handleUpdateStatus = (id: string, type: 'PG' | 'Rental' | 'Roommate', status: 'approved' | 'rejected') => {
         const staffId = 'Staff1'; // In a real app, this would come from the logged-in staff's session
         const timestamp = new Date();
 
-        const update = (items) => items.map(item => 
-            item.id === id ? { ...item, status, verifiedBy: staffId, verificationTimestamp: timestamp } : item
+        const update = (items: AnyListing[]) => items.map(item => 
+            item.id === id ? { ...item, status, verifiedBy: staffId, verificationTimestamp: timestamp.toISOString() } : item
         );
 
-        if (type === 'roommate') {
+        if (type === 'Roommate') {
             setRoommates(prev => {
-                const updated = update(prev);
+                const updated = update(prev) as RoommateProfile[];
                 saveToLocalStorage('roommates', updated);
                 return updated;
             });
         } else {
             setProperties(prev => {
-                const updated = update(prev);
+                const updated = update(prev) as Listing[];
                 saveToLocalStorage('properties', updated);
                 return updated;
             });
@@ -118,8 +112,8 @@ export default function StaffDashboard() {
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
     };
 
-    const handleDeleteItem = (id, type) => {
-        if (type === 'roommate') {
+    const handleDeleteItem = (id: string, type: 'PG' | 'Rental' | 'Roommate') => {
+        if (type === 'Roommate') {
              setRoommates(prev => {
                 const updated = prev.filter(r => r.id !== id);
                 saveToLocalStorage('roommates', updated);
@@ -136,9 +130,10 @@ export default function StaffDashboard() {
         toast({ title: "Item Deleted", description: `Item ${id} has been removed.`, variant: 'destructive' });
     };
 
-    const StatusBadge = ({ status }) => {
+    const StatusBadge = ({ status }: { status: 'pending' | 'approved' | 'rejected' | undefined }) => {
+        if (!status) return null;
         const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold capitalize";
-        const statusClasses = {
+        const statusClasses: { [key: string]: string } = {
             pending: "bg-yellow-200 text-yellow-800",
             approved: "bg-green-200 text-green-800",
             rejected: "bg-red-200 text-red-800",
@@ -189,11 +184,11 @@ export default function StaffDashboard() {
                             <TableBody>
                                 {listings.map(p => (
                                     <TableRow key={p.id}>
-                                        <TableCell className="font-medium">{p.title || p.ownerName}</TableCell>
-                                        <TableCell className="capitalize">{p.itemType}</TableCell>
+                                        <TableCell className="font-medium">{'title' in p ? p.title : p.ownerName}</TableCell>
+                                        <TableCell className="capitalize">{p.propertyType}</TableCell>
                                         <TableCell>{p.submittedAt ? format(new Date(p.submittedAt), 'dd MMM, yyyy') : 'N/A'}</TableCell>
                                         <TableCell>
-                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.itemType)}>View</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(p)}>View</Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -253,7 +248,7 @@ export default function StaffDashboard() {
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
                 <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle>{currentItem?.title || currentItem?.ownerName}</DialogTitle>
+                        <DialogTitle>{currentItem && ('title' in currentItem ? currentItem.title : currentItem?.ownerName)}</DialogTitle>
                     </DialogHeader>
                     {currentItem && (
                         <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
@@ -275,14 +270,14 @@ export default function StaffDashboard() {
                                 </div>
                             )}
 
-                            {(currentItem.aadhaarCardUrl || currentItem.electricityBillUrl || currentItem.nocUrl) && (
+                            {('aadhaarCardUrl' in currentItem || 'electricityBillUrl' in currentItem || 'nocUrl' in currentItem) && (
                                 <div className="border rounded-lg p-4 bg-blue-50">
                                     <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
                                         <FileCheck className="w-5 h-5 text-blue-700" />
                                         Verification Documents
                                     </h4>
                                     <div className="flex flex-wrap gap-4">
-                                        {currentItem.aadhaarCardUrl && (
+                                        {'aadhaarCardUrl' in currentItem && currentItem.aadhaarCardUrl && (
                                             <div className="flex flex-col items-center gap-2">
                                                 <FileText className="w-8 h-8 text-blue-600"/>
                                                 <p className="text-sm font-medium">Aadhaar Card</p>
@@ -291,7 +286,7 @@ export default function StaffDashboard() {
                                                 </Button>
                                             </div>
                                         )}
-                                        {currentItem.electricityBillUrl && (
+                                        {'electricityBillUrl' in currentItem && currentItem.electricityBillUrl && (
                                             <div className="flex flex-col items-center gap-2">
                                                 <FileText className="w-8 h-8 text-blue-600"/>
                                                 <p className="text-sm font-medium">Electricity Bill</p>
@@ -300,7 +295,7 @@ export default function StaffDashboard() {
                                                 </Button>
                                             </div>
                                         )}
-                                        {currentItem.nocUrl && (
+                                        {'nocUrl' in currentItem && currentItem.nocUrl && (
                                             <div className="flex flex-col items-center gap-2">
                                                 <FileText className="w-8 h-8 text-blue-600"/>
                                                 <p className="text-sm font-medium">NOC</p>
@@ -320,11 +315,11 @@ export default function StaffDashboard() {
                                 </div>
                                  <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> Vendor Number</strong>
-                                    <div className="font-mono">{currentItem.vendorNumber || 'N/A'}</div>
+                                    <div className="font-mono">{'vendorNumber' in currentItem ? currentItem.vendorNumber || 'N/A' : 'N/A'}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Type</strong>
-                                    <div className="capitalize">{currentItem.propertyType || currentItem.type}</div>
+                                    <div className="capitalize">{currentItem.propertyType}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Locality</strong>
@@ -334,7 +329,7 @@ export default function StaffDashboard() {
                                     <strong className="block text-sm font-medium text-muted-foreground">Status</strong>
                                     <StatusBadge status={currentItem.status} />
                                 </div>
-                                {currentItem.verifiedBy && (
+                                {currentItem.verifiedBy && currentItem.verificationTimestamp && (
                                      <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                         <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Verified By</strong>
                                         <div>
@@ -345,7 +340,7 @@ export default function StaffDashboard() {
 
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><UserIcon className="w-4 h-4" /> Owner/User Name</strong>
-                                    <div>{currentItem.ownerName || currentItem.name}</div>
+                                    <div>{currentItem.ownerName}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Phone className="w-4 h-4" /> Phone Number</strong>
@@ -358,7 +353,7 @@ export default function StaffDashboard() {
 
                                 <div className="md:col-span-2 p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Description</strong>
-                                    <div>{currentItem.description}</div>
+                                    <div>{'description' in currentItem && currentItem.description}</div>
                                 </div>
                             </div>
 
@@ -372,12 +367,12 @@ export default function StaffDashboard() {
                                         <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete the item.</AlertDialogDescription></AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteItem(currentItem.id, currentItem.type)}>Confirm Delete</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => handleDeleteItem(currentItem.id, currentItem.propertyType)}>Confirm Delete</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
-                                {currentItem.status !== 'rejected' && <Button variant="secondary" onClick={() => handleUpdateStatus(currentItem.id, currentItem.type, 'rejected')}><XCircle className="w-4 h-4 mr-2" />Reject</Button>}
-                                {currentItem.status !== 'approved' && <Button onClick={() => handleUpdateStatus(currentItem.id, currentItem.type, 'approved')}><CheckCircle className="w-4 h-4 mr-2" />Approve</Button>}
+                                {currentItem.status !== 'rejected' && <Button variant="secondary" onClick={() => handleUpdateStatus(currentItem.id, currentItem.propertyType, 'rejected')}><XCircle className="w-4 h-4 mr-2" />Reject</Button>}
+                                {currentItem.status !== 'approved' && <Button onClick={() => handleUpdateStatus(currentItem.id, currentItem.propertyType, 'approved')}><CheckCircle className="w-4 h-4 mr-2" />Approve</Button>}
                             </div>
                         </div>
                     )}

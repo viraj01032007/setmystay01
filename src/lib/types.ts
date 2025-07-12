@@ -54,11 +54,11 @@ export interface Listing {
   electricityBillUrl?: string;
   nocUrl?: string;
   beds?: Bed[];
-  lastAvailabilityCheck: Date;
+  lastAvailabilityCheck: string;
   status?: 'pending' | 'approved' | 'rejected';
   verifiedBy?: string; // Staff ID
-  submittedAt?: Date;
-  verificationTimestamp?: Date;
+  submittedAt: string;
+  verificationTimestamp?: string;
 }
 
 export interface RoommateProfile {
@@ -84,12 +84,15 @@ export interface RoommateProfile {
   views: number;
   ownerId: string;
   aadhaarCardUrl?: string;
+  electricityBillUrl?: string;
   hasProperty: boolean;
   status?: 'pending' | 'approved' | 'rejected';
   verifiedBy?: string; // Staff ID
-  submittedAt?: Date;
-  verificationTimestamp?: Date;
+  submittedAt: string;
+  verificationTimestamp?: string;
 }
+
+export type AnyListing = Listing | RoommateProfile;
 
 export type UnlockPlan = 1 | 5 | 10 | 'unlimited';
 
