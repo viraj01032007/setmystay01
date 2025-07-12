@@ -698,7 +698,7 @@ export default function AdminDashboard() {
     }, [properties]);
 
     const handleGenerateVendorNumber = () => {
-        const newVendorNumber = `VN-${Math.floor(100000 + Math.random() * 900000)}`;
+        const newVendorNumber = `Admin${Math.floor(1000 + Math.random() * 9000)}`;
         navigator.clipboard.writeText(newVendorNumber);
         toast({
             title: "Vendor Number Generated",
