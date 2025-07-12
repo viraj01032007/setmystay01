@@ -6,14 +6,14 @@ export const dummyAdvertisements: Advertisement[] = [
         id: 'ad001',
         title: 'Grand Opening Offer!',
         description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50',
-        imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto=format&fit=crop',
+        imageUrl: 'https://placehold.co/600x400',
         isActive: true,
     },
     {
         id: 'ad002',
         title: 'Unlock Unlimited Connections',
         description: 'Subscribe to our unlimited plan and find your perfect roommate today.',
-        imageUrl: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2070&auto=format&fit=crop',
+        imageUrl: 'https://placehold.co/600x400',
         isActive: false,
     }
 ];
@@ -49,7 +49,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['AC', 'WiFi', 'Meals', 'Laundry', 'Housekeeping', 'Security'],
         size: 'Single Room',
         images: [
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop',
+            'https://placehold.co/600x400',
         ],
         views: 125,
         ownerId: 'dummyOwner1',
@@ -66,6 +66,9 @@ export const dummyProperties: Listing[] = [
         submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
         verifiedBy: 'S001',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
+        nocUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'luxury-2bhk-vashi',
@@ -87,8 +90,8 @@ export const dummyProperties: Listing[] = [
         amenities: ['AC', 'WiFi', 'Parking', 'Gym', 'Elevator', 'Security'],
         size: '2 BHK',
         images: [
-            'https://images.unsplash.com/photo-1493809842344-ab6181ba96a2?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1980&auto=format&fit=crop',
+            'https://placehold.co/600x400',
+            'https://placehold.co/600x400',
         ],
         videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
         views: 340,
@@ -100,6 +103,8 @@ export const dummyProperties: Listing[] = [
         submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 48 * 60 * 60 * 1000),
         verifiedBy: 'S002',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'spacious-3bhk-kharghar',
@@ -120,7 +125,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['Parking', 'Balcony', 'Garden', 'Power Backup'],
         size: '3 BHK',
         images: [
-            'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=2070&auto=format&fit=crop',
+            'https://placehold.co/600x400',
         ],
         views: 210,
         ownerId: 'dummyOwner1',
@@ -130,6 +135,9 @@ export const dummyProperties: Listing[] = [
         submittedAt: new Date(Date.now() - 96 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 72 * 60 * 60 * 1000),
         verifiedBy: 'S001',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
+        nocUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'modern-2bhk-nerul',
@@ -150,7 +158,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['AC', 'WiFi', 'Gym', 'Elevator'],
         size: '2 BHK',
         images: [
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop',
+            'https://placehold.co/600x400',
         ],
         views: 95,
         ownerId: 'dummyOwner3',
@@ -158,6 +166,8 @@ export const dummyProperties: Listing[] = [
         lastAvailabilityCheck: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
         status: 'pending',
         submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'affordable-1bhk-panvel',
@@ -178,7 +188,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['Parking', 'Elevator'],
         size: '1 BHK',
         images: [
-            'https://images.unsplash.com/photo-1600585152225-358bfe9ddb0b?q=80&w=2070&auto=format&fit=crop',
+            'https://placehold.co/600x400',
         ],
         views: 450,
         ownerId: 'dummyOwner4',
@@ -188,6 +198,8 @@ export const dummyProperties: Listing[] = [
         submittedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
         verifiedBy: 'S001',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'cozy-1bhk-andheri',
@@ -206,7 +218,7 @@ export const dummyProperties: Listing[] = [
         furnishedStatus: 'Semi-Furnished',
         amenities: ['Elevator', 'Security', 'Piped Gas'],
         size: '1 BHK',
-        images: ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2070&auto=format&fit=crop'],
+        images: ['https://placehold.co/600x400'],
         views: 280,
         ownerId: 'dummyOwner6',
         brokerStatus: 'Without Broker',
@@ -215,6 +227,8 @@ export const dummyProperties: Listing[] = [
         submittedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         verifiedBy: 'S002',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'student-pg-airoli',
@@ -234,7 +248,7 @@ export const dummyProperties: Listing[] = [
         amenities: ['WiFi', 'Housekeeping', 'Security'],
         size: 'Double Sharing',
         images: [
-            'https://images.unsplash.com/photo-1591825729269-caeb483e0222?q=80&w=1974&auto=format&fit=crop',
+            'https://placehold.co/600x400',
         ],
         views: 190,
         ownerId: 'dummyOwner5',
@@ -251,6 +265,8 @@ export const dummyProperties: Listing[] = [
         lastAvailabilityCheck: new Date(),
         status: 'pending',
         submittedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     }
 ];
 
@@ -272,7 +288,7 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Non-Smoker', 'Clean', 'Drinker', 'Vegetarian'],
         gender: 'Male',
         images: [
-            'https://images.unsplash.com/photo-1557862921-37829c790f19?q=80&w=2071&auto=format&fit=crop',
+            'https://placehold.co/400x400',
         ],
         views: 75,
         ownerId: 'dummyRoommateOwner1',
@@ -281,6 +297,7 @@ export const dummyRoommates: RoommateProfile[] = [
         submittedAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
         verifiedBy: 'S001',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'ankita-reddy-kharghar',
@@ -299,7 +316,7 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Non-Smoker', 'Clean', 'Drinker', 'Non-Vegetarian'],
         gender: 'Female',
         images: [
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop',
+            'https://placehold.co/400x400',
         ],
         views: 180,
         ownerId: 'dummyRoommateOwner2',
@@ -308,6 +325,8 @@ export const dummyRoommates: RoommateProfile[] = [
         submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 48 * 60 * 60 * 1000),
         verifiedBy: 'S002',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'vikram-singh-vashi',
@@ -325,13 +344,15 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Pet-Friendly', 'Clean', 'Drinker'],
         gender: 'Male',
         images: [
-            'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop',
+            'https://placehold.co/400x400',
         ],
         views: 220,
         ownerId: 'dummyRoommateOwner3',
         hasProperty: true,
         status: 'pending',
         submittedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'priya-nair-nerul',
@@ -349,7 +370,7 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Pet-Friendly', 'Non-Smoker', 'Clean'],
         gender: 'Female',
         images: [
-            'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop',
+            'https://placehold.co/400x400',
         ],
         views: 155,
         ownerId: 'dummyRoommateOwner4',
@@ -358,6 +379,8 @@ export const dummyRoommates: RoommateProfile[] = [
         submittedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         verificationTimestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
         verifiedBy: 'S001',
+        aadhaarCardUrl: 'https://placehold.co/400x300',
+        electricityBillUrl: 'https://placehold.co/400x300',
     },
     {
         id: 'neha-gupta-pune',
@@ -374,11 +397,12 @@ export const dummyRoommates: RoommateProfile[] = [
         description: "Art student looking for a fun and friendly female roommate for a shared PG. I'm tidy, love to paint, and explore cafes. Let's find a great place together!",
         preferences: ['Non-Smoker', 'Clean', 'Vegetarian'],
         gender: 'Female',
-        images: ['https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop'],
+        images: ['https://placehold.co/400x400'],
         views: 95,
         ownerId: 'dummyRoommateOwner5',
         hasProperty: false,
         status: 'pending',
         submittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        aadhaarCardUrl: 'https://placehold.co/400x300',
     }
 ];

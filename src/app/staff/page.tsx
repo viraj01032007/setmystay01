@@ -3,14 +3,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search, Phone, MapPin, User as UserIcon, Briefcase } from 'lucide-react';
+import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search, Phone, MapPin, User as UserIcon, Briefcase, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +18,48 @@ import { LoadingSpinner } from '@/components/icons';
 import { dummyProperties, dummyRoommates } from '@/lib/data';
 import { format } from 'date-fns';
 import { getFromLocalStorage, saveToLocalStorage } from '@/lib/storage';
+
+const VendorDetailsDialog = ({ isOpen, onClose, details }) => {
+    if (!details) return null;
+
+    const { vendorNumber, properties } = details;
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Properties for Vendor: {vendorNumber}</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto">
+                     {properties.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Property ID</TableHead>
+                                    <TableHead>Property Title</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {properties.map(prop => (
+                                    <TableRow key={prop.propertyId}>
+                                        <TableCell>{prop.propertyId}</TableCell>
+                                        <TableCell className="font-medium">{prop.propertyTitle}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                         <p className="text-center text-muted-foreground py-8">No properties assigned to this vendor number.</p>
+                    )}
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>Close</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default function StaffDashboard() {
     const router = useRouter();
@@ -31,6 +73,9 @@ export default function StaffDashboard() {
     const [currentItem, setCurrentItem] = useState(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [propertySearchTerm, setPropertySearchTerm] = useState('');
+    const [vendorSearchTerm, setVendorSearchTerm] = useState('');
+    const [isVendorDetailsModalOpen, setVendorDetailsModalOpen] = useState(false);
+    const [vendorDetails, setVendorDetails] = useState(null);
 
     useEffect(() => {
         const authStatus = localStorage.getItem('staff_authenticated');
@@ -47,6 +92,44 @@ export default function StaffDashboard() {
             setRoommates(getFromLocalStorage('roommates', dummyRoommates));
         }
     }, [isMounted]);
+    
+    const vendorNumbers = useMemo(() => {
+        const groupedByVendor = properties
+            .filter(p => p.vendorNumber)
+            .reduce((acc, p) => {
+                if (!acc[p.vendorNumber]) {
+                    acc[p.vendorNumber] = [];
+                }
+                acc[p.vendorNumber].push({ propertyId: p.id, propertyTitle: p.title });
+                return acc;
+            }, {});
+        
+        return Object.entries(groupedByVendor).map(([vendorNumber, properties]) => ({
+            vendorNumber,
+            properties
+        }));
+    }, [properties]);
+    
+    const filteredVendorNumbers = useMemo(() => {
+        if (!vendorSearchTerm) return vendorNumbers;
+        return vendorNumbers.filter(v => 
+            v.vendorNumber.toLowerCase().includes(vendorSearchTerm.toLowerCase())
+        );
+    }, [vendorNumbers, vendorSearchTerm]);
+
+    const handleGenerateVendorNumber = () => {
+        const newVendorNumber = `Staff${Math.floor(1000 + Math.random() * 9000)}`;
+        navigator.clipboard.writeText(newVendorNumber);
+        toast({
+            title: "Vendor Number Generated",
+            description: `${newVendorNumber} has been copied to your clipboard.`,
+        });
+    };
+    
+    const handleViewVendorDetails = (vendorData) => {
+        setVendorDetails(vendorData);
+        setVendorDetailsModalOpen(true);
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('staff_authenticated');
@@ -162,74 +245,137 @@ export default function StaffDashboard() {
                 </div>
             </header>
 
-            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Pending Listings Section */}
-                <Card className="mb-8">
-                    <CardHeader><CardTitle className="text-2xl">Pending Listings for Verification</CardTitle></CardHeader>
-                    <CardContent>
-                        {pendingListings.length > 0 ? (
-                            pendingListings.map(item => (
-                                <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <div className="w-full">
-                                        <p className="font-semibold">{item.title || item.ownerName} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
-                                        <p className="text-sm text-slate-600">{item.locality}</p>
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Left Column */}
+                <div className="md:col-span-2 space-y-8">
+                    {/* Pending Listings Section */}
+                    <Card>
+                        <CardHeader><CardTitle className="text-2xl">Pending Listings for Verification</CardTitle></CardHeader>
+                        <CardContent>
+                            {pendingListings.length > 0 ? (
+                                pendingListings.map(item => (
+                                    <div key={item.id} className="border-l-4 border-yellow-400 bg-slate-50 p-4 rounded-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                        <div className="w-full">
+                                            <p className="font-semibold">{item.title || item.ownerName} <span className="text-xs font-medium text-slate-500">({item.itemType})</span></p>
+                                            <p className="text-sm text-slate-600">{item.locality}</p>
+                                        </div>
+                                        <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">Verify Details</Button>
                                     </div>
-                                    <Button onClick={() => handleViewDetails(item.id, item.itemType)} className="w-full sm:w-auto">Verify Details</Button>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-slate-500">No pending listings.</p>
-                        )}
-                    </CardContent>
-                </Card>
+                                ))
+                            ) : (
+                                <p className="text-slate-500">No pending listings.</p>
+                            )}
+                        </CardContent>
+                    </Card>
 
-                {/* All Listings Table */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <CardTitle className="text-2xl">All System Listings</CardTitle>
-                                <CardDescription>Search and manage all properties and roommate profiles.</CardDescription>
+                    {/* All Listings Table */}
+                    <Card>
+                        <CardHeader>
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <CardTitle className="text-2xl">All System Listings</CardTitle>
+                                    <CardDescription>Search and manage all properties and roommate profiles.</CardDescription>
+                                </div>
+                                <div className="relative w-full sm:w-auto">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                        placeholder="Search by title or name..." 
+                                        value={propertySearchTerm}
+                                        onChange={(e) => setPropertySearchTerm(e.target.value)}
+                                        className="pl-10 w-full sm:w-64"
+                                    />
+                                </div>
                             </div>
-                            <div className="relative w-full sm:w-auto">
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Title/Name</TableHead>
+                                        <TableHead>Type</TableHead>
+                                        <TableHead>Vendor #</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredProperties.map(p => (
+                                        <TableRow key={p.id}>
+                                            <TableCell className="font-medium">{p.title || p.ownerName}</TableCell>
+                                            <TableCell className="capitalize">{p.propertyType || p.type || 'N/A'}</TableCell>
+                                            <TableCell>{p.vendorNumber || 'N/A'}</TableCell>
+                                            <TableCell><StatusBadge status={p.status} /></TableCell>
+                                            <TableCell>
+                                                <Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.propertyType || p.type || 'roommate')}>View</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right Column */}
+                <div className="md:col-span-1">
+                    <Card>
+                        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <CardTitle className="text-2xl">Vendor Management</CardTitle>
+                                <CardDescription>Generate and track vendor numbers.</CardDescription>
+                            </div>
+                            <Button onClick={handleGenerateVendorNumber}>
+                                <PlusCircle className="mr-2 h-4 w-4" /> Generate
+                            </Button>
+                        </CardHeader>
+                        <CardContent>
+                                <div className="relative mb-4">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input 
-                                    placeholder="Search by title or name..." 
-                                    value={propertySearchTerm}
-                                    onChange={(e) => setPropertySearchTerm(e.target.value)}
-                                    className="pl-10 w-full sm:w-64"
+                                    placeholder="Search by vendor number..." 
+                                    value={vendorSearchTerm}
+                                    onChange={(e) => setVendorSearchTerm(e.target.value)}
+                                    className="pl-10"
                                 />
                             </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Title/Name</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Vendor #</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredProperties.map(p => (
-                                    <TableRow key={p.id}>
-                                        <TableCell className="font-medium">{p.title || p.ownerName}</TableCell>
-                                        <TableCell className="capitalize">{p.propertyType || p.type || 'N/A'}</TableCell>
-                                        <TableCell>{p.vendorNumber || 'N/A'}</TableCell>
-                                        <TableCell><StatusBadge status={p.status} /></TableCell>
-                                        <TableCell>
-                                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.propertyType || p.type || 'roommate')}>View</Button>
-                                        </TableCell>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Vendor Number</TableHead>
+                                        <TableHead>Properties</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredVendorNumbers.map(v => (
+                                        <TableRow key={v.vendorNumber}>
+                                            <TableCell>
+                                                <Button variant="link" className="font-mono p-0 h-auto" onClick={() => handleViewVendorDetails(v)}>
+                                                    {v.vendorNumber}
+                                                </Button>
+                                            </TableCell>
+                                            <TableCell>{v.properties.length}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                        {filteredVendorNumbers.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={2} className="text-center text-muted-foreground py-4">
+                                                No vendor numbers found.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
             </main>
+
+            {/* Vendor Details Modal */}
+            <VendorDetailsDialog
+                isOpen={isVendorDetailsModalOpen}
+                onClose={() => setVendorDetailsModalOpen(false)}
+                details={vendorDetails}
+            />
 
             {/* Details Modal */}
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
@@ -257,38 +403,43 @@ export default function StaffDashboard() {
                                 </div>
                             )}
 
-                            <div className="border rounded-lg p-4 bg-blue-50">
-                                <h4 className="font-semibold text-base mb-3">Verification Documents</h4>
-                                <div className="flex flex-wrap gap-4">
-                                    {currentItem.aadhaarCardUrl && (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <FileText className="w-8 h-8 text-blue-600"/>
-                                            <p className="text-sm font-medium">Aadhaar Card</p>
-                                            <Button asChild variant="outline" size="sm">
-                                                <a href={currentItem.aadhaarCardUrl} target="_blank" rel="noopener noreferrer">View</a>
-                                            </Button>
-                                        </div>
-                                    )}
-                                    {currentItem.electricityBillUrl && (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <FileText className="w-8 h-8 text-blue-600"/>
-                                            <p className="text-sm font-medium">Electricity Bill</p>
-                                            <Button asChild variant="outline" size="sm">
-                                                <a href={currentItem.electricityBillUrl} target="_blank" rel="noopener noreferrer">View</a>
-                                            </Button>
-                                        </div>
-                                    )}
-                                    {currentItem.nocUrl && (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <FileText className="w-8 h-8 text-blue-600"/>
-                                            <p className="text-sm font-medium">NOC</p>
-                                            <Button asChild variant="outline" size="sm">
-                                                <a href={currentItem.nocUrl} target="_blank" rel="noopener noreferrer">View</a>
-                                            </Button>
-                                        </div>
-                                    )}
+                            {(currentItem.aadhaarCardUrl || currentItem.electricityBillUrl || currentItem.nocUrl) && (
+                                <div className="border rounded-lg p-4 bg-blue-50">
+                                    <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
+                                        <FileCheck className="w-5 h-5 text-blue-700" />
+                                        Verification Documents
+                                    </h4>
+                                    <div className="flex flex-wrap gap-4">
+                                        {currentItem.aadhaarCardUrl && (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <FileText className="w-8 h-8 text-blue-600"/>
+                                                <p className="text-sm font-medium">Aadhaar Card</p>
+                                                <Button asChild variant="outline" size="sm">
+                                                    <a href={currentItem.aadhaarCardUrl} target="_blank" rel="noopener noreferrer">View</a>
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {currentItem.electricityBillUrl && (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <FileText className="w-8 h-8 text-blue-600"/>
+                                                <p className="text-sm font-medium">Electricity Bill</p>
+                                                <Button asChild variant="outline" size="sm">
+                                                    <a href={currentItem.electricityBillUrl} target="_blank" rel="noopener noreferrer">View</a>
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {currentItem.nocUrl && (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <FileText className="w-8 h-8 text-blue-600"/>
+                                                <p className="text-sm font-medium">NOC</p>
+                                                <Button asChild variant="outline" size="sm">
+                                                    <a href={currentItem.nocUrl} target="_blank" rel="noopener noreferrer">View</a>
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">

@@ -1296,55 +1296,6 @@ export default function AdminDashboard() {
                             </CardContent>
                         </Card>
                         <div className="space-y-8">
-                             <Card>
-                                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                    <div>
-                                        <CardTitle className="text-2xl">Vendor Number Management</CardTitle>
-                                        <CardDescription>Generate and track vendor numbers.</CardDescription>
-                                    </div>
-                                    <Button onClick={handleGenerateVendorNumber}>
-                                        <PlusCircle className="mr-2 h-4 w-4" /> Generate
-                                    </Button>
-                                </CardHeader>
-                                <CardContent>
-                                     <div className="relative mb-4">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input 
-                                            placeholder="Search by vendor number..." 
-                                            value={vendorSearchTerm}
-                                            onChange={(e) => setVendorSearchTerm(e.target.value)}
-                                            className="pl-10"
-                                        />
-                                    </div>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Vendor Number</TableHead>
-                                                <TableHead>Properties Assigned</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredVendorNumbers.map(v => (
-                                                <TableRow key={v.vendorNumber}>
-                                                    <TableCell>
-                                                        <Button variant="link" className="font-mono p-0 h-auto" onClick={() => handleViewVendorDetails(v)}>
-                                                            {v.vendorNumber}
-                                                        </Button>
-                                                    </TableCell>
-                                                    <TableCell>{v.properties.length}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                             {filteredVendorNumbers.length === 0 && (
-                                                <TableRow>
-                                                    <TableCell colSpan={2} className="text-center text-muted-foreground py-4">
-                                                        No vendor numbers found.
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </CardContent>
-                            </Card>
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div>
