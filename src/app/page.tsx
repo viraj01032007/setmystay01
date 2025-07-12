@@ -67,6 +67,7 @@ export default function Home() {
   const [pendingListingData, setPendingListingData] = useState<any>(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authActionRequired, setAuthActionRequired] = useState<string | null>(null);
 
   const [adToShow, setAdToShow] = useState<Advertisement | null>(null);
   const [isAdModalOpen, setIsAdModalOpen] = useState(false);
@@ -90,6 +91,13 @@ export default function Home() {
 
   useEffect(() => {
     if (isClient) {
+      const loggedInStatus = getFromLocalStorage('setmystay_isLoggedIn', false);
+      setIsLoggedIn(loggedInStatus);
+    }
+  }, [isClient]);
+
+  useEffect(() => {
+    if (isClient) {
       // Initial data loading
       const approvedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
       const approvedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
@@ -104,11 +112,8 @@ export default function Home() {
       setFeaturedProperties(shuffledListings.slice(0, 3));
       setFeaturedRoommates(shuffledRoommates.slice(0, 3));
       
-      const loggedInStatus = getFromLocalStorage('setmystay_isLoggedIn', false);
-      setIsLoggedIn(loggedInStatus);
-      
       const allUserData = getFromLocalStorage('setmystay_user_data', {});
-      const userData = loggedInStatus ? (allUserData.defaultUser || defaultUserState) : defaultUserState;
+      const userData = isLoggedIn ? (allUserData.defaultUser || defaultUserState) : defaultUserState;
       
       setUnlocks({
           count: userData.unlocks.count || 0,
@@ -116,8 +121,20 @@ export default function Home() {
           unlockedIds: new Set(userData.unlocks.unlockedIds || []),
       });
       setPurchaseHistory((userData.purchaseHistory || []).map((p: any) => ({...p, date: new Date(p.date)})));
-      setLikedItemIds(new Set(userData.likedItemIds || []));
       
+      const currentLikedIds = new Set(userData.likedItemIds || []);
+      setLikedItemIds(currentLikedIds);
+      
+      const allProps = getFromLocalStorage('properties', dummyProperties);
+      const allMates = getFromLocalStorage('roommates', dummyRoommates);
+      const allItems = [...allProps, ...allMates];
+      setLikedItems(allItems.filter(item => currentLikedIds.has(item.id)));
+
+      const userId = 'newUser'; // Simulate current user
+      const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
+      const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
+      setMyProperties([...userListings, ...userRoommateProfiles]);
+
       const storedAdvertisements = getFromLocalStorage('advertisements', []);
       const activeAd = storedAdvertisements.find(ad => ad.isActive);
       const adShown = sessionStorage.getItem('setmystay_ad_shown');
@@ -133,17 +150,6 @@ export default function Home() {
       }
       
       setActiveCoupons(getFromLocalStorage('coupons', dummyCoupons));
-      
-      const allProps = getFromLocalStorage('properties', dummyProperties);
-      const allMates = getFromLocalStorage('roommates', dummyRoommates);
-      const allItems = [...allProps, ...allMates];
-      const userLikedItems = allItems.filter(item => (userData.likedItemIds || []).includes(item.id));
-      setLikedItems(userLikedItems);
-
-      const userId = 'newUser'; // Simulate current user
-      const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
-      const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
-      setMyProperties([...userListings, ...userRoommateProfiles]);
       
       setIsLoading(false);
     }
@@ -171,7 +177,22 @@ export default function Home() {
     if (isClient) {
       saveUserData();
     }
-  }, [isClient, saveUserData, unlocks, purchaseHistory, likedItemIds]);
+  }, [isClient, saveUserData]);
+  
+  // Effect to handle showing the auth modal when an action requires it
+  useEffect(() => {
+    if (authActionRequired) {
+      toast({
+        title: "Authentication Required",
+        description: `Please sign in to ${authActionRequired}.`,
+      });
+      setAuthModalOpen(true);
+      if (authActionRequired === 'list your property') {
+        sessionStorage.setItem('setmystay_intended_page', 'list');
+      }
+    }
+  }, [authActionRequired, toast]);
+
 
   const handleNavigate = (page: Page) => {
     setActivePage(page);
@@ -263,8 +284,7 @@ export default function Home() {
 
   const handleUnlockClick = () => {
     if (!isLoggedIn) {
-        setAuthModalOpen(true);
-        toast({ title: "Authentication Required", description: "Please sign in to unlock details." });
+        setAuthActionRequired('unlock details');
         return;
     }
     if (selectedItem) {
@@ -281,8 +301,7 @@ export default function Home() {
   
   const handleToggleLike = (itemId: string) => {
     if (!isLoggedIn) {
-        setAuthModalOpen(true);
-        toast({ title: "Authentication Required", description: "Please sign in to like items." });
+        setAuthActionRequired('like items');
         return;
     }
     setLikedItemIds(currentSet => {
@@ -298,13 +317,8 @@ export default function Home() {
 
   const handleInitiateListing = (data: any) => {
     if (!isLoggedIn) {
-      setAuthModalOpen(true);
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to list your property.",
-        variant: "destructive"
-      });
-      return;
+        setAuthActionRequired('list a property');
+        return;
     }
     setPendingListingData(data);
     setListPaymentModalOpen(true);
@@ -421,20 +435,10 @@ export default function Home() {
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
+    setAuthActionRequired(null);
     saveToLocalStorage('setmystay_isLoggedIn', true);
     
-    // Reload user-specific data
-    const allUserData = getFromLocalStorage('setmystay_user_data', {});
-    const userData = allUserData.defaultUser || defaultUserState;
-    setUnlocks({
-      count: userData.unlocks.count || 0,
-      isUnlimited: userData.unlocks.isUnlimited || false,
-      unlockedIds: new Set(userData.unlocks.unlockedIds || []),
-    });
-    setPurchaseHistory((userData.purchaseHistory || []).map((p: any) => ({...p, date: new Date(p.date)})));
-    setLikedItemIds(new Set(userData.likedItemIds || []));
-
-    // If user wanted to list a property, take them there now
+    // If user intended to list a property, take them there now
     const intendedPage = sessionStorage.getItem('setmystay_intended_page');
     if (intendedPage === 'list') {
       setActivePage('list');
@@ -477,12 +481,7 @@ export default function Home() {
   const handlePlanSelect = (plan: { plan: UnlockPlan, title: string, price: number }) => {
     if (!isLoggedIn) {
       setUnlockModalOpen(false);
-      setAuthModalOpen(true);
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to purchase a plan.",
-        variant: "destructive",
-      });
+      setAuthActionRequired('purchase a plan');
       return;
     }
     setUnlockModalOpen(false);
@@ -491,12 +490,7 @@ export default function Home() {
 
   const handleNavigationWithAuth = (page: Page) => {
     if (page === 'list' && !isLoggedIn) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please sign in to list a property.',
-      });
-      sessionStorage.setItem('setmystay_intended_page', 'list');
-      setAuthModalOpen(true);
+      setAuthActionRequired('list your property');
       return;
     }
     handleNavigate(page);
@@ -504,35 +498,11 @@ export default function Home() {
   
   const handleGameClick = () => {
     if (!isLoggedIn) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please sign in to play the game.',
-      });
-      setAuthModalOpen(true);
+      setAuthActionRequired('play the game');
     } else {
       setIsSlotMachineModalOpen(true);
     }
   };
-
-  useEffect(() => {
-    // This effect ensures that the liked items list is updated whenever the likedItemIds change.
-    if(isClient) {
-      const allProps = getFromLocalStorage('properties', dummyProperties);
-      const allMates = getFromLocalStorage('roommates', dummyRoommates);
-      const allItems = [...allProps, ...allMates];
-      setLikedItems(allItems.filter(item => likedItemIds.has(item.id)));
-    }
-  }, [likedItemIds, isClient]);
-
-  useEffect(() => {
-      // This effect ensures that the user's own properties are loaded correctly.
-      if(isClient) {
-          const userId = 'newUser'; // Simulate current user
-          const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
-          const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
-          setMyProperties([...userListings, ...userRoommateProfiles]);
-      }
-  }, [isClient]);
 
   if (isLoading || !isClient) {
     return (
@@ -658,6 +628,7 @@ export default function Home() {
         onClose={() => {
             setUnlockModalOpen(false);
             if (itemToUnlock) {
+                // If we bailed on an unlock to buy more credits, show the item again.
                 setSelectedItem(itemToUnlock);
                 setItemToUnlock(null);
             }
@@ -678,7 +649,10 @@ export default function Home() {
       />
        <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setAuthModalOpen(false)}
+        onClose={() => {
+            setAuthModalOpen(false);
+            setAuthActionRequired(null);
+        }}
         onLoginSuccess={handleLoginSuccess}
       />
        <ChatModal
