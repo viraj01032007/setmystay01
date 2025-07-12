@@ -83,7 +83,7 @@ export default function Home() {
   const { toast } = useToast();
   
   const saveUserData = useCallback(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && isClient) {
       const allUserData = getFromLocalStorage('setmystay_user_data', {});
       const currentUserData = allUserData.defaultUser || {};
       const updatedData = { 
@@ -98,7 +98,7 @@ export default function Home() {
       };
       saveToLocalStorage('setmystay_user_data', { defaultUser: updatedData });
     }
-  }, [isLoggedIn, unlocks, purchaseHistory, likedItemIds]);
+  }, [isLoggedIn, isClient, unlocks, purchaseHistory, likedItemIds]);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -221,23 +221,20 @@ export default function Home() {
 
     toast({
       title: "Purchase Successful!",
-      description: plan === 'unlimited' ? "You've subscribed to unlimited unlocks for one month." : `You've added ${plan} unlocks.`,
+      description: plan === 'unlimited' ? "You now have unlimited unlocks." : `You've added ${plan} unlocks.`,
       variant: "default",
     });
 
     setTimeout(() => {
+        // After purchase, don't auto-unlock. Just return to the item.
         if (itemToUnlock) {
-            if (useUnlock(itemToUnlock.data.id)) {
-                // After purchase, use an unlock immediately and show the details
-                setSelectedItem(itemToUnlock);
-            }
+            setSelectedItem(itemToUnlock);
             setItemToUnlock(null);
         } else {
-            // If there was no specific item, just show the rating modal
             setRateUsModalOpen(true);
         }
-    }, 500);
-  }, [toast, itemToUnlock, useUnlock]);
+    }, 300);
+  }, [toast, itemToUnlock]);
 
   const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => {
     setSelectedItem({ type, data: item });
@@ -246,7 +243,7 @@ export default function Home() {
   const handleConfirmUnlock = () => {
     if (selectedItem?.data.id) {
       if (useUnlock(selectedItem.data.id)) {
-        // Refresh the selected item to show unlocked state
+        // Refresh the selected item to show unlocked state by re-setting it
         handleViewDetails(selectedItem.data, selectedItem.type);
       }
     }
@@ -263,7 +260,7 @@ export default function Home() {
         if (unlocks.isUnlimited || unlocks.count > 0) {
             setUnlockConfirmationOpen(true);
         } else {
-            // Set the item to unlock and close the details modal to show the pricing modal
+            // User has no unlocks, set the item to unlock and close the details modal to show the pricing modal
             setItemToUnlock(selectedItem);
             setSelectedItem(null); 
             setUnlockModalOpen(true);
@@ -272,6 +269,11 @@ export default function Home() {
   }
   
   const handleToggleLike = (itemId: string) => {
+    if (!isLoggedIn) {
+        setAuthModalOpen(true);
+        toast({ title: "Authentication Required", description: "Please sign in to like items." });
+        return;
+    }
     setLikedItemIds(currentSet => {
         const newSet = new Set(currentSet);
         if (newSet.has(itemId)) {
@@ -466,10 +468,7 @@ export default function Home() {
   };
 
   const handlePlanSelect = (plan: { plan: UnlockPlan, title: string, price: number }) => {
-    if (isLoggedIn) {
-      setUnlockModalOpen(false);
-      handleOpenConfirmationModal(plan.title, plan.price, () => handleUnlockPurchase(plan.plan, plan.title, plan.price));
-    } else {
+    if (!isLoggedIn) {
       setUnlockModalOpen(false);
       setAuthModalOpen(true);
       toast({
@@ -477,7 +476,10 @@ export default function Home() {
         description: "Please sign in to purchase a plan.",
         variant: "destructive",
       });
+      return;
     }
+    setUnlockModalOpen(false);
+    handleOpenConfirmationModal(plan.title, plan.price, () => handleUnlockPurchase(plan.plan, plan.title, plan.price));
   };
 
   const handleNavigationWithAuth = (page: Page) => {
@@ -507,7 +509,7 @@ export default function Home() {
     }
   };
 
-  if (isLoading) {
+  if (!isClient) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
         <LoadingSpinner className="w-16 h-16 text-primary" />

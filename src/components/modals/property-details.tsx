@@ -202,8 +202,8 @@ export function PropertyDetails({ listing, onClose, isUnlocked, onUnlock, onChat
             </div>
           </div>
         )}
-
-        <div className='space-y-4'>
+        
+        <div className='space-y-4 border-t pt-6'>
             <Button size="lg" variant="secondary" className="w-full" onClick={() => onCheckAvailability(listing)}>
                 <CheckCircle className="w-5 h-5 mr-2" /> Check Availability
             </Button>
