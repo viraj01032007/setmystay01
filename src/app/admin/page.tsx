@@ -593,6 +593,47 @@ const VendorDetailsDialog = ({ isOpen, onClose, details }) => {
     );
 };
 
+const CreateVendorDialog = ({ isOpen, onClose, onCreate }) => {
+    const { toast } = useToast();
+    const [vendorNumber, setVendorNumber] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!vendorNumber.trim()) {
+            toast({ title: 'Error', description: 'Vendor number cannot be empty.', variant: 'destructive' });
+            return;
+        }
+        onCreate(vendorNumber);
+        setVendorNumber('');
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Create Custom Vendor Number</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="vendor-number">Vendor Number</Label>
+                        <Input 
+                            id="vendor-number" 
+                            value={vendorNumber} 
+                            onChange={(e) => setVendorNumber(e.target.value)} 
+                            placeholder="e.g., Shreyansh2310"
+                            required 
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="submit">Create Vendor</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -608,6 +649,7 @@ export default function AdminDashboard() {
     const [availabilityInquiries, setAvailabilityInquiries] = useState([]);
     const [staff, setStaff] = useState<StaffMember[]>([]);
     const [ratings, setRatings] = useState<Rating[]>([]);
+    const [explicitVendors, setExplicitVendors] = useState<string[]>([]);
 
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
@@ -627,6 +669,8 @@ export default function AdminDashboard() {
 
     const [isVendorDetailsModalOpen, setVendorDetailsModalOpen] = useState(false);
     const [vendorDetails, setVendorDetails] = useState(null);
+    
+    const [isCreateVendorModalOpen, setCreateVendorModalOpen] = useState(false);
 
     const [isMounted, setIsMounted] = useState(false);
     
@@ -673,6 +717,7 @@ export default function AdminDashboard() {
             setSelectedDate(new Date());
             setProperties(getFromLocalStorage('properties', dummyProperties));
             setRoommates(getFromLocalStorage('roommates', dummyRoommates));
+            setExplicitVendors(getFromLocalStorage('explicitVendors', []));
             setPricing(getFromLocalStorage('pricing', {
                 unlocks: { 1: 49, 5: 199, 10: 399, unlimited: 999 },
                 listings: { roommate: 149, pg: 349, rental: 999 }
@@ -735,21 +780,27 @@ export default function AdminDashboard() {
     }, [ratings]);
 
     const vendorNumbers = useMemo(() => {
-        const groupedByVendor = properties
+        // Start with explicitly created vendors
+        const vendorData = explicitVendors.reduce((acc, vendorNumber) => {
+            acc[vendorNumber] = [];
+            return acc;
+        }, {});
+
+        // Add vendors from properties
+        properties
             .filter(p => p.vendorNumber)
-            .reduce((acc, p) => {
-                if (!acc[p.vendorNumber]) {
-                    acc[p.vendorNumber] = [];
+            .forEach(p => {
+                if (!vendorData[p.vendorNumber]) {
+                    vendorData[p.vendorNumber] = [];
                 }
-                acc[p.vendorNumber].push({ propertyId: p.id, propertyTitle: p.title });
-                return acc;
-            }, {});
-        
-        return Object.entries(groupedByVendor).map(([vendorNumber, properties]) => ({
+                vendorData[p.vendorNumber].push({ propertyId: p.id, propertyTitle: p.title });
+            });
+
+        return Object.entries(vendorData).map(([vendorNumber, properties]) => ({
             vendorNumber,
             properties
         }));
-    }, [properties]);
+    }, [properties, explicitVendors]);
     
     const filteredVendorNumbers = useMemo(() => {
         if (!vendorSearchTerm) return vendorNumbers;
@@ -768,6 +819,19 @@ export default function AdminDashboard() {
         });
     };
 
+    const handleCreateVendor = (vendorNumber: string) => {
+        if (explicitVendors.includes(vendorNumber) || vendorNumbers.some(v => v.vendorNumber === vendorNumber)) {
+            toast({ title: 'Error', description: 'This vendor number already exists.', variant: 'destructive' });
+            return;
+        }
+        
+        const updatedVendors = [...explicitVendors, vendorNumber];
+        setExplicitVendors(updatedVendors);
+        saveToLocalStorage('explicitVendors', updatedVendors);
+        
+        toast({ title: 'Success', description: `Vendor "${vendorNumber}" has been created.` });
+        setCreateVendorModalOpen(false);
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('admin_authenticated');
@@ -1373,9 +1437,14 @@ export default function AdminDashboard() {
                                         <CardTitle className="text-2xl">Vendor Management</CardTitle>
                                         <CardDescription>Generate and track vendor numbers.</CardDescription>
                                     </div>
-                                    <Button onClick={handleGenerateVendorNumber} className="w-full sm:w-auto">
-                                        <PlusCircle className="mr-2 h-4 w-4" /> Generate
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button onClick={handleGenerateVendorNumber} variant="outline">
+                                            Generate Random
+                                        </Button>
+                                        <Button onClick={() => setCreateVendorModalOpen(true)}>
+                                            <PlusCircle className="mr-2 h-4 w-4" /> Create
+                                        </Button>
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                         <div className="relative mb-4">
@@ -1567,6 +1636,12 @@ export default function AdminDashboard() {
                 onClose={() => setVendorDetailsModalOpen(false)}
                 details={vendorDetails}
             />
+            
+            <CreateVendorDialog
+                isOpen={isCreateVendorModalOpen}
+                onClose={() => setCreateVendorModalOpen(false)}
+                onCreate={handleCreateVendor}
+            />
 
             {/* Details Modal */}
             <Dialog open={isDetailsModalOpen} onOpenChange={setDetailsModalOpen}>
@@ -1594,13 +1669,12 @@ export default function AdminDashboard() {
                                 </div>
                             )}
 
-                             {(currentItem.aadhaarCardUrl || currentItem.electricityBillUrl) && (
+                             {(currentItem.aadhaarCardUrl || currentItem.electricityBillUrl || currentItem.nocUrl) && (
                                 <div className="border rounded-lg p-4 bg-blue-50">
                                     <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
                                         <FileCheck className="w-5 h-5 text-blue-700" />
                                         Verification Documents
                                     </h4>
-                                    <p className="text-sm text-blue-600 mb-4">These documents are visible only to admins for verification.</p>
                                     <div className="flex flex-wrap gap-4">
                                         {currentItem.aadhaarCardUrl && (
                                             <div className="flex flex-col items-center gap-2">
