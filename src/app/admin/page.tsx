@@ -552,6 +552,47 @@ const StaffActivityDialog = ({ isOpen, onClose, details }) => {
     );
 };
 
+const VendorDetailsDialog = ({ isOpen, onClose, details }) => {
+    if (!details) return null;
+
+    const { vendorNumber, properties } = details;
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Properties for Vendor: {vendorNumber}</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto">
+                     {properties.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Property ID</TableHead>
+                                    <TableHead>Property Title</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {properties.map(prop => (
+                                    <TableRow key={prop.propertyId}>
+                                        <TableCell>{prop.propertyId}</TableCell>
+                                        <TableCell className="font-medium">{prop.propertyTitle}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                         <p className="text-center text-muted-foreground py-8">No properties assigned to this vendor number.</p>
+                    )}
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>Close</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -584,11 +625,15 @@ export default function AdminDashboard() {
     const [isStaffActivityModalOpen, setStaffActivityModalOpen] = useState(false);
     const [staffActivityDetails, setStaffActivityDetails] = useState(null);
 
+    const [isVendorDetailsModalOpen, setVendorDetailsModalOpen] = useState(false);
+    const [vendorDetails, setVendorDetails] = useState(null);
+
     const [isMounted, setIsMounted] = useState(false);
     
     const [activeSettingsDialog, setActiveSettingsDialog] = useState<null | 'password' | 'pin' | 'security' | 'contact'>(null);
     
     const [propertySearchTerm, setPropertySearchTerm] = useState('');
+    const [vendorSearchTerm, setVendorSearchTerm] = useState('');
     const [propertyTypeFilter, setPropertyTypeFilter] = useState('all');
 
     const [chartView, setChartView] = useState('monthly');
@@ -690,12 +735,29 @@ export default function AdminDashboard() {
     }, [ratings]);
 
     const vendorNumbers = useMemo(() => {
-        return properties.filter(p => p.vendorNumber).map(p => ({
-            vendorNumber: p.vendorNumber,
-            propertyTitle: p.title,
-            propertyId: p.id,
+        const groupedByVendor = properties
+            .filter(p => p.vendorNumber)
+            .reduce((acc, p) => {
+                if (!acc[p.vendorNumber]) {
+                    acc[p.vendorNumber] = [];
+                }
+                acc[p.vendorNumber].push({ propertyId: p.id, propertyTitle: p.title });
+                return acc;
+            }, {});
+        
+        return Object.entries(groupedByVendor).map(([vendorNumber, properties]) => ({
+            vendorNumber,
+            properties
         }));
     }, [properties]);
+    
+    const filteredVendorNumbers = useMemo(() => {
+        if (!vendorSearchTerm) return vendorNumbers;
+        return vendorNumbers.filter(v => 
+            v.vendorNumber.toLowerCase().includes(vendorSearchTerm.toLowerCase())
+        );
+    }, [vendorNumbers, vendorSearchTerm]);
+
 
     const handleGenerateVendorNumber = () => {
         const newVendorNumber = `Admin${Math.floor(1000 + Math.random() * 9000)}`;
@@ -908,6 +970,11 @@ export default function AdminDashboard() {
     const handleViewStaffActivity = (staffName, activityType, listings) => {
         setStaffActivityDetails({ staffName, activityType, listings });
         setStaffActivityModalOpen(true);
+    };
+
+    const handleViewVendorDetails = (vendorData) => {
+        setVendorDetails(vendorData);
+        setVendorDetailsModalOpen(true);
     };
 
     const StatusBadge = ({ status }) => {
@@ -1230,7 +1297,7 @@ export default function AdminDashboard() {
                         </Card>
                         <div className="space-y-8">
                              <Card>
-                                <CardHeader className="flex flex-row items-center justify-between">
+                                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
                                         <CardTitle className="text-2xl">Vendor Number Management</CardTitle>
                                         <CardDescription>Generate and track vendor numbers.</CardDescription>
@@ -1240,28 +1307,37 @@ export default function AdminDashboard() {
                                     </Button>
                                 </CardHeader>
                                 <CardContent>
+                                     <div className="relative mb-4">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input 
+                                            placeholder="Search by vendor number..." 
+                                            value={vendorSearchTerm}
+                                            onChange={(e) => setVendorSearchTerm(e.target.value)}
+                                            className="pl-10"
+                                        />
+                                    </div>
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Vendor Number</TableHead>
-                                                <TableHead>Assigned To</TableHead>
-                                                <TableHead className="text-right">Actions</TableHead>
+                                                <TableHead>Properties Assigned</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {vendorNumbers.map(v => (
+                                            {filteredVendorNumbers.map(v => (
                                                 <TableRow key={v.vendorNumber}>
-                                                    <TableCell className="font-mono">{v.vendorNumber}</TableCell>
-                                                    <TableCell>{v.propertyTitle}</TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(v.propertyId, 'rental')}>View Property</Button>
+                                                    <TableCell>
+                                                        <Button variant="link" className="font-mono p-0 h-auto" onClick={() => handleViewVendorDetails(v)}>
+                                                            {v.vendorNumber}
+                                                        </Button>
                                                     </TableCell>
+                                                    <TableCell>{v.properties.length}</TableCell>
                                                 </TableRow>
                                             ))}
-                                             {vendorNumbers.length === 0 && (
+                                             {filteredVendorNumbers.length === 0 && (
                                                 <TableRow>
-                                                    <TableCell colSpan={3} className="text-center text-muted-foreground py-4">
-                                                        No vendor numbers assigned yet.
+                                                    <TableCell colSpan={2} className="text-center text-muted-foreground py-4">
+                                                        No vendor numbers found.
                                                     </TableCell>
                                                 </TableRow>
                                             )}
@@ -1483,6 +1559,13 @@ export default function AdminDashboard() {
                 isOpen={isStaffActivityModalOpen}
                 onClose={() => setStaffActivityModalOpen(false)}
                 details={staffActivityDetails}
+            />
+
+            {/* Vendor Details Modal */}
+            <VendorDetailsDialog
+                isOpen={isVendorDetailsModalOpen}
+                onClose={() => setVendorDetailsModalOpen(false)}
+                details={vendorDetails}
             />
 
             {/* Details Modal */}
