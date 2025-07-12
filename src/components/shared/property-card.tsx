@@ -35,7 +35,6 @@ export function PropertyCard({ listing, onViewDetails, isLiked, onToggleLike, is
           alt={listing.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
-          data-ai-hint={listing['data-ai-hint'] as string | undefined}
         />
         <Badge variant="secondary" className="absolute top-3 left-3">
           {listing.propertyType === 'PG' ? <BedDouble className="w-3 h-3 mr-1.5" /> : <Home className="w-3 h-3 mr-1.5" />}

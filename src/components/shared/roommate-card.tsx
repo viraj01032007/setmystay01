@@ -35,7 +35,6 @@ export function RoommateCard({ profile, onViewDetails, isLiked, onToggleLike, is
           alt={profile.ownerName}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
-          data-ai-hint={profile['data-ai-hint'] as string | undefined}
         />
         <Badge variant="secondary" className="absolute top-3 left-3">
           <User className="w-3 h-3 mr-1.5" />

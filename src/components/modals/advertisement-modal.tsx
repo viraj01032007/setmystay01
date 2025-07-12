@@ -31,7 +31,6 @@ export function AdvertisementModal({ isOpen, onClose, title, description, imageU
                     alt={title} 
                     fill 
                     className="object-cover" 
-                    data-ai-hint="advertisement marketing"
                 />
             </div>
            )}

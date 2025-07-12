@@ -64,7 +64,6 @@ export function HomeSection({
           fill
           className="object-cover -z-10"
           priority
-          data-ai-hint="modern interior"
         />
         <div className="absolute inset-0 bg-blue-800/60 backdrop-brightness-75"></div>
         <div className="relative text-white max-w-4xl space-y-6 w-full p-8 mx-4 sm:mx-8 rounded-xl">

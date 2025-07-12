@@ -8,7 +8,6 @@ export const dummyAdvertisements: Advertisement[] = [
         description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50',
         imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto=format&fit=crop',
         isActive: true,
-        'data-ai-hint': 'sale promotion',
     },
     {
         id: 'ad002',
@@ -16,7 +15,6 @@ export const dummyAdvertisements: Advertisement[] = [
         description: 'Subscribe to our unlimited plan and find your perfect roommate today.',
         imageUrl: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2070&auto=format&fit=crop',
         isActive: false,
-        'data-ai-hint': 'people connecting',
     }
 ];
 
@@ -53,7 +51,6 @@ export const dummyProperties: Listing[] = [
         images: [
             'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'modern apartment',
         views: 125,
         ownerId: 'dummyOwner1',
         brokerStatus: 'Without Broker',
@@ -92,7 +89,6 @@ export const dummyProperties: Listing[] = [
             'https://images.unsplash.com/photo-1493809842344-ab6181ba96a2?q=80&w=2070&auto=format&fit=crop',
             'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1980&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'luxury apartment',
         videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
         views: 340,
         ownerId: 'dummyOwner2',
@@ -124,7 +120,6 @@ export const dummyProperties: Listing[] = [
         images: [
             'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=2070&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'house garden',
         views: 210,
         ownerId: 'dummyOwner1',
         brokerStatus: 'Without Broker',
@@ -155,7 +150,6 @@ export const dummyProperties: Listing[] = [
         images: [
             'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'bright apartment',
         views: 95,
         ownerId: 'dummyOwner3',
         brokerStatus: 'With Broker',
@@ -184,7 +178,6 @@ export const dummyProperties: Listing[] = [
         images: [
             'https://images.unsplash.com/photo-1600585152225-358bfe9ddb0b?q=80&w=2070&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'simple apartment',
         views: 450,
         ownerId: 'dummyOwner4',
         brokerStatus: 'Without Broker',
@@ -212,7 +205,6 @@ export const dummyProperties: Listing[] = [
         amenities: ['Elevator', 'Security', 'Piped Gas'],
         size: '1 BHK',
         images: ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2070&auto=format&fit=crop'],
-        'data-ai-hint': 'small apartment interior',
         views: 280,
         ownerId: 'dummyOwner6',
         brokerStatus: 'Without Broker',
@@ -242,7 +234,6 @@ export const dummyProperties: Listing[] = [
         images: [
             'https://images.unsplash.com/photo-1591825729269-caeb483e0222?q=80&w=1974&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'student room',
         views: 190,
         ownerId: 'dummyOwner5',
         brokerStatus: 'Without Broker',
@@ -280,7 +271,6 @@ export const dummyRoommates: RoommateProfile[] = [
         images: [
             'https://images.unsplash.com/photo-1557862921-37829c790f19?q=80&w=2071&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'male portrait',
         views: 75,
         ownerId: 'dummyRoommateOwner1',
         hasProperty: false,
@@ -308,7 +298,6 @@ export const dummyRoommates: RoommateProfile[] = [
         images: [
             'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'female portrait',
         views: 180,
         ownerId: 'dummyRoommateOwner2',
         hasProperty: true,
@@ -335,7 +324,6 @@ export const dummyRoommates: RoommateProfile[] = [
         images: [
             'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'male professional',
         views: 220,
         ownerId: 'dummyRoommateOwner3',
         hasProperty: true,
@@ -360,7 +348,6 @@ export const dummyRoommates: RoommateProfile[] = [
         images: [
             'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop',
         ],
-        'data-ai-hint': 'female creative',
         views: 155,
         ownerId: 'dummyRoommateOwner4',
         hasProperty: true,
@@ -385,7 +372,6 @@ export const dummyRoommates: RoommateProfile[] = [
         preferences: ['Non-Smoker', 'Clean', 'Vegetarian'],
         gender: 'Female',
         images: ['https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop'],
-        'data-ai-hint': 'female student',
         views: 95,
         ownerId: 'dummyRoommateOwner5',
         hasProperty: false,

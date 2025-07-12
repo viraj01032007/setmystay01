@@ -620,12 +620,12 @@ export default function AdminDashboard() {
             router.replace('/admin/login');
         } else {
             setIsMounted(true);
-            setSelectedDate(new Date());
         }
     }, [router]);
 
     useEffect(() => {
         if (isMounted) {
+            setSelectedDate(new Date());
             setProperties(getFromLocalStorage('properties', dummyProperties));
             setRoommates(getFromLocalStorage('roommates', dummyRoommates));
             setPricing(getFromLocalStorage('pricing', {
@@ -633,8 +633,8 @@ export default function AdminDashboard() {
                 listings: { roommate: 149, pg: 349, rental: 999 }
             }));
             setAdvertisements(getFromLocalStorage('advertisements', [
-                { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true, 'data-ai-hint': 'sale promotion' },
-                { id: 'ad002', title: 'Unlock Unlimited Connections', description: 'Subscribe to our unlimited plan and find your perfect roommate today.', imageUrl: 'https://placehold.co/600x400', isActive: false, 'data-ai-hint': 'people connecting' }
+                { id: 'ad001', title: 'Grand Opening Offer!', description: 'Get 50% off on all listing plans for a limited time. Use code: GRAND50', imageUrl: 'https://placehold.co/600x400', isActive: true },
+                { id: 'ad002', title: 'Unlock Unlimited Connections', description: 'Subscribe to our unlimited plan and find your perfect roommate today.', imageUrl: 'https://placehold.co/600x400', isActive: false }
             ]));
             setCoupons(getFromLocalStorage('coupons', dummyCoupons));
             setStaff(getFromLocalStorage('staff', dummyStaff));

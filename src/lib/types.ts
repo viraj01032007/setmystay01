@@ -15,7 +15,6 @@ export interface Advertisement {
   description: string;
   imageUrl: string;
   isActive: boolean;
-  'data-ai-hint'?: string;
 }
 
 export interface Coupon {
@@ -49,7 +48,6 @@ export interface Listing {
   videoUrl?: string;
   views: number;
   ownerId: string;
-  'data-ai-hint'?: string;
   brokerStatus: 'With Broker' | 'Without Broker';
   aadhaarCardUrl?: string;
   electricityBillUrl?: string;
@@ -84,7 +82,6 @@ export interface RoommateProfile {
   images: string[];
   views: number;
   ownerId: string;
-  'data-ai-hint'?: string;
   aadhaarCardUrl?: string;
   hasProperty: boolean;
   status?: 'pending' | 'approved' | 'rejected';
