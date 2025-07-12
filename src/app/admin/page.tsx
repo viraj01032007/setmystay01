@@ -593,9 +593,10 @@ export default function AdminDashboard() {
 
     const [chartView, setChartView] = useState('monthly');
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
     const chartData = useMemo(() => {
+        if (!selectedDate) return [];
         switch (chartView) {
             case 'hourly':
                 return generateHourlyData(selectedDate);
@@ -619,6 +620,7 @@ export default function AdminDashboard() {
             router.replace('/admin/login');
         } else {
             setIsMounted(true);
+            setSelectedDate(new Date());
         }
     }, [router]);
 
@@ -906,7 +908,7 @@ export default function AdminDashboard() {
         return <span className={`${baseClasses} ${statusClasses[currentStatus]}`}>{currentStatus}</span>;
     };
     
-    if (!isMounted || !analytics || !pricing) {
+    if (!isMounted || !analytics || !pricing || !selectedDate) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-100">
                 <LoadingSpinner className="w-12 h-12 text-primary" />
