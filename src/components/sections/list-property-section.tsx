@@ -67,6 +67,10 @@ const fileSchema = z
   .refine((files) => files?.length === 1, "File is required.")
   .refine((files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type), ".jpg, .jpeg, .png and .pdf files are accepted.");
 
+const videoFileSchema = z
+  .any()
+  .refine((files) => files?.length === 1, "Video tour is required.")
+  .refine((files) => files?.[0]?.type.startsWith("video/"), "Please upload a valid video file.");
 
 const formSchema = z.object({
   propertyType: z.enum(['Rental', 'PG', 'Roommate']),
@@ -91,7 +95,7 @@ const formSchema = z.object({
   aadhaarCard: fileSchema,
   electricityBill: fileSchema.optional(),
   noc: z.any().optional(),
-  videoFile: z.any().optional(),
+  videoFile: videoFileSchema,
   vendorNumber: z.string().optional(),
   gender: z.string().optional(),
   roommateStatus: z.enum(['hasProperty', 'needsProperty']).optional(),
@@ -500,7 +504,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Photo & Video Upload</CardTitle>
-                <CardDescription>Add up to 8 photos and an optional video tour.</CardDescription>
+                <CardDescription>Add up to 8 photos and a mandatory video tour.</CardDescription>
               </CardHeader>
               <CardContent>
                  <div className="mb-6">
@@ -541,7 +545,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                         name="videoFile"
                         render={({ field: { onChange, onBlur, name, ref } }) => (
                             <FormItem>
-                                <FormLabel>Video Tour (Optional)</FormLabel>
+                                <FormLabel>Video Tour (Required)</FormLabel>
                                 <FormControl>
                                     <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary" onClick={() => document.getElementById('video-upload')?.click()}>
                                         <Video className="mx-auto h-12 w-12 text-muted-foreground"/>
@@ -567,6 +571,29 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 </div>
               </CardContent>
             </Card>
+
+            {(propertyType === 'Rental' || propertyType === 'PG') && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Vendor Information</CardTitle>
+                    <CardDescription>If you have a vendor number from our admin, please enter it here.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <FormField control={form.control} name="vendorNumber" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vendor Number</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="e.g., Admin1234" {...field} className="pl-10" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                  </CardContent>
+                </Card>
+            )}
 
              <Card>
               <CardHeader>
@@ -594,30 +621,6 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                  )}
               </CardContent>
             </Card>
-            
-            {(propertyType === 'Rental' || propertyType === 'PG') && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Vendor Information</CardTitle>
-                    <CardDescription>If you have a vendor number, please enter it here.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <FormField control={form.control} name="vendorNumber" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Vendor Number</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="e.g., VN-123456" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}/>
-                  </CardContent>
-                </Card>
-            )}
-
 
             <Card>
               <CardHeader>
