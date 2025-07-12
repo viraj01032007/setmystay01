@@ -17,9 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/icons';
 import { dummyProperties, dummyRoommates } from '@/lib/data';
 import { format } from 'date-fns';
-
-const initialProperties = dummyProperties;
-const initialRoommates = dummyRoommates;
+import { getFromLocalStorage } from '@/lib/storage';
 
 export default function StaffDashboard() {
     const router = useRouter();
@@ -40,11 +38,16 @@ export default function StaffDashboard() {
             router.replace('/staff/login');
         } else {
             setIsMounted(true);
-            // In a real app, fetch data from an API
-            setProperties(initialProperties);
-            setRoommates(initialRoommates);
         }
     }, [router]);
+    
+    useEffect(() => {
+        if (isMounted) {
+            // In a real app, fetch data from an API
+            setProperties(getFromLocalStorage('properties', dummyProperties));
+            setRoommates(getFromLocalStorage('roommates', dummyRoommates));
+        }
+    }, [isMounted]);
 
     const handleLogout = () => {
         localStorage.removeItem('staff_authenticated');
@@ -85,7 +88,7 @@ export default function StaffDashboard() {
         if (type === 'roommate') {
             setRoommates(rms => rms.map(r => r.id === id ? { ...r, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status, verifiedBy: staffId, verificationTimestamp: timestamp } : p));
+            setProperties(props => props.map(p => p.id === id ? { ...p, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
         }
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });

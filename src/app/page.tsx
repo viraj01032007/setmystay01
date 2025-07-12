@@ -59,6 +59,8 @@ export default function Home() {
   const [unlocks, setUnlocks] = useState(defaultUserState.unlocks);
   const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
   const [likedItemIds, setLikedItemIds] = useState<Set<string>>(new Set());
+  const [likedItems, setLikedItems] = useState<(Listing | RoommateProfile)[]>([]);
+  const [myProperties, setMyProperties] = useState<(Listing | RoommateProfile)[]>([]);
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [inquiryData, setInquiryData] = useState<{ listing: Listing; bed: Bed } | null>(null);
@@ -101,34 +103,35 @@ export default function Home() {
   }, [isLoggedIn, isClient, unlocks, purchaseHistory, likedItemIds]);
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && isClient) {
       saveUserData();
     }
-  }, [unlocks, purchaseHistory, likedItemIds, isLoggedIn, saveUserData]);
+  }, [unlocks, purchaseHistory, likedItemIds, isLoggedIn, saveUserData, isClient]);
 
   useEffect(() => {
     setIsClient(true);
-    // Initial data loading
-    const approvedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
-    const approvedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
-    setAllListings(approvedListings);
-    setAllRoommates(approvedRoommates);
-    
-    // Shuffling logic for initial render
-    const shuffledListings = [...approvedListings].sort(() => 0.5 - Math.random());
-    const roommatesWithProperty = approvedRoommates.filter(r => r.hasProperty);
-    const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
-  
-    setFeaturedProperties(shuffledListings.slice(0, 3));
-    setFeaturedRoommates(shuffledRoommates.slice(0, 3));
-    
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
     if (isClient) {
+        // Initial data loading
+        const approvedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
+        const approvedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
+        setAllListings(approvedListings);
+        setAllRoommates(approvedRoommates);
+        
+        // Shuffling logic for initial render
+        const shuffledListings = [...approvedListings].sort(() => 0.5 - Math.random());
+        const roommatesWithProperty = approvedRoommates.filter(r => r.hasProperty);
+        const shuffledRoommates = [...roommatesWithProperty].sort(() => 0.5 - Math.random());
+      
+        setFeaturedProperties(shuffledListings.slice(0, 3));
+        setFeaturedRoommates(shuffledRoommates.slice(0, 3));
+        
+        setIsLoading(false);
+      
       // Client-side only logic
-      const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
+      const loggedInStatus = getFromLocalStorage('setmystay_isLoggedIn', false);
       setIsLoggedIn(loggedInStatus);
       
       if (loggedInStatus) {
@@ -146,7 +149,7 @@ export default function Home() {
         // Reset to defaults if not logged in
         setUnlocks(defaultUserState.unlocks);
         setPurchaseHistory(defaultUserState.purchaseHistory);
-        setLikedItemIds(defaultUserState.likedItemIds);
+        setLikedItemIds(new Set());
       }
       
       const storedAdvertisements = getFromLocalStorage('advertisements', []);
@@ -166,8 +169,26 @@ export default function Home() {
       const storedCoupons = getFromLocalStorage('coupons', dummyCoupons);
       setActiveCoupons(storedCoupons);
     }
-  }, [isClient, isLoggedIn]);
+  }, [isClient]);
   
+  useEffect(() => {
+      if (isClient) {
+          const allProps = getFromLocalStorage('properties', dummyProperties);
+          const allMates = getFromLocalStorage('roommates', dummyRoommates);
+          const allItems = [...allProps, ...allMates];
+          setLikedItems(allItems.filter(item => likedItemIds.has(item.id)));
+      }
+  }, [likedItemIds, isClient]);
+
+  useEffect(() => {
+      if(isClient) {
+          const userId = 'newUser'; // Simulate current user
+          const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
+          const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
+          setMyProperties([...userListings, ...userRoommateProfiles]);
+      }
+  }, [isClient]);
+
   const handleNavigate = (page: Page) => {
     setActivePage(page);
   };
@@ -226,7 +247,6 @@ export default function Home() {
     });
 
     setTimeout(() => {
-        // After purchase, don't auto-unlock. Just return to the item.
         if (itemToUnlock) {
             setSelectedItem(itemToUnlock);
             setItemToUnlock(null);
@@ -284,21 +304,6 @@ export default function Home() {
         return newSet;
     });
   };
-  
-  const likedItems = useMemo(() => {
-    const allProps = getFromLocalStorage('properties', dummyProperties);
-    const allMates = getFromLocalStorage('roommates', dummyRoommates);
-    const allItems = [...allProps, ...allMates];
-    return allItems.filter(item => likedItemIds.has(item.id));
-  }, [likedItemIds]);
-  
-  const myProperties = useMemo(() => {
-      const userId = 'newUser'; // Simulate current user
-      const userListings = getFromLocalStorage('properties', dummyProperties).filter(l => l.ownerId === userId);
-      const userRoommateProfiles = getFromLocalStorage('roommates', dummyRoommates).filter(r => r.ownerId === userId);
-      return [...userListings, ...userRoommateProfiles];
-  }, []);
-
 
   const handleInitiateListing = (data: any) => {
     if (!isLoggedIn) {
@@ -425,7 +430,7 @@ export default function Home() {
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    localStorage.setItem('setmystay_isLoggedIn', 'true');
+    saveToLocalStorage('setmystay_isLoggedIn', true);
     // If user wanted to list a property, take them there now
     if (activePage === 'home') { // Heuristic: if they were on home page when auth modal opened
       const intendedPage = sessionStorage.getItem('setmystay_intended_page');
@@ -438,10 +443,11 @@ export default function Home() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem('setmystay_isLoggedIn');
+    saveToLocalStorage('setmystay_isLoggedIn', false);
+    // Also clear user-specific data from state
     setUnlocks(defaultUserState.unlocks);
     setPurchaseHistory(defaultUserState.purchaseHistory);
-    setLikedItemIds(defaultUserState.likedItemIds);
+    setLikedItemIds(new Set());
     setActivePage('home');
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
   };
@@ -509,7 +515,7 @@ export default function Home() {
     }
   };
 
-  if (!isClient) {
+  if (isLoading || !isClient) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
         <LoadingSpinner className="w-16 h-16 text-primary" />
@@ -519,16 +525,13 @@ export default function Home() {
   }
   
   const getListingsForPage = () => {
-    const allApprovedListings = getFromLocalStorage('properties', dummyProperties).filter((p: Listing) => p.status === 'approved');
-    const allApprovedRoommates = getFromLocalStorage('roommates', dummyRoommates).filter((r: RoommateProfile) => r.status === 'approved');
-
     switch (activePage) {
         case 'pg':
-            return allApprovedListings.filter(l => l.propertyType === 'PG');
+            return allListings.filter(l => l.propertyType === 'PG');
         case 'rentals':
-            return allApprovedListings.filter(l => l.propertyType === 'Rental');
+            return allListings.filter(l => l.propertyType === 'Rental');
         case 'roommates':
-            return allApprovedRoommates;
+            return allRoommates;
         case 'my-properties':
             return myProperties;
         case 'liked-properties':

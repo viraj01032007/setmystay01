@@ -35,19 +35,6 @@ import { cn } from '@/lib/utils';
 import { getFromLocalStorage, saveToLocalStorage } from '@/lib/storage';
 
 
-// Mock data similar to the provided script
-const initialProperties = dummyProperties;
-const initialRoommates = dummyRoommates;
-
-const initialRatings: Rating[] = [
-    { id: 'rating1', rating: 5, feedback: '', date: new Date('2024-07-20') },
-    { id: 'rating2', rating: 4, feedback: 'The user interface is a bit confusing on the listings page.', date: new Date('2024-07-19') },
-    { id: 'rating3', rating: 2, feedback: 'Took too long to find a relevant property. Need better filters.', date: new Date('2024-07-18') },
-    { id: 'rating4', rating: 5, feedback: 'Found a great roommate, thanks!', date: new Date('2024-07-17') },
-    { id: 'rating5', rating: 3, feedback: 'The unlock process was not very clear.', date: new Date('2024-07-16') },
-];
-
-
 // Chart data generation functions
 const generateHourlyData = (date: Date) => {
     return Array.from({ length: 24 }, (_, i) => ({
@@ -632,9 +619,13 @@ export default function AdminDashboard() {
             router.replace('/admin/login');
         } else {
             setIsMounted(true);
-            setProperties(initialProperties);
-            setRoommates(initialRoommates);
+        }
+    }, [router]);
 
+    useEffect(() => {
+        if (isMounted) {
+            setProperties(getFromLocalStorage('properties', dummyProperties));
+            setRoommates(getFromLocalStorage('roommates', dummyRoommates));
             setPricing(getFromLocalStorage('pricing', {
                 unlocks: { 1: 49, 5: 199, 10: 399, unlimited: 999 },
                 listings: { roommate: 149, pg: 349, rental: 999 }
@@ -645,19 +636,24 @@ export default function AdminDashboard() {
             ]));
             setCoupons(getFromLocalStorage('coupons', dummyCoupons));
             setStaff(getFromLocalStorage('staff', dummyStaff));
-
+            setRatings([
+                { id: 'rating1', rating: 5, feedback: '', date: new Date('2024-07-20') },
+                { id: 'rating2', rating: 4, feedback: 'The user interface is a bit confusing on the listings page.', date: new Date('2024-07-19') },
+                { id: 'rating3', rating: 2, feedback: 'Took too long to find a relevant property. Need better filters.', date: new Date('2024-07-18') },
+                { id: 'rating4', rating: 5, feedback: 'Found a great roommate, thanks!', date: new Date('2024-07-17') },
+                { id: 'rating5', rating: 3, feedback: 'The unlock process was not very clear.', date: new Date('2024-07-16') },
+            ]);
             setAvailabilityInquiries([
                 { id: 'INQ01', propertyId: 'premium-pg-cbd', propertyTitle: 'Premium PG for Professionals', userName: 'Amit Singh', time: new Date(Date.now() - 15 * 60 * 1000) },
                 { id: 'INQ02', propertyId: 'luxury-2bhk-vashi', propertyTitle: 'Luxury 2BHK Apartment', userName: 'Sneha Verma', time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
             ]);
-            setRatings(initialRatings);
             setAnalytics({
                 totalPageViews: (Math.floor(Math.random() * 5000) + 1000),
                 totalUnlocks: (Math.floor(Math.random() * 500) + 50),
                 lastUpdated: new Date().toLocaleString()
             });
         }
-    }, [router]);
+    }, [isMounted]);
 
     const staffStats = useMemo(() => {
         const allListings = [...properties, ...roommates];
@@ -731,7 +727,7 @@ export default function AdminDashboard() {
         if (type === 'roommate') {
             setRoommates(rms => rms.map(r => r.id === id ? { ...r, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
         } else {
-            setProperties(props => props.map(p => p.id === id ? { ...p, status, verifiedBy: staffId, verificationTimestamp: timestamp } : p));
+            setProperties(props => props.map(p => p.id === id ? { ...p, status, verifiedBy: staffId, verificationTimestamp: timestamp } : r));
         }
         setDetailsModalOpen(false);
         toast({ title: "Status Updated", description: `Item ${id} has been ${status}.` });
