@@ -31,6 +31,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { getFromLocalStorage, saveToLocalStorage } from "@/lib/storage";
 
 
+const defaultUserState = {
+    unlocks: { count: 0, isUnlimited: false, unlockedIds: new Set<string>() },
+    purchaseHistory: [] as Purchase[],
+    likedItemIds: new Set<string>(),
+};
+
 export default function Home() {
   const [activePage, setActivePage] = useState<Page>("home");
   const [allListings, setAllListings] = useState<Listing[]>([]);
@@ -50,7 +56,9 @@ export default function Home() {
   const [isHistoryModalOpen, setHistoryModalOpen] = useState(false);
   const [chattingWith, setChattingWith] = useState<string | null>(null);
 
-  const [unlocks, setUnlocks] = useState({ count: 0, isUnlimited: false, unlockedIds: new Set<string>() });
+  const [unlocks, setUnlocks] = useState(defaultUserState.unlocks);
+  const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
+  const [likedItemIds, setLikedItemIds] = useState<Set<string>>(new Set());
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [inquiryData, setInquiryData] = useState<{ listing: Listing; bed: Bed } | null>(null);
@@ -66,9 +74,6 @@ export default function Home() {
 
   const [isSlotMachineModalOpen, setIsSlotMachineModalOpen] = useState(false);
   
-  const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
-  const [likedItemIds, setLikedItemIds] = useState<Set<string>>(new Set());
-  
   const [availabilityInquiries, setAvailabilityInquiries] = useState<Inquiry[]>([]);
 
   const [isUnlockConfirmationOpen, setUnlockConfirmationOpen] = useState(false);
@@ -76,6 +81,14 @@ export default function Home() {
   const [activeCoupons, setActiveCoupons] = useState<Coupon[]>([]);
 
   const { toast } = useToast();
+  
+  const saveUserData = (data: { unlocks?: any, purchaseHistory?: any, likedItemIds?: any }) => {
+    if (isLoggedIn) {
+        const currentUserData = getFromLocalStorage('setmystay_user_data', {});
+        const updatedData = { ...currentUserData.defaultUser, ...data };
+        saveToLocalStorage('setmystay_user_data', { defaultUser: updatedData });
+    }
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -99,19 +112,26 @@ export default function Home() {
   useEffect(() => {
     if (isClient) {
       // Client-side only logic
-      const savedCount = parseInt(localStorage.getItem('setmystay_unlocks') || '0');
-      const savedIsUnlimited = localStorage.getItem('setmystay_isUnlimited') === 'true';
-      const savedUnlockedIds = new Set<string>(JSON.parse(localStorage.getItem('setmystay_unlockedIds') || '[]'));
-      setUnlocks({ count: savedCount, isUnlimited: savedIsUnlimited, unlockedIds: savedUnlockedIds });
-
       const loggedInStatus = localStorage.getItem('setmystay_isLoggedIn') === 'true';
       setIsLoggedIn(loggedInStatus);
       
-      const savedHistory = JSON.parse(localStorage.getItem('setmystay_purchaseHistory') || '[]');
-      setPurchaseHistory(savedHistory.map((p: any) => ({ ...p, date: new Date(p.date) })));
-      
-      const savedLikedItems = new Set<string>(JSON.parse(localStorage.getItem('setmystay_likedItems') || '[]'));
-      setLikedItemIds(savedLikedItems);
+      if (loggedInStatus) {
+        const allUserData = getFromLocalStorage('setmystay_user_data', {});
+        const userData = allUserData.defaultUser || defaultUserState;
+        
+        setUnlocks({
+            count: userData.unlocks.count || 0,
+            isUnlimited: userData.unlocks.isUnlimited || false,
+            unlockedIds: new Set(userData.unlocks.unlockedIds || []),
+        });
+        setPurchaseHistory((userData.purchaseHistory || []).map((p: any) => ({...p, date: new Date(p.date)})));
+        setLikedItemIds(new Set(userData.likedItemIds || []));
+      } else {
+        // Reset to defaults if not logged in
+        setUnlocks(defaultUserState.unlocks);
+        setPurchaseHistory(defaultUserState.purchaseHistory);
+        setLikedItemIds(defaultUserState.likedItemIds);
+      }
       
       const storedAdvertisements = getFromLocalStorage('advertisements', []);
       const activeAd = storedAdvertisements.find(ad => ad.isActive);
@@ -130,7 +150,7 @@ export default function Home() {
       const storedCoupons = getFromLocalStorage('coupons', dummyCoupons);
       setActiveCoupons(storedCoupons);
     }
-  }, [isClient]);
+  }, [isClient, isLoggedIn]);
   
   const handleNavigate = (page: Page) => {
     setActivePage(page);
@@ -138,37 +158,30 @@ export default function Home() {
 
   const handleRateUsClose = (rated: boolean) => {
     setRateUsModalOpen(false);
-    if (itemToUnlock) {
-        useUnlock(itemToUnlock.data.id, true);
-        setItemToUnlock(null);
+    if (itemToUnlock && useUnlock(itemToUnlock.data.id, true)) {
+        // The details view will be opened by useUnlock
     }
+    setItemToUnlock(null);
   }
 
   const handleUnlockPurchase = useCallback((plan: UnlockPlan, planName: string, amount: number) => {
-    setUnlocks(prev => {
-      let newCount = prev.count;
-      let newIsUnlimited = prev.isUnlimited;
+    const newUnlocksState = { ...unlocks };
+    if (plan === 'unlimited') {
+        newUnlocksState.isUnlimited = true;
+    } else {
+        newUnlocksState.count += plan;
+    }
+    setUnlocks(newUnlocksState);
 
-      if (plan === 'unlimited') {
-        newIsUnlimited = true;
-      } else {
-        newCount += plan;
-      }
-
-      const newUnlocks = { ...prev, count: newCount, isUnlimited: newIsUnlimited };
-      localStorage.setItem('setmystay_unlocks', newUnlocks.count.toString());
-      localStorage.setItem('setmystay_isUnlimited', newUnlocks.isUnlimited.toString());
-      
-      return newUnlocks;
-    });
-    
     const newPurchase: Purchase = { id: `purchase_${Date.now()}`, planName, amount, date: new Date() };
-    setPurchaseHistory(prev => {
-        const updatedHistory = [...prev, newPurchase];
-        localStorage.setItem('setmystay_purchaseHistory', JSON.stringify(updatedHistory));
-        return updatedHistory;
-    });
+    const updatedHistory = [...purchaseHistory, newPurchase];
+    setPurchaseHistory(updatedHistory);
     
+    saveUserData({
+        unlocks: { ...newUnlocksState, unlockedIds: Array.from(newUnlocksState.unlockedIds) },
+        purchaseHistory: updatedHistory
+    });
+
     toast({
       title: "Purchase Successful!",
       description: plan === 'unlimited' ? "You've subscribed to unlimited unlocks for one month." : `You've added ${plan} unlocks.`,
@@ -177,51 +190,45 @@ export default function Home() {
 
     setTimeout(() => {
         if (itemToUnlock) {
-            handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
+            if(useUnlock(itemToUnlock.data.id, true)) {
+                // The details view will be opened by useUnlock
+            }
             setItemToUnlock(null);
         } else {
             setRateUsModalOpen(true);
         }
     }, 500);
-  }, [toast, itemToUnlock]);
+  }, [toast, itemToUnlock, unlocks, purchaseHistory, isLoggedIn]);
 
   const useUnlock = useCallback((itemId: string, forceView: boolean = false) => {
-    const performUnlock = () => {
-      if (unlocks.isUnlimited) {
-        const newUnlockedIds = new Set(unlocks.unlockedIds).add(itemId);
-        setUnlocks(prev => ({...prev, unlockedIds: newUnlockedIds}));
-        localStorage.setItem('setmystay_unlockedIds', JSON.stringify(Array.from(newUnlockedIds)));
-        return true;
-      }
-      if (unlocks.count > 0) {
-        const newCount = unlocks.count - 1;
-        const newUnlockedIds = new Set(unlocks.unlockedIds).add(itemId);
-        setUnlocks({ count: newCount, isUnlimited: false, unlockedIds: newUnlockedIds });
-        localStorage.setItem('setmystay_unlocks', newCount.toString());
-        localStorage.setItem('setmystay_unlockedIds', JSON.stringify(Array.from(newUnlockedIds)));
-        toast({
-          title: "Details Unlocked!",
-          description: `You have ${newCount} unlocks remaining.`,
-        });
-        return true;
-      }
-      return false;
-    };
-    
-    if (performUnlock() && forceView) {
-      if (itemToUnlock) {
-          handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
-      }
+    let success = false;
+    const newUnlocksState = { ...unlocks };
+
+    if (newUnlocksState.isUnlimited) {
+      success = true;
+    } else if (newUnlocksState.count > 0) {
+      newUnlocksState.count -= 1;
+      success = true;
+      toast({
+        title: "Details Unlocked!",
+        description: `You have ${newUnlocksState.count} unlocks remaining.`,
+      });
     }
-    return true; // Assume success for flow
-  }, [unlocks, toast, itemToUnlock]);
+
+    if (success) {
+      newUnlocksState.unlockedIds.add(itemId);
+      setUnlocks(newUnlocksState);
+      saveUserData({ unlocks: { ...newUnlocksState, unlockedIds: Array.from(newUnlocksState.unlockedIds) } });
+    }
+    
+    if (success && forceView && itemToUnlock) {
+        handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
+    }
+    return success;
+  }, [unlocks, toast, itemToUnlock, isLoggedIn]);
 
   const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate', forceOpen = false) => {
-    if (forceOpen) {
-        setSelectedItem({ type, data: item });
-    } else {
-        setSelectedItem({ type, data: item });
-    }
+    setSelectedItem({ type, data: item });
   };
   
   const handleConfirmUnlock = () => {
@@ -235,6 +242,11 @@ export default function Home() {
   };
 
   const handleUnlockClick = () => {
+    if (!isLoggedIn) {
+        setAuthModalOpen(true);
+        toast({ title: "Authentication Required", description: "Please sign in to unlock details." });
+        return;
+    }
     if (selectedItem) {
         setItemToUnlock(selectedItem);
         setSelectedItem(null);
@@ -247,16 +259,14 @@ export default function Home() {
   }
   
   const handleToggleLike = (itemId: string) => {
-    setLikedItemIds(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(itemId)) {
-            newSet.delete(itemId);
-        } else {
-            newSet.add(itemId);
-        }
-        localStorage.setItem('setmystay_likedItems', JSON.stringify(Array.from(newSet)));
-        return newSet;
-    });
+    const newSet = new Set(likedItemIds);
+    if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+    } else {
+        newSet.add(itemId);
+    }
+    setLikedItemIds(newSet);
+    saveUserData({ likedItemIds: Array.from(newSet) });
   };
   
   const likedItems = useMemo(() => {
@@ -466,6 +476,19 @@ export default function Home() {
     }
     handleNavigate(page);
   };
+  
+  const handleGameClick = () => {
+    if (!isLoggedIn) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to play the game.',
+        variant: 'destructive',
+      });
+      setAuthModalOpen(true);
+    } else {
+      setIsSlotMachineModalOpen(true);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -551,14 +574,14 @@ export default function Home() {
       </main>
 
       <Footer onNavigate={handleNavigate} />
-      <FloatingCta onGameClick={() => setIsSlotMachineModalOpen(true)} />
+      <FloatingCta onGameClick={handleGameClick} />
       <ContactFab />
       
       {/* Modals */}
       <PropertyDetails 
         listing={selectedItem?.type === 'listing' ? selectedItem.data as Listing : null}
         onClose={() => setSelectedItem(null)}
-        isUnlocked={selectedItem?.data ? unlocks.unlockedIds.has(selectedItem.data.id) : false}
+        isUnlocked={isLoggedIn && selectedItem?.data ? unlocks.unlockedIds.has(selectedItem.data.id) : false}
         onUnlock={handleUnlockClick}
         onChat={() => handleChat(selectedItem?.data?.ownerName || 'Owner')}
         onBookInquiry={handleBookInquiry}
@@ -567,14 +590,14 @@ export default function Home() {
       <RoommateDetails
         profile={selectedItem?.type === 'roommate' ? selectedItem.data as RoommateProfile : null}
         onClose={() => setSelectedItem(null)}
-        isUnlocked={selectedItem?.data ? unlocks.unlockedIds.has(selectedItem.data.id) : false}
+        isUnlocked={isLoggedIn && selectedItem?.data ? unlocks.unlockedIds.has(selectedItem.data.id) : false}
         onUnlock={handleUnlockClick}
         onChat={() => handleChat(selectedItem?.data?.ownerName || 'Roommate')}
       />
        <AlertDialog open={isUnlockConfirmationOpen} onOpenChange={setUnlockConfirmationOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Unlock</AlertDialogTitle>
             <AlertDialogDescription>
               This will use one of your unlock credits. This action cannot be undone.
               You have {unlocks.count} unlocks remaining.

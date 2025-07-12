@@ -3,7 +3,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Gift } from 'lucide-react';
-import Link from 'next/link';
 
 interface FloatingCtaProps {
     onGameClick: () => void;
