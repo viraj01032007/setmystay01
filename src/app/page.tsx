@@ -82,14 +82,29 @@ export default function Home() {
 
   const { toast } = useToast();
   
-  const saveUserData = useCallback((data: { unlocks?: any, purchaseHistory?: any, likedItemIds?: any }) => {
+  const saveUserData = useCallback(() => {
     if (isLoggedIn) {
-        const allUserData = getFromLocalStorage('setmystay_user_data', {});
-        const currentUserData = allUserData.defaultUser || {};
-        const updatedData = { ...currentUserData, ...data };
-        saveToLocalStorage('setmystay_user_data', { defaultUser: updatedData });
+      const allUserData = getFromLocalStorage('setmystay_user_data', {});
+      const currentUserData = allUserData.defaultUser || {};
+      const updatedData = { 
+        ...currentUserData, 
+        unlocks: {
+            count: unlocks.count,
+            isUnlimited: unlocks.isUnlimited,
+            unlockedIds: Array.from(unlocks.unlockedIds),
+        },
+        purchaseHistory: purchaseHistory,
+        likedItemIds: Array.from(likedItemIds),
+      };
+      saveToLocalStorage('setmystay_user_data', { defaultUser: updatedData });
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, unlocks, purchaseHistory, likedItemIds]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      saveUserData();
+    }
+  }, [unlocks, purchaseHistory, likedItemIds, isLoggedIn, saveUserData]);
 
   useEffect(() => {
     setIsClient(true);
@@ -161,49 +176,47 @@ export default function Home() {
     setRateUsModalOpen(false);
   }
 
-  const useUnlock = useCallback((itemId: string, forceView: boolean = false) => {
+  const useUnlock = useCallback((itemId: string) => {
     let success = false;
-    const newUnlocksState = { ...unlocks };
-
-    if (newUnlocksState.isUnlimited) {
-      success = true;
-    } else if (newUnlocksState.count > 0) {
-      newUnlocksState.count -= 1;
-      success = true;
-      toast({
-        title: "Details Unlocked!",
-        description: `You have ${newUnlocksState.count} unlocks remaining.`,
-      });
-    }
-
-    if (success) {
-      newUnlocksState.unlockedIds.add(itemId);
-      setUnlocks(newUnlocksState);
-      saveUserData({ unlocks: { ...newUnlocksState, unlockedIds: Array.from(newUnlocksState.unlockedIds) } });
-    }
-    
-    if (success && forceView && itemToUnlock) {
-        handleViewDetails(itemToUnlock.data, itemToUnlock.type, true);
-    }
+    setUnlocks(currentUnlocks => {
+        if (currentUnlocks.isUnlimited) {
+            success = true;
+            return {
+                ...currentUnlocks,
+                unlockedIds: new Set(currentUnlocks.unlockedIds).add(itemId),
+            };
+        }
+        if (currentUnlocks.count > 0) {
+            success = true;
+            toast({
+                title: "Details Unlocked!",
+                description: `You have ${currentUnlocks.count - 1} unlocks remaining.`,
+            });
+            return {
+                ...currentUnlocks,
+                count: currentUnlocks.count - 1,
+                unlockedIds: new Set(currentUnlocks.unlockedIds).add(itemId),
+            };
+        }
+        return currentUnlocks;
+    });
     return success;
-  }, [unlocks, toast, itemToUnlock, saveUserData]);
+  }, [toast]);
   
   const handleUnlockPurchase = useCallback((plan: UnlockPlan, planName: string, amount: number) => {
-    const newUnlocksState = { ...unlocks };
-    if (plan === 'unlimited') {
+    setUnlocks(currentUnlocks => {
+      const newUnlocksState = { ...currentUnlocks };
+      if (plan === 'unlimited') {
         newUnlocksState.isUnlimited = true;
-    } else {
+      } else {
         newUnlocksState.count += plan;
-    }
-    setUnlocks(newUnlocksState);
+      }
+      return newUnlocksState;
+    });
 
-    const newPurchase: Purchase = { id: `purchase_${Date.now()}`, planName, amount, date: new Date() };
-    const updatedHistory = [...purchaseHistory, newPurchase];
-    setPurchaseHistory(updatedHistory);
-    
-    saveUserData({
-        unlocks: { ...newUnlocksState, unlockedIds: Array.from(newUnlocksState.unlockedIds) },
-        purchaseHistory: updatedHistory
+    setPurchaseHistory(currentHistory => {
+        const newPurchase: Purchase = { id: `purchase_${Date.now()}`, planName, amount, date: new Date() };
+        return [...currentHistory, newPurchase];
     });
 
     toast({
@@ -214,17 +227,19 @@ export default function Home() {
 
     setTimeout(() => {
         if (itemToUnlock) {
-            // After purchase, use an unlock immediately and show the details
-            useUnlock(itemToUnlock.data.id, true);
+            if (useUnlock(itemToUnlock.data.id)) {
+                // After purchase, use an unlock immediately and show the details
+                setSelectedItem(itemToUnlock);
+            }
             setItemToUnlock(null);
         } else {
             // If there was no specific item, just show the rating modal
             setRateUsModalOpen(true);
         }
     }, 500);
-  }, [toast, itemToUnlock, unlocks, purchaseHistory, saveUserData, useUnlock]);
+  }, [toast, itemToUnlock, useUnlock]);
 
-  const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate', forceOpen = false) => {
+  const handleViewDetails = (item: Listing | RoommateProfile, type: 'listing' | 'roommate') => {
     setSelectedItem({ type, data: item });
   };
   
@@ -232,7 +247,7 @@ export default function Home() {
     if (selectedItem?.data.id) {
       if (useUnlock(selectedItem.data.id)) {
         // Refresh the selected item to show unlocked state
-        handleViewDetails(selectedItem.data, selectedItem.type, true);
+        handleViewDetails(selectedItem.data, selectedItem.type);
       }
     }
     setUnlockConfirmationOpen(false);
@@ -245,27 +260,27 @@ export default function Home() {
         return;
     }
     if (selectedItem) {
-        // Set the item to unlock and close the details modal to show the pricing modal
-        setItemToUnlock(selectedItem);
-        setSelectedItem(null); 
-        
         if (unlocks.isUnlimited || unlocks.count > 0) {
             setUnlockConfirmationOpen(true);
         } else {
+            // Set the item to unlock and close the details modal to show the pricing modal
+            setItemToUnlock(selectedItem);
+            setSelectedItem(null); 
             setUnlockModalOpen(true);
         }
     }
   }
   
   const handleToggleLike = (itemId: string) => {
-    const newSet = new Set(likedItemIds);
-    if (newSet.has(itemId)) {
-        newSet.delete(itemId);
-    } else {
-        newSet.add(itemId);
-    }
-    setLikedItemIds(newSet);
-    saveUserData({ likedItemIds: Array.from(newSet) });
+    setLikedItemIds(currentSet => {
+        const newSet = new Set(currentSet);
+        if (newSet.has(itemId)) {
+            newSet.delete(itemId);
+        } else {
+            newSet.add(itemId);
+        }
+        return newSet;
+    });
   };
   
   const likedItems = useMemo(() => {
