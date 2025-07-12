@@ -49,6 +49,7 @@ export interface Listing {
   views: number;
   ownerId: string;
   brokerStatus: 'With Broker' | 'Without Broker';
+  vendorNumber?: string;
   aadhaarCardUrl?: string;
   electricityBillUrl?: string;
   nocUrl?: string;

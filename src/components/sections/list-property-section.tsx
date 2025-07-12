@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp, Wifi, Car, Dumbbell, Utensils, Tv, Snowflake, Wind, Droplets, Zap, Users, Shield, VenetianMask, User, BedDouble, Building, Leaf, PawPrint, Sparkles, ArrowBigUpDash } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, ShieldCheck, Video, Plus, FileText, FileUp, Wifi, Car, Dumbbell, Utensils, Tv, Snowflake, Wind, Droplets, Zap, Users, Shield, VenetianMask, User, BedDouble, Building, Leaf, PawPrint, Sparkles, ArrowBigUpDash, Briefcase } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import Image from 'next/image';
@@ -92,6 +92,7 @@ const formSchema = z.object({
   electricityBill: fileSchema.optional(),
   noc: z.any().optional(),
   videoFile: z.any().optional(),
+  vendorNumber: z.string().optional(),
   gender: z.string().optional(),
   roommateStatus: z.enum(['hasProperty', 'needsProperty']).optional(),
 }).superRefine((data, ctx) => {
@@ -201,6 +202,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
       amenities: [],
       phonePrimary: '',
       phoneSecondary: '',
+      vendorNumber: '',
       gender: undefined,
       state: '',
       city: '',
@@ -592,6 +594,30 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                  )}
               </CardContent>
             </Card>
+            
+            {(propertyType === 'Rental' || propertyType === 'PG') && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Vendor Information</CardTitle>
+                    <CardDescription>If you have a vendor number, please enter it here.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <FormField control={form.control} name="vendorNumber" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vendor Number</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="e.g., VN-123456" {...field} className="pl-10" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                  </CardContent>
+                </Card>
+            )}
+
 
             <Card>
               <CardHeader>

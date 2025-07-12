@@ -54,6 +54,7 @@ export const dummyProperties: Listing[] = [
         views: 125,
         ownerId: 'dummyOwner1',
         brokerStatus: 'Without Broker',
+        vendorNumber: 'VN-582193',
         beds: [
             { id: 'bed1', status: 'occupied' },
             { id: 'bed2', status: 'vacant' },
@@ -93,6 +94,7 @@ export const dummyProperties: Listing[] = [
         views: 340,
         ownerId: 'dummyOwner2',
         brokerStatus: 'With Broker',
+        vendorNumber: 'VN-938471',
         lastAvailabilityCheck: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
         status: 'approved',
         submittedAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
@@ -237,6 +239,7 @@ export const dummyProperties: Listing[] = [
         views: 190,
         ownerId: 'dummyOwner5',
         brokerStatus: 'Without Broker',
+        vendorNumber: 'VN-112233',
         beds: [
             { id: 'bed1', status: 'vacant' },
             { id: 'bed2', status: 'vacant' },

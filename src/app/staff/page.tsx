@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search, Phone, MapPin, User as UserIcon } from 'lucide-react';
+import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search, Phone, MapPin, User as UserIcon, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -208,7 +208,7 @@ export default function StaffDashboard() {
                                 <TableRow>
                                     <TableHead>Title/Name</TableHead>
                                     <TableHead>Type</TableHead>
-                                    <TableHead>Rent/Budget</TableHead>
+                                    <TableHead>Vendor #</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Actions</TableHead>
                                 </TableRow>
@@ -218,7 +218,7 @@ export default function StaffDashboard() {
                                     <TableRow key={p.id}>
                                         <TableCell className="font-medium">{p.title || p.ownerName}</TableCell>
                                         <TableCell className="capitalize">{p.propertyType || p.type || 'N/A'}</TableCell>
-                                        <TableCell>₹{(p.rent || p.budget).toLocaleString()}</TableCell>
+                                        <TableCell>{p.vendorNumber || 'N/A'}</TableCell>
                                         <TableCell><StatusBadge status={p.status} /></TableCell>
                                         <TableCell>
                                             <Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.propertyType || p.type || 'roommate')}>View</Button>
@@ -294,6 +294,10 @@ export default function StaffDashboard() {
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">ID</strong>
                                     <div>{currentItem.id}</div>
+                                </div>
+                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> Vendor Number</strong>
+                                    <div className="font-mono">{currentItem.vendorNumber || 'N/A'}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Type</strong>

@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock, User as UserIcon, Star, MessageSquare } from 'lucide-react';
+import { Eye, Building, Users, LockOpen, Home, X as XIcon, HelpCircle, CheckCircle, Trash2, ChevronLeft, ChevronRight, LogOut, XCircle, PlusCircle, Edit, ImageIcon, Ticket, Settings, KeyRound, ShieldQuestion, Mail, Phone, MapPin, FileCheck, Search, Filter, Calendar as CalendarIcon, FileText, Bell, UserPlus, Clock, User as UserIcon, Star, MessageSquare, Briefcase } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import Image from 'next/image';
 import { LoadingSpinner } from '@/components/icons';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { Advertisement, Coupon, StaffMember, Rating } from '@/lib/types';
+import type { Advertisement, Coupon, StaffMember, Rating, Listing } from '@/lib/types';
 import { dummyCoupons, dummyProperties, dummyRoommates, dummyStaff } from '@/lib/data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -558,7 +558,7 @@ export default function AdminDashboard() {
     const { toast } = useToast();
     
     // State management
-    const [properties, setProperties] = useState([]);
+    const [properties, setProperties] = useState<Listing[]>([]);
     const [roommates, setRoommates] = useState([]);
     const [pricing, setPricing] = useState(null);
     const [analytics, setAnalytics] = useState(null);
@@ -688,6 +688,23 @@ export default function AdminDashboard() {
         const total = ratings.reduce((sum, r) => sum + r.rating, 0);
         return (total / ratings.length);
     }, [ratings]);
+
+    const vendorNumbers = useMemo(() => {
+        return properties.filter(p => p.vendorNumber).map(p => ({
+            vendorNumber: p.vendorNumber,
+            propertyTitle: p.title,
+            propertyId: p.id,
+        }));
+    }, [properties]);
+
+    const handleGenerateVendorNumber = () => {
+        const newVendorNumber = `VN-${Math.floor(100000 + Math.random() * 900000)}`;
+        navigator.clipboard.writeText(newVendorNumber);
+        toast({
+            title: "Vendor Number Generated",
+            description: `${newVendorNumber} has been copied to your clipboard.`,
+        });
+    };
 
 
     const handleLogout = () => {
@@ -1132,7 +1149,7 @@ export default function AdminDashboard() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Title</TableHead><TableHead>Type</TableHead><TableHead>Rent</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead>
+                                            <TableHead>Title</TableHead><TableHead>Type</TableHead><TableHead>Vendor #</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -1140,7 +1157,7 @@ export default function AdminDashboard() {
                                             <TableRow key={p.id}>
                                                 <TableCell className="font-medium">{p.title}</TableCell>
                                                 <TableCell>{p.propertyType}</TableCell>
-                                                <TableCell>₹{p.rent.toLocaleString()}</TableCell>
+                                                <TableCell>{p.vendorNumber || 'N/A'}</TableCell>
                                                 <TableCell><StatusBadge status={p.status} /></TableCell>
                                                 <TableCell><Button variant="outline" size="sm" onClick={() => handleViewDetails(p.id, p.propertyType)}>View</Button></TableCell>
                                             </TableRow>
@@ -1212,6 +1229,46 @@ export default function AdminDashboard() {
                             </CardContent>
                         </Card>
                         <div className="space-y-8">
+                             <Card>
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                    <div>
+                                        <CardTitle className="text-2xl">Vendor Number Management</CardTitle>
+                                        <CardDescription>Generate and track vendor numbers.</CardDescription>
+                                    </div>
+                                    <Button onClick={handleGenerateVendorNumber}>
+                                        <PlusCircle className="mr-2 h-4 w-4" /> Generate
+                                    </Button>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Vendor Number</TableHead>
+                                                <TableHead>Assigned To</TableHead>
+                                                <TableHead className="text-right">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {vendorNumbers.map(v => (
+                                                <TableRow key={v.vendorNumber}>
+                                                    <TableCell className="font-mono">{v.vendorNumber}</TableCell>
+                                                    <TableCell>{v.propertyTitle}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(v.propertyId, 'rental')}>View Property</Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                             {vendorNumbers.length === 0 && (
+                                                <TableRow>
+                                                    <TableCell colSpan={3} className="text-center text-muted-foreground py-4">
+                                                        No vendor numbers assigned yet.
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div>
@@ -1497,6 +1554,10 @@ export default function AdminDashboard() {
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">ID</strong>
                                     <div>{currentItem.id}</div>
+                                </div>
+                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
+                                    <strong className="block text-sm font-medium text-muted-foreground flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> Vendor Number</strong>
+                                    <div className="font-mono">{currentItem.vendorNumber || 'N/A'}</div>
                                 </div>
                                 <div className="p-3 bg-slate-50 rounded-md space-y-1">
                                     <strong className="block text-sm font-medium text-muted-foreground">Type</strong>
