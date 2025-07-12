@@ -576,7 +576,7 @@ export function ListPropertySection({ onSubmit }: ListPropertySectionProps) {
                 <Card>
                   <CardHeader>
                     <CardTitle>Vendor Information</CardTitle>
-                    <CardDescription>If you have a vendor number from our admin, please enter it here.</CardDescription>
+                    <CardDescription>This is optional. If you have a vendor number from our admin, please enter it here.</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <FormField control={form.control} name="vendorNumber" render={({ field }) => (
