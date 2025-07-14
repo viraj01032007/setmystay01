@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search, Phone, MapPin, User as UserIcon, Briefcase } from 'lucide-react';
+import { Home, LogOut, CheckCircle, Trash2, XCircle, FileText, ChevronLeft, ChevronRight, Search, Phone, MapPin, User as UserIcon, Briefcase, FileCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
